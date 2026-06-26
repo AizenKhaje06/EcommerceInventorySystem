@@ -10,17 +10,22 @@ import { supabaseAdmin } from '@/lib/supabase'
  * 
  * Access: Admin, Logistics roles only (enforced at UI level)
  * Note: Auth check removed to match other endpoints pattern
+ * 
+ * Deploy version: 2026-06-26 (Force rebuild)
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  // Await params for Next.js 15+ compatibility
+  const resolvedParams = await params
+  
   console.log('[Confirm Order] POST request received')
-  console.log('[Confirm Order] Params:', params)
-  console.log('[Confirm Order] Order ID:', params?.id)
+  console.log('[Confirm Order] Params:', resolvedParams)
+  console.log('[Confirm Order] Order ID:', resolvedParams?.id)
   
   try {
-    const orderId = params.id
+    const orderId = resolvedParams.id
 
     if (!orderId) {
       console.error('[Confirm Order] No order ID provided')
