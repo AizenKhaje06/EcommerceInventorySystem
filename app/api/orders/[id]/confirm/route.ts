@@ -17,22 +17,12 @@ export async function POST(
   try {
     const orderId = params.id
 
-    // Get authenticated user from session cookie
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) {
+    // Get user ID from cookies (standard session-based auth)
+    const userId = request.cookies.get('userId')?.value
+    
+    if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized - No auth header' },
-        { status: 401 }
-      )
-    }
-
-    // Get user info
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Unauthorized - Please login' },
         { status: 401 }
       )
     }
@@ -41,7 +31,7 @@ export async function POST(
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single()
 
     if (userError || !userData) {
@@ -63,7 +53,7 @@ export async function POST(
     // Fetch order details before updating
     const { data: order, error: fetchError } = await supabaseAdmin
       .from('orders')
-      .select('id, waybill, channel, sales_channel')
+      .select('id, waybill, channel, sales_channel, confirmation_status')
       .eq('id', orderId)
       .single()
 
@@ -75,13 +65,7 @@ export async function POST(
     }
 
     // Check if already confirmed
-    const { data: currentOrder } = await supabaseAdmin
-      .from('orders')
-      .select('confirmation_status')
-      .eq('id', orderId)
-      .single()
-
-    if (currentOrder?.confirmation_status === 'Confirmed') {
+    if (order.confirmation_status === 'Confirmed') {
       return NextResponse.json(
         { success: false, error: 'Order is already confirmed' },
         { status: 400 }
@@ -109,6 +93,8 @@ export async function POST(
 
     // Get the channel name for notification
     const channelName = order.channel || order.sales_channel || 'Unknown'
+
+    console.log(`[Confirm Order] Order ${orderId} confirmed by ${userData.role} user ${userId}`)
 
     return NextResponse.json({
       success: true,
