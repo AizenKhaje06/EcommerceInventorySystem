@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { BarcodeScanner } from '@/components/barcode-scanner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { EnterpriseDateRangePicker } from '@/components/ui/enterprise-date-range-picker'
-import { Search, Package, RefreshCw, Camera, Eye, CheckCircle, Clock, TrendingUp, Zap, Target, Timer, Award, Truck, User } from 'lucide-react'
+import { Search, Package, RefreshCw, Camera, Eye, CheckCircle, Clock, TrendingUp, Zap, Target, Timer, Award, Truck, User, Phone, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { getCurrentUser } from '@/lib/auth'
 import { AnimatedNumber } from '@/components/ui/animated-number'
@@ -1096,29 +1096,32 @@ export default function PackerDashboard() {
                       </h3>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Full Name
-                        </p>
-                        <p className="text-base font-semibold text-slate-900 dark:text-white">
-                          {selectedOrder.customerName}
-                        </p>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex-shrink-0">
+                          <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Full Name</p>
+                          <p className="text-base font-semibold text-slate-900 dark:text-white">{selectedOrder.customerName}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Phone Number
-                        </p>
-                        <p className="text-base font-mono font-semibold text-slate-900 dark:text-white">
-                          {selectedOrder.customerPhone}
-                        </p>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex-shrink-0">
+                          <Phone className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Phone Number</p>
+                          <p className="text-base font-mono font-semibold text-slate-900 dark:text-white">{selectedOrder.customerPhone}</p>
+                        </div>
                       </div>
-                      <div className="col-span-2">
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Delivery Address
-                        </p>
-                        <p className="text-base font-medium text-slate-900 dark:text-white leading-relaxed">
-                          {selectedOrder.customerAddress}
-                        </p>
+                      <div className="col-span-2 flex items-start gap-3">
+                        <div className="mt-0.5 p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex-shrink-0">
+                          <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Delivery Address</p>
+                          <p className="text-base font-medium text-slate-900 dark:text-white leading-relaxed">{selectedOrder.customerAddress}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1135,43 +1138,68 @@ export default function PackerDashboard() {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Order Number
-                        </p>
-                        <p className="text-base font-mono font-bold text-slate-900 dark:text-white">
-                          #{selectedOrder.orderNumber.slice(-6)}
-                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Order Number</p>
+                        <p className="text-base font-mono font-bold text-slate-900 dark:text-white">#{selectedOrder.orderNumber.slice(-6)}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Order Date
-                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Order Date</p>
                         <p className="text-base font-semibold text-slate-900 dark:text-white">
-                          {new Date(selectedOrder.orderDate).toLocaleDateString('en-US', { 
-                            month: 'long', 
-                            day: 'numeric', 
-                            year: 'numeric' 
+                          {new Date(selectedOrder.orderDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
+
+                      {/* Left: Product Items list */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Product Items</p>
+                        <ul className="rounded-lg border border-emerald-200 dark:border-emerald-700/30 bg-white dark:bg-slate-950/60 divide-y divide-emerald-100 dark:divide-emerald-900/30 overflow-hidden">
+                          {selectedOrder.itemName.split(',').map((item: string, idx: number) => {
+                            const raw = item.trim()
+                            const match = raw.match(/^(.+?)\s*\((\d+)\)\s*$/)
+                            const name = match ? match[1].trim() : raw
+                            const qty = match ? match[2] : null
+                            if (!name) return null
+                            return (
+                              <li key={idx} className="flex items-center gap-2.5 px-3 py-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                                <span className="text-sm text-slate-800 dark:text-slate-200 flex-1">
+                                  {name}{qty ? ` (${qty})` : ''}
+                                </span>
+                              </li>
+                            )
                           })}
-                        </p>
+                        </ul>
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Product Items
-                        </p>
-                        <p className="text-base font-semibold text-slate-900 dark:text-white">
-                          {selectedOrder.itemName.replace(/\s*\(\d+\)\s*$/, '')}
-                        </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                          Qty: {selectedOrder.quantity}
-                        </p>
+
+                      {/* Right: Courier summary box */}
+                      <div className="flex flex-col gap-3 mt-6">
+                        <div className="rounded-lg border border-emerald-200 dark:border-emerald-700/20 bg-white dark:bg-slate-950/40 p-3 space-y-2.5">
+                          <div>
+                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Courier</p>
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{selectedOrder.courier || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Waybill</p>
+                            <p className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400">{selectedOrder.waybill || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Channel</p>
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{selectedOrder.channel || 'N/A'}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Total Amount
-                        </p>
-                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                          ₱{selectedOrder.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
+
+                      {/* Bottom: Total Amount + Total Items spanning full width */}
+                      <div className="col-span-2 flex items-center justify-between pt-3 border-t border-emerald-200 dark:border-emerald-700/20">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-400 dark:border-emerald-600/50 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+                          <Package className="h-3.5 w-3.5" />
+                          Total Items: {selectedOrder.quantity}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Total Amount</p>
+                          <p className="text-2xl font-bold text-emerald-500 dark:text-emerald-400 tabular-nums">
+                            ₱{selectedOrder.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1188,36 +1216,20 @@ export default function PackerDashboard() {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Courier Service
-                        </p>
-                        <p className="text-base font-semibold text-slate-900 dark:text-white">
-                          {selectedOrder.courier}
-                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Courier Service</p>
+                        <p className="text-base font-semibold text-slate-900 dark:text-white">{selectedOrder.courier}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Waybill Number
-                        </p>
-                        <p className="text-base font-mono font-bold text-purple-600 dark:text-purple-400">
-                          {selectedOrder.waybill}
-                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Waybill Number</p>
+                        <p className="text-base font-mono font-bold text-purple-600 dark:text-purple-400">{selectedOrder.waybill}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Sales Channel
-                        </p>
-                        <Badge variant="secondary" className="text-sm font-semibold">
-                          {selectedOrder.channel}
-                        </Badge>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Sales Channel</p>
+                        <Badge variant="secondary" className="text-sm font-semibold">{selectedOrder.channel}</Badge>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                          Store
-                        </p>
-                        <p className="text-base font-semibold text-slate-900 dark:text-white">
-                          {selectedOrder.store}
-                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Store</p>
+                        <p className="text-base font-semibold text-slate-900 dark:text-white">{selectedOrder.store}</p>
                       </div>
                     </div>
                   </div>
@@ -1232,28 +1244,24 @@ export default function PackerDashboard() {
                       {selectedOrder.is_cancelled ? 'Order Cancelled' : 'Ready to Pack?'}
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {selectedOrder.is_cancelled 
-                        ? 'This order has been cancelled and cannot be packed.' 
+                      {selectedOrder.is_cancelled
+                        ? 'This order has been cancelled and cannot be packed.'
                         : 'Confirm that all items are packed and ready for dispatch. This action will mark the order as packed.'}
                     </p>
                   </div>
-                  
+
                   {selectedOrder.is_cancelled && (
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                       <div className="flex items-start gap-3">
                         <span className="text-2xl">⚠️</span>
                         <div>
-                          <p className="text-sm font-semibold text-red-700 dark:text-red-400">
-                            Order Cancelled
-                          </p>
-                          <p className="text-xs text-red-600 dark:text-red-500 mt-1">
-                            This order was cancelled by the department and cannot be packed.
-                          </p>
+                          <p className="text-sm font-semibold text-red-700 dark:text-red-400">Order Cancelled</p>
+                          <p className="text-xs text-red-600 dark:text-red-500 mt-1">This order was cancelled by the department and cannot be packed.</p>
                         </div>
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex gap-3">
                     <Button
                       variant="outline"

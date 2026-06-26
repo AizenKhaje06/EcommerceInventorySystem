@@ -1,100 +1,94 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase'
 
 /**
  * API Route: Confirm Order (Waybill Confirmation)
  * POST /api/orders/[id]/confirm
- * 
+ *
  * Purpose: Logistics/Admin confirms that physical waybill has been received.
  * This allows the order to be visible in the packer's queue.
- * 
+ *
  * Access: Admin, Logistics roles only (enforced at UI level)
- * Note: Auth check removed to match other endpoints pattern
- * 
- * Deploy version: 2026-06-26 (Force rebuild)
  */
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
-  // Await params for Next.js 15+ compatibility
-  const resolvedParams = await params
-  
-  console.log('[Confirm Order] POST request received')
-  console.log('[Confirm Order] Params:', resolvedParams)
-  console.log('[Confirm Order] Order ID:', resolvedParams?.id)
-  
-  try {
-    const orderId = resolvedParams.id
+  const orderId = params.id
 
+  console.log('[Confirm Order] POST request received, orderId:', orderId)
+
+  try {
     if (!orderId) {
-      console.error('[Confirm Order] No order ID provided')
       return NextResponse.json(
         { success: false, error: 'Order ID is required' },
         { status: 400 }
       )
     }
 
-    console.log(`[Confirm Order] Looking up order: ${orderId}`)
-
-    // Fetch order details before updating
-    const { data: order, error: fetchError } = await supabaseAdmin
+    // Fetch order using id and status fields that definitely exist
+    // Avoid selecting confirmation_status here in case migration hasn't run
+    const { data: order, error: fetchError } = await supabase
       .from('orders')
-      .select('id, waybill, channel, sales_channel, confirmation_status')
+      .select('id, waybill, sales_channel')
       .eq('id', orderId)
       .single()
 
-    console.log('[Confirm Order] Query result:', { order, error: fetchError })
+    console.log('[Confirm Order] Fetch result:', { order, fetchError })
 
     if (fetchError || !order) {
-      console.error('[Confirm Order] Order not found:', fetchError)
+      console.error('[Confirm Order] Order not found or DB error:', fetchError?.message, fetchError?.code)
       return NextResponse.json(
-        { success: false, error: 'Order not found', debug: { orderId, fetchError } },
+        { success: false, error: 'Order not found', details: fetchError?.message },
         { status: 404 }
       )
     }
 
-    // Check if already confirmed
-    if (order.confirmation_status === 'Confirmed') {
-      return NextResponse.json(
-        { success: false, error: 'Order is already confirmed' },
-        { status: 400 }
-      )
-    }
-
-    // Update confirmation status to 'Confirmed'
-    const { data, error } = await supabaseAdmin
+    // Update confirmation_status to 'Confirmed'
+    // If the column doesn't exist yet, this will fail with a clear error
+    const { data: updated, error: updateError } = await supabase
       .from('orders')
       .update({
         confirmation_status: 'Confirmed',
         updated_at: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select()
+      .select('id, waybill, sales_channel, confirmation_status')
       .single()
 
-    if (error) {
-      console.error('[Confirm Order] Database error:', error)
+    if (updateError) {
+      console.error('[Confirm Order] Update error:', updateError.message, updateError.code)
+
+      // If column doesn't exist (migration not run), return helpful error
+      if (updateError.message?.includes('confirmation_status') || updateError.code === '42703') {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Database migration required. Run migration 052_add_confirmation_status_to_orders.sql in Supabase SQL Editor.',
+            details: updateError.message
+          },
+          { status: 500 }
+        )
+      }
+
       return NextResponse.json(
-        { success: false, error: 'Failed to confirm order' },
+        { success: false, error: 'Failed to confirm order', details: updateError.message },
         { status: 500 }
       )
     }
 
-    // Get the channel name for notification
-    const channelName = order.channel || order.sales_channel || 'Unknown'
-
+    const channelName = order.sales_channel || 'Unknown'
     console.log(`[Confirm Order] Order ${orderId} confirmed successfully`)
 
     return NextResponse.json({
       success: true,
       message: 'Order confirmed successfully',
-      order: data,
-      channelName // Return channel name for notification
+      order: updated,
+      channelName
     })
 
   } catch (error) {
-    console.error('[Confirm Order] Error:', error)
+    console.error('[Confirm Order] Unexpected error:', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

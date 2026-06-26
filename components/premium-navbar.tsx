@@ -1,20 +1,12 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Bell, Settings, User, Menu, RefreshCw, LogOut, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/use-accessibility"
 import { CommandPaletteSearch } from "@/components/command-palette-search"
 import { getCurrentUser } from "@/lib/auth"
 import { ToggleTheme } from "@/components/ui/toggle-theme"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +33,19 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
   const [currentTime, setCurrentTime] = useState('')
   const [currentDate, setCurrentDate] = useState('')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowProfileDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Get current user only on client side to avoid hydration errors
   React.useEffect(() => {
@@ -262,55 +267,74 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
             />
             
             {/* Profile Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button 
-                  className="h-9 w-9 rounded-full overflow-hidden border-2 border-slate-300 dark:border-amber-900/50 hover:border-amber-500 dark:hover:border-amber-400 transition-all hover:shadow-md flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600"
-                  aria-label="User menu"
-                  title={`${username} - ${userRole}`}
-                >
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowProfileDropdown(v => !v)}
+                className="flex items-center focus:outline-none"
+                aria-label="User menu"
+              >
+                <div className="h-9 w-9 rounded-full overflow-hidden border-2 border-slate-300 dark:border-amber-900/50 hover:ring-4 hover:ring-blue-400 dark:hover:ring-amber-400 transition-all duration-150 cursor-pointer flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600">
                   {profileImage ? (
-                    <img 
+                    <img
                       src={`/api/image-proxy?url=${encodeURIComponent(profileImage)}`}
                       alt={username}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        console.error('[Header] Image load error:', profileImage)
-                        e.currentTarget.style.display = 'none'
-                      }}
+                      className="h-full w-full object-cover object-center"
+                      onError={(e) => { e.currentTarget.style.display = 'none' }}
                     />
                   ) : (
                     <User className="h-5 w-5 text-white" strokeWidth={2.5} />
                   )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 dark:bg-black dark:border-amber-500/15">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{username}</span>
-                    <span className="text-xs text-slate-500 dark:text-amber-400/60 font-normal">{userRole}</span>
+                </div>
+              </button>
+
+              {showProfileDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                  {/* User info */}
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600 flex-shrink-0">
+                        {profileImage ? (
+                          <img
+                            src={`/api/image-proxy?url=${encodeURIComponent(profileImage)}`}
+                            alt={username}
+                            className="h-full w-full object-cover object-center"
+                            onError={(e) => { e.currentTarget.style.display = 'none' }}
+                          />
+                        ) : (
+                          <User className="h-5 w-5 text-white" strokeWidth={2.5} />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{username}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                          {userRole}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="dark:bg-amber-500/10" />
-                {/* Settings — admin only */}
-                {currentUser?.role === 'admin' && (
-                  <DropdownMenuItem onSelect={() => window.location.href = '/dashboard/settings'} className="dark:hover:bg-amber-500/10 dark:focus:bg-amber-500/10">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </DropdownMenuItem>
-                )}
-                {currentUser?.role === 'admin' && (
-                  <DropdownMenuSeparator className="dark:bg-amber-500/10" />
-                )}
-                <DropdownMenuItem
-                  className="text-red-600 dark:text-red-400 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10"
-                  onSelect={() => setShowLogoutDialog(true)}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {/* Actions */}
+                  <div className="p-1.5 space-y-0.5">
+                    {currentUser?.role === 'admin' && (
+                      <button
+                        onClick={() => { setShowProfileDropdown(false); window.location.href = '/dashboard/settings' }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <Settings className="h-4 w-4 flex-shrink-0 text-slate-400" />
+                        Settings
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setShowProfileDropdown(false); setShowLogoutDialog(true) }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4 flex-shrink-0" />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

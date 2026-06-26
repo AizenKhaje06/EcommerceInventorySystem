@@ -768,15 +768,6 @@ export default function PackingQueuePage() {
         throw new Error(data.error || 'Failed to confirm order')
       }
       
-      // Play notification sound
-      try {
-        const audio = new Audio('/sounds/order-confirmed.mp3')
-        audio.volume = 0.5
-        audio.play().catch(err => console.log('[Audio] Play failed:', err))
-      } catch (err) {
-        console.log('[Audio] Error:', err)
-      }
-      
       // Success toast
       toast.success('✅ Order confirmed! Waybill received.', {
         description: `Order is now visible to packers in ${channelName} department`,
@@ -1264,61 +1255,46 @@ export default function PackingQueuePage() {
                           {formatCurrency(order.total || order.totalAmount || 0)}
                         </span>
                       </td>
-                      <td className="py-3 px-5">
+                      <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-2">
-                          {/* Dynamic primary action based on confirmation status */}
+                          {/* Primary action — context-aware */}
                           {!order.is_cancelled && (
                             <>
                               {order.confirmation_status === 'Unconfirmed' ? (
-                                // UNCONFIRMED: Show CONFIRM button (Admin/Logistics only)
-                                (userRole === 'admin' || userRole === 'logistics') && (
-                                  <Button
-                                    size="sm"
+                                (userRole === 'admin' || userRole === 'logistics' || userRole === 'logistics-admin') && (
+                                  <button
                                     onClick={async () => await handleConfirmOrder(order.id, order.channel || order.sales_channel || 'Unknown')}
                                     disabled={confirming === order.id}
-                                    className="h-10 px-5 rounded-lg font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 shadow-sm transition-all duration-200 whitespace-nowrap"
+                                    className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap"
                                   >
-                                    {confirming === order.id ? (
-                                      <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Confirming...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                        CONFIRM
-                                      </>
-                                    )}
-                                  </Button>
+                                    {confirming === order.id
+                                      ? <Loader2 className="h-3 w-3 animate-spin" />
+                                      : <><CheckCircle className="h-3 w-3" />Confirm</>
+                                    }
+                                  </button>
                                 )
                               ) : (
-                                // CONFIRMED: Show MARK AS PACKED button (except Logistics)
                                 userRole !== 'logistics-admin' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      openConfirmDialog(order)
-                                    }}
-                                    className="h-10 px-4 rounded-lg font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 shadow-sm transition-all duration-200 whitespace-nowrap"
+                                  <button
+                                    onClick={() => openConfirmDialog(order)}
+                                    className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-colors duration-150 whitespace-nowrap"
                                   >
-                                    <Package className="h-4 w-4 mr-2" />
-                                    MARK AS PACKED
-                                  </Button>
+                                    <Package className="h-3 w-3" />
+                                    Pack
+                                  </button>
                                 )
                               )}
                             </>
                           )}
-                          
-                          {/* VIEW DETAILS button - always visible */}
-                          <Button
-                            variant="outline"
-                            size="sm"
+
+                          {/* Secondary action — always visible */}
+                          <button
                             onClick={() => openDetailsModal(order)}
-                            className="h-10 px-6 rounded-lg font-semibold border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-200 whitespace-nowrap"
+                            className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm transition-colors duration-150 whitespace-nowrap"
                           >
-                            <Eye className="h-4 w-4 mr-2" />
-                            VIEW DETAILS
-                          </Button>
+                            <Eye className="h-3 w-3 text-slate-400" />
+                            Details
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1905,7 +1881,7 @@ export default function PackingQueuePage() {
                             {/* Dynamic primary action based on confirmation status */}
                             {selectedOrder?.confirmation_status === 'Unconfirmed' ? (
                               // UNCONFIRMED: Show CONFIRM button (Admin/Logistics only)
-                              (userRole === 'admin' || userRole === 'logistics') && (
+                              (userRole === 'admin' || userRole === 'logistics' || userRole === 'logistics-admin') && (
                                 <Button
                                   onClick={async () => {
                                     await handleConfirmOrder(
