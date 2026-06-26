@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * API Route: Confirm Order (Waybill Confirmation)
@@ -15,11 +15,21 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
     const orderId = params.id
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get authenticated user from session cookie
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - No auth header' },
+        { status: 401 }
+      )
+    }
+
+    // Get user info
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
     if (authError || !user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -28,7 +38,7 @@ export async function POST(
     }
 
     // Get user role from users table
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', user.id)
@@ -51,7 +61,7 @@ export async function POST(
     }
 
     // Fetch order details before updating
-    const { data: order, error: fetchError } = await supabase
+    const { data: order, error: fetchError } = await supabaseAdmin
       .from('orders')
       .select('id, waybill, channel, sales_channel')
       .eq('id', orderId)
@@ -65,7 +75,7 @@ export async function POST(
     }
 
     // Check if already confirmed
-    const { data: currentOrder } = await supabase
+    const { data: currentOrder } = await supabaseAdmin
       .from('orders')
       .select('confirmation_status')
       .eq('id', orderId)
@@ -79,7 +89,7 @@ export async function POST(
     }
 
     // Update confirmation status to 'Confirmed'
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .update({
         confirmation_status: 'Confirmed',
