@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { LoadingOverlay } from '@/components/ui/loading-overlay'
-import { Search, Package, RefreshCw, CheckCircle, ShoppingCart, TrendingUp, Eye, User, Phone, MapPin, Clock, Truck, Trash2, XCircle } from 'lucide-react'
+import { Search, Package, RefreshCw, CheckCircle, ShoppingCart, TrendingUp, Eye, User, Phone, MapPin, Clock, Truck, Trash2, XCircle, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import { apiGet, apiPost } from '@/lib/api-client'
@@ -54,6 +54,7 @@ interface Order {
   cancelled_at?: string
   restored_by?: string
   restored_at?: string
+  confirmation_status?: string // NEW: Waybill confirmation status
 }
 
 /**
@@ -83,6 +84,7 @@ export default function PackingQueuePage() {
   const [cancellationReason, setCancellationReason] = useState('')
   const [cancellationReasonOther, setCancellationReasonOther] = useState('') // For "Other" option
   const [uncancelling, setUncancelling] = useState(false)
+  const [confirming, setConfirming] = useState<string | null>(null) // NEW: Track confirming order ID
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -249,7 +251,8 @@ export default function PackingQueuePage() {
         cancelled_by: order.cancelled_by,
         cancelled_at: order.cancelled_at,
         restored_by: order.restored_by,
-        restored_at: order.restored_at
+        restored_at: order.restored_at,
+        confirmation_status: order.confirmation_status // NEW: Waybill confirmation status
       } as any))
       
       // Filter by assigned channel for dept-manager and operations roles
@@ -747,6 +750,58 @@ export default function PackingQueuePage() {
     }
   }
 
+  // NEW: Handle confirm order (waybill confirmation)
+  const handleConfirmOrder = async (orderId: string, channelName: string) => {
+    try {
+      setConfirming(orderId)
+      
+      const response = await fetch(`/api/orders/${orderId}/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to confirm order')
+      }
+      
+      // Play notification sound
+      try {
+        const audio = new Audio('/sounds/order-confirmed.mp3')
+        audio.volume = 0.5
+        audio.play().catch(err => console.log('[Audio] Play failed:', err))
+      } catch (err) {
+        console.log('[Audio] Error:', err)
+      }
+      
+      // Success toast
+      toast.success('✅ Order confirmed! Waybill received.', {
+        description: `Order is now visible to packers in ${channelName} department`,
+        duration: 4000
+      })
+      
+      // Update local state immediately (optimistic update)
+      setOrders(prev => prev.map(o => 
+        o.id === orderId ? { ...o, confirmation_status: 'Confirmed' } : o
+      ))
+      setFilteredOrders(prev => prev.map(o => 
+        o.id === orderId ? { ...o, confirmation_status: 'Confirmed' } : o
+      ))
+      
+      // Refresh data from server in background
+      fetchOrders()
+      
+    } catch (error: any) {
+      console.error('Error confirming order:', error)
+      toast.error(error.message || 'Failed to confirm order')
+    } finally {
+      setConfirming(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center min-h-[600px]">
@@ -1095,6 +1150,9 @@ export default function PackingQueuePage() {
                       <th className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
                         Date & Time
                       </th>
+                      <th className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
+                        Status
+                      </th>
                       {!isTeamLeader && (
                         <th className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
                           Channel
@@ -1123,7 +1181,9 @@ export default function PackingQueuePage() {
                         key={order.id}
                         className={`transition-all duration-200 cursor-pointer ${
                           order.is_cancelled 
-                            ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30' 
+                            ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30'
+                            : order.confirmation_status === 'Unconfirmed'
+                            ? 'bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'
                             : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'
                         }`}
                       >
@@ -1164,6 +1224,17 @@ export default function PackingQueuePage() {
                           </span>
                         </div>
                       </td>
+                      <td className="py-3 px-4 text-center">
+                        {order.confirmation_status === 'Confirmed' ? (
+                          <Badge className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold whitespace-nowrap">
+                            Confirmed
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-yellow-600 text-white text-[10px] px-2 py-1 font-bold whitespace-nowrap">
+                            Unconfirmed
+                          </Badge>
+                        )}
+                      </td>
                       {!isTeamLeader && (
                         <td className="py-3 px-4 text-center">
                           <Badge variant="outline" className="text-[10px] font-semibold whitespace-nowrap">
@@ -1195,6 +1266,27 @@ export default function PackingQueuePage() {
                       </td>
                       <td className="py-3 px-5">
                         <div className="flex items-center justify-center gap-2">
+                          {/* Show Confirm button only for Admin/Logistics AND Unconfirmed orders */}
+                          {(userRole === 'admin' || userRole === 'logistics') && order.confirmation_status === 'Unconfirmed' && !order.is_cancelled && (
+                            <Button
+                              size="sm"
+                              onClick={async () => await handleConfirmOrder(order.id, order.channel || order.sales_channel || 'Unknown')}
+                              disabled={confirming === order.id}
+                              className="h-10 px-4 rounded-lg font-semibold bg-green-600 hover:bg-green-700 text-white border-0 transition-all duration-200 whitespace-nowrap"
+                            >
+                              {confirming === order.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Confirming...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  CONFIRM
+                                </>
+                              )}
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"

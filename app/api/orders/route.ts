@@ -183,6 +183,7 @@ export async function POST(request: NextRequest) {
         customer_address: customerAddress || null,
         customer_contact: customerContact || null,
         dispatch_notes: notes || null,
+        confirmation_status: 'Unconfirmed', // NEW: Requires logistics/admin confirmation before packing
         created_at: createdAt,
         updated_at: createdAt
       })

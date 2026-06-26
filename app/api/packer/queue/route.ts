@@ -7,11 +7,13 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function GET(request: NextRequest) {
   try {
-    // Query unpacked orders (status != 'Packed')
+    // Query unpacked orders (status != 'Packed' AND confirmation_status = 'Confirmed')
+    // Only show confirmed orders to packers - ensures waybill was received by logistics
     const { data: orders, error: ordersError } = await supabaseAdmin
       .from('orders')
       .select('*')
       .neq('status', 'Packed')
+      .eq('confirmation_status', 'Confirmed') // NEW: Only show confirmed orders
       .order('created_at', { ascending: true })
 
     if (ordersError) {
