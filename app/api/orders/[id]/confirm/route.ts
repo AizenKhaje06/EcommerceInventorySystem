@@ -15,8 +15,22 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  console.log('[Confirm Order] POST request received')
+  console.log('[Confirm Order] Params:', params)
+  console.log('[Confirm Order] Order ID:', params?.id)
+  
   try {
     const orderId = params.id
+
+    if (!orderId) {
+      console.error('[Confirm Order] No order ID provided')
+      return NextResponse.json(
+        { success: false, error: 'Order ID is required' },
+        { status: 400 }
+      )
+    }
+
+    console.log(`[Confirm Order] Looking up order: ${orderId}`)
 
     // Fetch order details before updating
     const { data: order, error: fetchError } = await supabaseAdmin
@@ -25,9 +39,12 @@ export async function POST(
       .eq('id', orderId)
       .single()
 
+    console.log('[Confirm Order] Query result:', { order, error: fetchError })
+
     if (fetchError || !order) {
+      console.error('[Confirm Order] Order not found:', fetchError)
       return NextResponse.json(
-        { success: false, error: 'Order not found' },
+        { success: false, error: 'Order not found', debug: { orderId, fetchError } },
         { status: 404 }
       )
     }
