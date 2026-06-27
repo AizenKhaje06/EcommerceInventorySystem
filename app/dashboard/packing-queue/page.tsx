@@ -1358,7 +1358,7 @@ export default function PackingQueuePage() {
                                     onClick={async () => await handleConfirmOrder(order.id, order.channel || order.sales_channel || 'Unknown')}
                                     disabled={confirming === order.id}
                                     aria-label={`Confirm waybill for order ${order.waybill || order.id}`}
-                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
+                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-yellow-400 text-yellow-900 hover:bg-yellow-500 active:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
                                   >
                                     {confirming === order.id
                                       ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />

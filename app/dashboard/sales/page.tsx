@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, BarChart3, TrendingUp, DollarSign, Package, Users, ShoppingCart } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { apiGet } from '@/lib/api-client';
 import { TableSkeleton, CardSkeleton, StatCardSkeleton } from '@/components/ui/table-skeleton';
@@ -314,18 +315,43 @@ export default function SalesAnalyticsPage() {
       {viewMode === 'daily' ? (
         <Card className="border-0 shadow-lg bg-white dark:bg-slate-900 animate-in fade-in-0 slide-in-from-bottom-4 duration-700 delay-200">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <CardTitle className="text-slate-900 dark:text-white">Daily Sales Calendar</CardTitle>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
-                  Previous
-                </Button>
-                <Badge variant="secondary">
-                  {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </Badge>
-                <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
-                  Next
-                </Button>
+                <Select
+                  value={String(currentMonth.getMonth())}
+                  onValueChange={(val) => {
+                    const newDate = new Date(currentMonth);
+                    newDate.setMonth(Number(val));
+                    setCurrentMonth(newDate);
+                  }}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['January','February','March','April','May','June','July','August','September','October','November','December'].map((month, idx) => (
+                      <SelectItem key={idx} value={String(idx)}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={String(currentMonth.getFullYear())}
+                  onValueChange={(val) => {
+                    const newDate = new Date(currentMonth);
+                    newDate.setFullYear(Number(val));
+                    setCurrentMonth(newDate);
+                  }}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((year) => (
+                      <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { DollarSign, TrendingUp, TrendingDown, Percent, BarChart3, ChevronLeft, ChevronRight, Calendar, ShoppingCart, Package, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { DollarSign, TrendingUp, TrendingDown, Percent, BarChart3, Calendar, ShoppingCart, Package, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, Area, AreaChart, Tooltip } from "recharts"
 import {
   ChartContainer,
@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
     const monthNum = (i + 1).toString().padStart(2, '0')
     const monthKey = `2026-${monthNum}` // Current year
     const existingData = rawMonthlySales.find(m => m.month === monthKey)
-    return existingData || { month: monthKey, revenue: 0 }
+    return existingData || { month: monthKey, revenue: 0, profit: 0, itemsSold: 0 }
   })
 
   // Calculate additional metrics
@@ -296,36 +296,38 @@ export default function AnalyticsPage() {
       {/* Filter and Controls - Professional */}
       <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-0 shadow-lg">
         <CardContent className="p-4">
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">View Type</Label>
-                <div className="flex gap-2">
-                  <Button
-                    variant={view === 'daily' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setView('daily')}
-                    className="h-9 flex-1"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Daily
-                  </Button>
-                  <Button
-                    variant={view === 'monthly' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setView('monthly')}
-                    className="h-9 flex-1"
-                  >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Monthly
-                  </Button>
-                </div>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            {/* Left: View Type */}
+            <div>
+              <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">View Type</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={view === 'daily' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setView('daily')}
+                  className="h-9"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Daily
+                </Button>
+                <Button
+                  variant={view === 'monthly' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setView('monthly')}
+                  className="h-9"
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Monthly
+                </Button>
               </div>
+            </div>
 
+            {/* Right: Sales Channel + Chart Type + Month + Year */}
+            <div className="flex flex-wrap items-end gap-3">
               <div>
                 <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Sales Channel</Label>
                 <Select value={salesChannelFilter} onValueChange={setSalesChannelFilter}>
-                  <SelectTrigger className="h-9 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
+                  <SelectTrigger className="h-9 w-[160px] border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
                     <SelectValue placeholder="All Channels" />
                   </SelectTrigger>
                   <SelectContent>
@@ -343,7 +345,7 @@ export default function AnalyticsPage() {
                 <div>
                   <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Chart Type</Label>
                   <Select value={chartType} onValueChange={(value: 'bar' | 'line' | 'area') => setChartType(value)}>
-                    <SelectTrigger className="h-9 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
+                    <SelectTrigger className="h-9 w-[130px] border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -354,21 +356,54 @@ export default function AnalyticsPage() {
                   </Select>
                 </div>
               )}
-            </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {view === 'daily' && (
-                <div className="flex items-center gap-2 flex-1">
-                  <Button variant="outline" size="sm" onClick={prevMonth} className="h-9 flex-shrink-0">
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white text-center flex-1">
-                    {monthYear}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={nextMonth} className="h-9 flex-shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <>
+                  <div>
+                    <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Month</Label>
+                    <Select
+                      value={String(currentMonth.getMonth())}
+                      onValueChange={(val) => {
+                        const newDate = new Date(currentMonth);
+                        newDate.setMonth(Number(val));
+                        setCurrentMonth(newDate);
+                        setLoading(true);
+                        setError(null);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 w-[130px] border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['January','February','March','April','May','June','July','August','September','October','November','December'].map((month, idx) => (
+                          <SelectItem key={idx} value={String(idx)}>{month}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Year</Label>
+                    <Select
+                      value={String(currentMonth.getFullYear())}
+                      onValueChange={(val) => {
+                        const newDate = new Date(currentMonth);
+                        newDate.setFullYear(Number(val));
+                        setCurrentMonth(newDate);
+                        setLoading(true);
+                        setError(null);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 w-[90px] border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((year) => (
+                          <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -475,22 +510,23 @@ export default function AnalyticsPage() {
                         tickMargin={12}
                         minTickGap={32}
                         tickFormatter={(month) => new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
-                        className="text-sm font-medium"
-                        stroke="hsl(var(--muted-foreground))"
+                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
+                        stroke="#94a3b8"
                       />
                       <YAxis 
                         tickLine={false}
                         axisLine={false}
                         tickMargin={12}
                         tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
-                        className="text-sm font-medium"
+                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
                         width={60}
-                        stroke="hsl(var(--muted-foreground))"
+                        stroke="#94a3b8"
                       />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (!active || !payload || !payload.length) return null
                         const data = payload[0]
+                        const profit = data.payload.profit ?? 0
                         return (
                           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-4 min-w-[200px]">
                             <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -499,11 +535,19 @@ export default function AnalyticsPage() {
                                 {new Date(data.payload.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Revenue</p>
-                              <p className="text-2xl font-bold bg-gradient-to-br from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
-                                {formatCurrency(data.value as number)}
-                              </p>
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Revenue</p>
+                                <p className="text-xl font-bold bg-gradient-to-br from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+                                  {formatCurrency(data.value as number)}
+                                </p>
+                              </div>
+                              <div className="border-t border-slate-100 dark:border-slate-800 pt-2">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Gross Profit</p>
+                                <p className={`text-xl font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                                  {formatCurrency(profit)}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         )
@@ -532,19 +576,22 @@ export default function AnalyticsPage() {
                       tickMargin={10}
                       minTickGap={32}
                       tickFormatter={(month) => new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
-                      className="text-xs"
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
+                      stroke="#94a3b8"
                     />
                     <YAxis 
                       tickLine={false}
                       tickMargin={10}
                       tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
-                      className="text-xs"
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
                       width={45}
+                      stroke="#94a3b8"
                     />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (!active || !payload || !payload.length) return null
                         const data = payload[0]
+                        const profit = data.payload.profit ?? 0
                         return (
                           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-4 min-w-[200px]">
                             <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -553,11 +600,19 @@ export default function AnalyticsPage() {
                                 {new Date(data.payload.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Revenue</p>
-                              <p className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                                {formatCurrency(data.value as number)}
-                              </p>
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Revenue</p>
+                                <p className="text-xl font-bold bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                                  {formatCurrency(data.value as number)}
+                                </p>
+                              </div>
+                              <div className="border-t border-slate-100 dark:border-slate-800 pt-2">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Gross Profit</p>
+                                <p className={`text-xl font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                                  {formatCurrency(profit)}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         )
@@ -594,20 +649,23 @@ export default function AnalyticsPage() {
                       tickMargin={10}
                       minTickGap={32}
                       tickFormatter={(month) => new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
-                      className="text-xs fill-slate-400 dark:fill-slate-500"
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
+                      stroke="#94a3b8"
                     />
                     <YAxis 
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
                       tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
-                      className="text-xs fill-slate-400 dark:fill-slate-500"
+                      tick={{ fill: '#94a3b8', fontSize: 12 }}
                       width={50}
+                      stroke="#94a3b8"
                     />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (!active || !payload || !payload.length) return null
                         const data = payload[0]
+                        const profit = data.payload.profit ?? 0
                         return (
                           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-4 min-w-[200px] animate-in fade-in-0 zoom-in-95 duration-200">
                             <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -616,11 +674,19 @@ export default function AnalyticsPage() {
                                 {new Date(data.payload.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Revenue</p>
-                              <p className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-indigo-700 bg-clip-text text-transparent tabular-nums">
-                                {formatCurrency(data.value as number)}
-                              </p>
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Revenue</p>
+                                <p className="text-xl font-bold bg-gradient-to-br from-indigo-600 to-indigo-700 bg-clip-text text-transparent tabular-nums">
+                                  {formatCurrency(data.value as number)}
+                                </p>
+                              </div>
+                              <div className="border-t border-slate-100 dark:border-slate-800 pt-2">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Gross Profit</p>
+                                <p className={`text-xl font-bold tabular-nums ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                                  {formatCurrency(profit)}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         )
