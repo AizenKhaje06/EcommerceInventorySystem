@@ -2354,10 +2354,12 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
       },
       'packing-queue': {
         title: 'Packing Queue',
-        description: 'View and manage orders waiting to be packed. Edit order details, confirm packing to deduct inventory, or cancel orders.',
+        description: 'View and manage orders waiting to be packed. Edit order details, confirm waybill receipt, pack orders to deduct inventory, or cancel orders.',
         workflow: [
           'View all Pending orders queued for packing.',
-          'Click an order to view details in the modal.',
+          'Unconfirmed orders show a YELLOW "Confirm" button — Admin/Logistics clicks this to confirm waybill receipt.',
+          'Confirmed orders show a GREEN "Pack" button — click to mark as packed and deduct inventory.',
+          'Click an order\'s "Details" button to view full information in a modal.',
           'Click "EDIT" to modify customer info, courier, waybill, quantity, amount, or sales channel.',
           'Fill required fields (marked with *): Name, Phone, Address, Courier, Waybill.',
           'System validates all fields before saving — empty required fields are rejected.',
@@ -2370,6 +2372,9 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
           'Packed orders move automatically to Track Orders.',
         ],
         guide: [
+          'YELLOW Confirm button = order is Unconfirmed (waybill not yet received).',
+          'GREEN Pack button = order is Confirmed and ready to pack.',
+          'Only Admin, Logistics, and Logistics Admin can click the Confirm button.',
           'Cancelled orders count as "Cancelled (Packing)" in dashboard.',
           'Inventory deduction happens only when status changes to Packed.',
           'Single Product Orders: Quantity and Amount are editable.',
@@ -2387,6 +2392,7 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
           'Packer role handles this page in the field.',
           'Cancelled orders can be restored before being deleted.',
           'Required fields are marked with a red asterisk (*).',
+          'Yellow = Unconfirmed (needs waybill confirmation), Green = Confirmed (ready to pack).',
         ],
       },
       'track-orders': {
@@ -2419,16 +2425,28 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
       },
       analytics: {
         title: 'Analytics',
-        description: 'Deep-dive sales analytics: revenue trends, top products, channel performance, and period comparisons.',
+        description: 'Deep-dive sales analytics: revenue trends, gross profit tooltips, channel performance, and period comparisons.',
         workflow: [
-          'Select a time period or date range.',
-          'View revenue breakdown by sales channel.',
-          'Review top-selling products and categories.',
-          'Compare current period vs previous period.',
+          'Switch between Daily and Monthly view using the View Type buttons.',
+          'In Daily view, select a Month and Year from the dropdowns (top-right of the controls card).',
+          'In Monthly view, select a Chart Type: Bar, Line, or Area.',
+          'Filter by Sales Channel to narrow data to a specific platform.',
+          'Hover over any bar/line/area to see the Revenue and Gross Profit tooltip.',
+          'Use the Enterprise Date Range Picker (top-right) to filter KPI cards by a custom period.',
         ],
         guide: [
+          'Daily view shows a calendar for the selected month and year.',
+          'Month and Year dropdowns replace the old left/right arrow navigation.',
+          'Monthly view shows all 12 months of the current year (months with no sales show ₱0).',
+          'Tooltip shows Revenue AND Gross Profit — Gross Profit turns red if negative.',
+          'Axis labels (months, amounts) are always visible in both light and dark mode.',
           'All analytics exclude CANCELLED and RETURNED orders.',
           'Revenue is based on actual order amounts, not estimates.',
+        ],
+        notes: [
+          'Month/Year dropdowns only appear in Daily view; they are hidden in Monthly view.',
+          'Chart type selector (Bar/Line/Area) only appears in Monthly view.',
+          'Dark mode axis text uses slate-400 color for readability.',
         ],
       },
       insights: {
@@ -2634,10 +2652,12 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
       },
       'packing-queue': {
         title: 'Packing Queue',
-        description: 'View and pack orders for your sales channel. Edit order details before packing.',
+        description: 'View and pack orders for your sales channel. Confirm waybill receipt and edit order details before packing.',
         workflow: [
           'View Pending orders for your channel.',
-          'Click an order to view details.',
+          'Click an order\'s "Details" button to view details.',
+          'Unconfirmed orders show a YELLOW "Confirm" button — only Admin/Logistics can confirm.',
+          'Confirmed orders show a GREEN "Pack" button — click to pack and deduct inventory.',
           'Click "EDIT" to modify customer info, courier, waybill, quantity, or amount.',
           'Fill required fields (marked with *) before saving.',
           'If waybill is changed, system auto-checks for duplicates.',
@@ -2646,6 +2666,8 @@ const MANUAL_DATA: Record<string, { label: string; icon: string; pages: Record<s
           'Click "UNCANCEL" to restore a cancelled order.',
         ],
         guide: [
+          'YELLOW button = Unconfirmed order (waybill not yet confirmed by Admin/Logistics).',
+          'GREEN button = Confirmed order, ready to pack.',
           'Packing deducts inventory immediately.',
           'Cancelled orders here show in dashboard as "Cancelled (Packing)".',
           'Single Product Orders: Quantity and Amount are editable.',
@@ -3126,6 +3148,7 @@ function ManualTab() {
       const salesFeatures = [
         'Point of Sale with fast order creation and Title Case product display',
         'Packing Queue with full order editing (validation, waybill duplicate check, unsaved-changes guard)',
+        'Color-coded action buttons: YELLOW = Confirm (waybill unconfirmed), GREEN = Pack (ready to pack)',
         'Sales Channel correction in edit mode (Admin only)',
         'Dept. Head can cancel and restore orders in Packing Queue',
         'Order Tracking with complete status updates and export',
@@ -3160,13 +3183,16 @@ function ManualTab() {
       yPos += 8
       
       const analyticsFeatures = [
-        'Revenue Analytics with visual trend charts',
+        'Revenue Analytics with visual trend charts (Bar, Line, Area)',
+        'Month and Year dropdowns for Daily view navigation',
+        'Gross Profit shown in chart tooltips alongside Revenue',
         'Profit Margin Analysis and calculations',
         'ABC Classification for inventory',
         'Inventory Turnover with days-to-sell metrics',
         'Channel Performance breakdown',
         'Fast/Slow/Dead Stock analysis',
-        'Excel and PDF export capabilities'
+        'Excel and PDF export capabilities',
+        'Dark mode axis labels always readable (slate-400 color)'
       ]
       
       doc.setFontSize(9)
