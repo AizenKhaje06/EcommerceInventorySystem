@@ -13,6 +13,7 @@ import {
 import { formatCurrency } from '@/lib/utils'
 import { apiGet } from '@/lib/api-client'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton, CardSkeleton } from '@/components/ui/table-skeleton'
 import { EnterpriseDateRangePicker } from '@/components/ui/enterprise-date-range-picker'
 import { getCurrentUser } from '@/lib/auth'
 
@@ -234,11 +235,8 @@ export default function DeptManagerLogPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <BrandLoader size="md" />
-              <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm">Loading orders...</p>
-            </div>
+          <div className="py-6" aria-live="polite" aria-busy="true">
+            <TableSkeleton rows={5} columns={5} />
           </div>
         ) : !data || data.orders.length === 0 ? (
           <div className="text-center py-16">

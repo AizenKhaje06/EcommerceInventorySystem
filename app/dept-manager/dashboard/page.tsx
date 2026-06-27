@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Package, ShoppingCart, TrendingUp, Users, XCircle, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { apiGet } from '@/lib/api-client'
-import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton, CardSkeleton, StatCardSkeleton } from '@/components/ui/table-skeleton'
 import { EnterpriseDateRangePicker } from '@/components/ui/enterprise-date-range-picker'
 import { getCurrentUser } from '@/lib/auth'
 
@@ -68,11 +68,16 @@ export default function DeptManagerDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-4 text-sm font-medium">Loading department data...</p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <StatCardSkeleton count={4} />
+        <div className="grid gap-5 grid-cols-1 lg:grid-cols-2">
+          <CardSkeleton lines={5} />
+          <CardSkeleton lines={5} />
+        </div>
+        <span className="sr-only">Loading, please wait...</span>
       </div>
     )
   }

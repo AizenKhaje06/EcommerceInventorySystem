@@ -111,14 +111,16 @@ export const ROLE_PERMISSIONS = {
     '/dept-manager/log'  ]
 } as const
 
-// Default passwords per role
+// Default passwords removed from source code for security.
+// All authentication is handled via Supabase (bcrypt hashes in DB).
+// See: app/api/auth/unified-login/route.ts → validateCredentials()
 export const DEFAULT_PASSWORDS: Record<UserRole, string> = {
-  admin: 'admin123',
-  operations: 'ops456',
-  packer: 'pack789',
-  tracker: 'tracker123',
-  'logistics-admin': 'logistics123',
-  'dept-manager': 'manager123'
+  admin: '',
+  operations: '',
+  packer: '',
+  tracker: '',
+  'logistics-admin': '',
+  'dept-manager': '',
 }
 
 // Auth helpers
@@ -200,22 +202,14 @@ export function getCurrentUser(): User | null {
     const username = localStorage.getItem('username')
     const role = localStorage.getItem('userRole') as UserRole
     const displayName = localStorage.getItem('displayName')
-    const assignedChannel = localStorage.getItem('assignedChannel') // NEW: Get assigned channel
+    const assignedChannel = localStorage.getItem('assignedChannel')
     
     if (isLoggedIn === 'true' && username && role) {
-      // Validate role is valid
       if (!['admin', 'operations', 'packer', 'tracker', 'logistics-admin', 'dept-manager'].includes(role)) {
-        console.warn('[Auth] Invalid role in session, clearing...')
         clearCurrentUser()
         return null
       }
-      
-      return { 
-        username, 
-        role, 
-        displayName: displayName || username,
-        assignedChannel // NEW: Include in user object
-      }
+      return { username, role, displayName: displayName || username, assignedChannel }
     }
   } catch (error) {
     console.error('[Auth] Error reading user from localStorage:', error)
@@ -256,37 +250,17 @@ export function setCurrentUser(user: User): void {
   }
 }
 
-export function validateRolePassword(role: UserRole, password: string): boolean {
-  if (typeof window === 'undefined') return false
-  
-  try {
-    // Check custom stored password first
-    const storedPassword = localStorage.getItem(`${role}Password`)
-    if (storedPassword) {
-      return password === storedPassword
-    }
-    // Fall back to default password
-    return password === DEFAULT_PASSWORDS[role]
-  } catch (error) {
-    console.error('Error validating password:', error)
-    return false
-  }
-}
+// validateRolePassword removed — all auth handled server-side via Supabase.
+// See: app/api/auth/unified-login/route.ts
 
 export function clearCurrentUser(): void {
   if (typeof window === 'undefined') return
-  
   try {
-    console.log('[Auth] Clearing all user sessions...')
-    
-    // Clear admin/operations/packer session
     localStorage.removeItem('isLoggedIn')
     localStorage.removeItem('username')
     localStorage.removeItem('userRole')
     localStorage.removeItem('displayName')
     localStorage.removeItem('currentUser')
-    
-    console.log('[Auth] All sessions cleared successfully')
   } catch (error) {
     console.error('Error clearing user from localStorage:', error)
   }

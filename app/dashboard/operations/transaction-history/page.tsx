@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -122,13 +123,12 @@ export default function TransactionHistoryPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">
-            Loading orders...
-          </p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <TableSkeleton rows={8} columns={6} />
+        <span className="sr-only">Loading orders, please wait...</span>
       </div>
     )
   }

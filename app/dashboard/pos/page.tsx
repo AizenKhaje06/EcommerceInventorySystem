@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import type { InventoryItem } from "@/lib/types"
 import { apiGet, apiPost } from "@/lib/api-client"
 import { getCurrentUser } from "@/lib/auth"
-import { formatCurrency, cn } from "@/lib/utils"
+import { formatCurrency, cn, toDisplayName } from "@/lib/utils"
 import { toast } from "sonner"
 
 interface CartItem {
@@ -20,16 +20,6 @@ interface CartItem {
 }
 
 export default function POSPage() {
-  // Helper: convert ALL CAPS or mixed to proper Title Case for display
-  const toDisplayName = (name: string) => {
-    if (!name) return name
-    // If already has mixed case (not all uppercase), leave it
-    if (name !== name.toUpperCase()) return name
-    // Convert ALL CAPS to Title Case
-    return name
-      .toLowerCase()
-      .replace(/\b\w/g, c => c.toUpperCase())
-  }
   const [items, setItems] = useState<InventoryItem[]>([])
   const [cart, setCart] = useState<CartItem[]>(() => {
     // Restore cart from localStorage on mount
@@ -238,7 +228,7 @@ export default function POSPage() {
 
   function handleOpenOrderForm() {
     if (cart.length === 0) {
-      alert('Please add items to cart first')
+      toast.error('Please add items to cart first')
       return
     }
 

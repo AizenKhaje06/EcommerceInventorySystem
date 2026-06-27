@@ -23,10 +23,11 @@ export async function POST(request: NextRequest) {
       message: 'Logged out successfully' 
     })
 
-    // Clear all possible cookies (if any are set)
+    // Clear all possible cookies
     response.cookies.delete('session')
     response.cookies.delete('token')
     response.cookies.delete('auth')
+    response.cookies.delete('__session')
 
     return response
   } catch (error) {

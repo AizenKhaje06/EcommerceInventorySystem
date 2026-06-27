@@ -142,7 +142,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[Unified Login] Login successful, redirecting to:', redirectPath)
-    return NextResponse.json({
+
+    const response = NextResponse.json({
       success: true,
       sessionId,
       user: {
@@ -157,6 +158,20 @@ export async function POST(request: NextRequest) {
       redirectPath,
       rememberDevice
     })
+
+    // Set HTTP-only session cookie for server-side validation in middleware
+    // This provides a second layer of security on top of localStorage
+    const cookieValue = `${username}:${sessionId}`
+    const maxAge = rememberDevice ? 60 * 60 * 24 * 30 : 60 * 60 * 8 // 30 days or 8 hours
+    response.cookies.set('__session', cookieValue, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    })
+
+    return response
 
   } catch (error) {
     console.error('[Unified Login] Error:', error)

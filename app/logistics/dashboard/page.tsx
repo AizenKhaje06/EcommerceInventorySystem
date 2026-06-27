@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton, CardSkeleton, StatCardSkeleton } from '@/components/ui/table-skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -221,11 +222,16 @@ export default function LogisticsAdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center space-y-4">
-          <BrandLoader size="lg" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Loading logistics dashboard...</p>
+      <div className="max-w-[1400px] mx-auto px-3 py-6 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <StatCardSkeleton count={4} />
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <CardSkeleton lines={6} />
+          <CardSkeleton lines={6} />
+        </div>
+        <span className="sr-only">Loading logistics dashboard, please wait...</span>
       </div>
     )
   }

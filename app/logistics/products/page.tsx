@@ -11,6 +11,7 @@ import type { InventoryItem } from "@/lib/types"
 import { formatNumber, formatCurrency, cn } from "@/lib/utils"
 import { apiGet, apiDelete, apiPost } from "@/lib/api-client"
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EditItemDialog } from "@/components/edit-item-dialog"
 import { AddItemDialog } from "@/components/add-item-dialog"
@@ -164,13 +165,12 @@ export default function LogisticsProductsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6">
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <BrandLoader size="lg" />
-            <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">Loading products...</p>
-          </div>
+      <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <TableSkeleton rows={8} columns={6} />
+        <span className="sr-only">Loading products, please wait...</span>
       </div>
     )
   }

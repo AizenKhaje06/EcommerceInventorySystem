@@ -13,6 +13,7 @@ import {
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { apiGet } from '@/lib/api-client'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton, CardSkeleton } from '@/components/ui/table-skeleton'
 import { EnterpriseDateRangePicker } from '@/components/ui/enterprise-date-range-picker'
 import {
   AreaChart, Area, BarChart, Bar,
@@ -350,9 +351,7 @@ export default function AgentPerformancePage() {
         </div>
         <CardContent className="p-6">
           {trendLoading ? (
-            <div className="h-64 flex items-center justify-center">
-              <BrandLoader size="md" />
-            </div>
+            <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={trend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -443,7 +442,7 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-5">
             {analyticsLoading ? (
-              <div className="h-64 flex items-center justify-center"><BrandLoader size="md" /></div>
+              <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
             ) : !analytics?.productSales.length ? (
               <div className="h-64 flex items-center justify-center flex-col gap-2">
                 <Package className="h-10 w-10 text-slate-200 dark:text-slate-700" />
@@ -496,7 +495,7 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-5">
             {analyticsLoading ? (
-              <div className="h-64 flex items-center justify-center"><BrandLoader size="md" /></div>
+              <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
             ) : !analytics?.storeSales.length ? (
               <div className="h-64 flex items-center justify-center flex-col gap-2">
                 <Store className="h-10 w-10 text-slate-200 dark:text-slate-700" />
@@ -576,8 +575,8 @@ export default function AgentPerformancePage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <BrandLoader size="md" />
+          <div className="py-6" aria-live="polite" aria-busy="true">
+            <TableSkeleton rows={6} columns={6} />
           </div>
         ) : filteredAgentCards.length === 0 ? (
           <div className="text-center py-16">
@@ -696,7 +695,7 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-5">
             {analyticsLoading ? (
-              <div className="h-64 flex items-center justify-center"><BrandLoader size="md" /></div>
+              <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
             ) : !analytics?.revenueShare?.length ? (
               <div className="h-64 flex items-center justify-center flex-col gap-2">
                 <Activity className="h-10 w-10 text-slate-200 dark:text-slate-700" />
@@ -759,7 +758,7 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-5">
             {analyticsLoading ? (
-              <div className="h-64 flex items-center justify-center"><BrandLoader size="md" /></div>
+              <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
             ) : !analytics?.cancellationReasons?.length ? (
               <div className="h-64 flex items-center justify-center flex-col gap-2">
                 <CheckCircle className="h-10 w-10 text-emerald-200 dark:text-emerald-900/40 mx-auto" />
@@ -826,7 +825,7 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-5">
             {analyticsLoading ? (
-              <div className="h-64 flex items-center justify-center"><BrandLoader size="md" /></div>
+              <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" aria-hidden="true" />
             ) : !analytics?.courierBreakdown?.length ? (
               <div className="h-64 flex items-center justify-center flex-col gap-2">
                 <Truck className="h-10 w-10 text-slate-200 dark:text-slate-700" />
@@ -882,7 +881,9 @@ export default function AgentPerformancePage() {
           </div>
           <CardContent className="p-0">
             {analyticsLoading ? (
-              <div className="flex items-center justify-center py-16"><BrandLoader size="md" /></div>
+              <div className="py-6">
+                <TableSkeleton rows={5} columns={4} />
+              </div>
             ) : !analytics?.agentMetrics?.filter(m => m.totalDispatchedOrders > 0).length ? (
               <div className="text-center py-12">
                 <Users className="h-10 w-10 text-slate-200 dark:text-slate-700 mx-auto mb-2" />

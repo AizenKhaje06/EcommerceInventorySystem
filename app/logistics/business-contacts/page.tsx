@@ -20,6 +20,7 @@ import { PremiumTableLoading } from "@/components/premium-loading"
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api-client"
 import { getCurrentUser } from "@/lib/auth"
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export default function BusinessContactsPage() {
   const [contacts, setContacts] = useState<BusinessContact[]>([])
@@ -227,13 +228,13 @@ export default function BusinessContactsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">
-            Loading business contacts...
-          </p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          <div className="h-3 w-44 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <TableSkeleton rows={6} columns={5} />
+        <span className="sr-only">Loading business contacts, please wait...</span>
       </div>
     )
   }

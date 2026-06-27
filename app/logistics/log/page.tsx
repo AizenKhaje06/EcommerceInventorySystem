@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -275,13 +276,10 @@ export default function LogisticsLogPage() {
 
   if (loading) {
     return (
-      <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6">
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <BrandLoader size="lg" />
-            <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">Loading activity logs...</p>
-          </div>
-        </div>
+      <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+        <TableSkeleton rows={8} columns={5} />
+        <span className="sr-only">Loading activity logs, please wait...</span>
       </div>
     )
   }

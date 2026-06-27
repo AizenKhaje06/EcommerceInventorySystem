@@ -1,11 +1,18 @@
-"use client"
+import { StatCardSkeleton, CardSkeleton } from '@/components/ui/table-skeleton'
 
-export default function DashboardLoading() {
+export default function Loading() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-600 dark:text-slate-400 text-sm">Loading dashboard...</p>
+    <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+      <div className="space-y-2">
+        <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+        <div className="h-4 w-72 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      </div>
+      <StatCardSkeleton count={4} />
+      <StatCardSkeleton count={4} />
+      <div className="grid gap-5 grid-cols-1 lg:grid-cols-3">
+        <CardSkeleton lines={6} />
+        <CardSkeleton lines={6} />
+        <CardSkeleton lines={6} />
       </div>
     </div>
   )

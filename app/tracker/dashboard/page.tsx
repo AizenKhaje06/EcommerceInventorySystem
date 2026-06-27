@@ -17,6 +17,7 @@ import { formatCurrency, cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { apiGet } from '@/lib/api-client'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { EnterpriseDateRangePicker } from '@/components/ui/enterprise-date-range-picker'
 import { TablePagination } from '@/components/ui/table-pagination'
 import * as XLSX from 'xlsx'
@@ -487,11 +488,18 @@ export default function TrackerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">Loading orders...</p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+          ))}
+        </div>
+        <TableSkeleton rows={8} columns={7} />
+        <span className="sr-only">Loading tracker dashboard, please wait...</span>
       </div>
     )
   }

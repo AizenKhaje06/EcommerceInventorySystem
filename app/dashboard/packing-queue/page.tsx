@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { BrandLoader } from '@/components/ui/brand-loader'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -166,11 +167,14 @@ export default function PackingQueuePage() {
     setCurrentUser(user)
     fetchOrders()
 
-    // Poll for updates every 10 seconds (team leaders only)
-    if (isTeamLeader) {
-      const interval = setInterval(fetchOrders, 10000)
-      return () => clearInterval(interval)
-    }
+    // Poll for updates every 30 seconds for admin/logistics so new orders appear automatically
+    const POLL_INTERVAL = 30_000
+    const interval = setInterval(() => {
+      // Silent background refresh — don't show loading spinner
+      fetchOrders()
+    }, POLL_INTERVAL)
+
+    return () => clearInterval(interval)
   }, [isTeamLeader])
 
   useEffect(() => {
@@ -322,7 +326,35 @@ export default function PackingQueuePage() {
         return orderDate <= endOfDay
       })
     }
-    
+
+    // Sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'date-asc':
+          return parseAsPhilippineTime(a.created_at || a.orderDate || a.date || '').getTime()
+               - parseAsPhilippineTime(b.created_at || b.orderDate || b.date || '').getTime()
+        case 'date-desc':
+          return parseAsPhilippineTime(b.created_at || b.orderDate || b.date || '').getTime()
+               - parseAsPhilippineTime(a.created_at || a.orderDate || a.date || '').getTime()
+        case 'waybill-asc':
+          return (a.waybill || '').localeCompare(b.waybill || '')
+        case 'waybill-desc':
+          return (b.waybill || '').localeCompare(a.waybill || '')
+        case 'qty-asc':
+          return (a.qty || a.quantity || 0) - (b.qty || b.quantity || 0)
+        case 'qty-desc':
+          return (b.qty || b.quantity || 0) - (a.qty || a.quantity || 0)
+        case 'total-asc':
+          return (a.total || a.totalAmount || 0) - (b.total || b.totalAmount || 0)
+        case 'total-desc':
+          return (b.total || b.totalAmount || 0) - (a.total || a.totalAmount || 0)
+        default:
+          // Default: newest first
+          return parseAsPhilippineTime(b.created_at || b.orderDate || b.date || '').getTime()
+               - parseAsPhilippineTime(a.created_at || a.orderDate || a.date || '').getTime()
+      }
+    })
+
     setFilteredOrders(filtered)
   }
 
@@ -795,13 +827,30 @@ export default function PackingQueuePage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">
-            Loading packing queue...
-          </p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        {/* Skeleton header */}
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="space-y-2">
+            <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+            <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
         </div>
+        {/* Skeleton stats */}
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+          ))}
+        </div>
+        {/* Skeleton filters */}
+        <div className="flex gap-4">
+          <div className="h-10 flex-1 max-w-sm bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+          <div className="h-10 w-40 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+          <div className="h-10 w-40 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+        </div>
+        {/* Skeleton table */}
+        <TableSkeleton rows={10} columns={9} />
+        <span className="sr-only">Loading packing queue, please wait...</span>
       </div>
     )
   }
@@ -1035,8 +1084,8 @@ export default function PackingQueuePage() {
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-slate-600 dark:text-slate-400" />
           <h3 className="font-bold text-slate-900 dark:text-white text-sm tracking-tight">Search & Filter Orders</h3>
-          <Button onClick={fetchOrders} variant="ghost" size="sm" className="ml-auto h-8 text-xs gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-            <RefreshCw className="h-3 w-3" />
+          <Button onClick={fetchOrders} variant="ghost" size="sm" className="ml-auto h-8 text-xs gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20" aria-label="Refresh order list">
+            <RefreshCw className="h-3 w-3" aria-hidden="true" />
             Refresh
           </Button>
         </div>
@@ -1132,36 +1181,79 @@ export default function PackingQueuePage() {
               </div>
 
               <div className="table-scroll-container">
-                <table className="w-full table-fixed min-w-[1200px]">
+                <table className="w-full table-fixed min-w-[1200px]" aria-label="Packing Queue Orders">
+                  <caption className="sr-only">
+                    Packing queue orders — {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''} shown
+                  </caption>
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-black dark:bg-black">
-                      <th className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
-                        Waybill No.
+                      {/* Sortable: Waybill */}
+                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
+                        <button
+                          onClick={() => setSortBy(sortBy === 'waybill-asc' ? 'waybill-desc' : 'waybill-asc')}
+                          className="flex items-center gap-1 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
+                          aria-label={`Sort by Waybill ${sortBy === 'waybill-asc' ? 'descending' : 'ascending'}`}
+                        >
+                          Waybill No.
+                          <span aria-hidden="true" className="opacity-60">
+                            {sortBy === 'waybill-asc' ? '↑' : sortBy === 'waybill-desc' ? '↓' : '↕'}
+                          </span>
+                        </button>
                       </th>
-                      <th className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
-                        Date & Time
+                      {/* Sortable: Date */}
+                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
+                        <button
+                          onClick={() => setSortBy(sortBy === 'date-asc' ? 'date-desc' : 'date-asc')}
+                          className="flex items-center gap-1 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
+                          aria-label={`Sort by Date ${sortBy === 'date-asc' ? 'descending' : 'ascending'}`}
+                        >
+                          Date & Time
+                          <span aria-hidden="true" className="opacity-60">
+                            {sortBy === 'date-asc' ? '↑' : sortBy === 'date-desc' ? '↓' : '↕'}
+                          </span>
+                        </button>
                       </th>
-                      <th className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
+                      <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
                         Status
                       </th>
                       {!isTeamLeader && (
-                        <th className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
+                        <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
                           Channel
                         </th>
                       )}
-                      <th className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[150px]">
+                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[150px]">
                         Store
                       </th>
-                      <th className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[200px]">
+                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[200px]">
                         Product
                       </th>
-                      <th className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
-                        Qty
+                      {/* Sortable: Qty */}
+                      <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
+                        <button
+                          onClick={() => setSortBy(sortBy === 'qty-asc' ? 'qty-desc' : 'qty-asc')}
+                          className="flex items-center justify-center gap-1 w-full hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
+                          aria-label={`Sort by Quantity ${sortBy === 'qty-asc' ? 'descending' : 'ascending'}`}
+                        >
+                          Qty
+                          <span aria-hidden="true" className="opacity-60">
+                            {sortBy === 'qty-asc' ? '↑' : sortBy === 'qty-desc' ? '↓' : '↕'}
+                          </span>
+                        </button>
                       </th>
-                      <th className="text-right py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
-                        Total
+                      {/* Sortable: Total */}
+                      <th scope="col" className="text-right py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
+                        <button
+                          onClick={() => setSortBy(sortBy === 'total-asc' ? 'total-desc' : 'total-asc')}
+                          className="flex items-center justify-end gap-1 w-full hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
+                          aria-label={`Sort by Total ${sortBy === 'total-asc' ? 'descending' : 'ascending'}`}
+                        >
+                          Total
+                          <span aria-hidden="true" className="opacity-60">
+                            {sortBy === 'total-asc' ? '↑' : sortBy === 'total-desc' ? '↓' : '↕'}
+                          </span>
+                        </button>
                       </th>
-                      <th className="text-center py-4 px-5 text-[11px] font-bold text-white uppercase tracking-wider w-[200px]">
+                      <th scope="col" className="text-center py-4 px-5 text-[11px] font-bold text-white uppercase tracking-wider w-[200px]">
                         Action
                       </th>
                     </tr>
@@ -1265,11 +1357,12 @@ export default function PackingQueuePage() {
                                   <button
                                     onClick={async () => await handleConfirmOrder(order.id, order.channel || order.sales_channel || 'Unknown')}
                                     disabled={confirming === order.id}
-                                    className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap"
+                                    aria-label={`Confirm waybill for order ${order.waybill || order.id}`}
+                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
                                   >
                                     {confirming === order.id
-                                      ? <Loader2 className="h-3 w-3 animate-spin" />
-                                      : <><CheckCircle className="h-3 w-3" />Confirm</>
+                                      ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                                      : <><CheckCircle className="h-3 w-3" aria-hidden="true" />Confirm</>
                                     }
                                   </button>
                                 )
@@ -1277,9 +1370,10 @@ export default function PackingQueuePage() {
                                 userRole !== 'logistics-admin' && (
                                   <button
                                     onClick={() => openConfirmDialog(order)}
-                                    className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-colors duration-150 whitespace-nowrap"
+                                    aria-label={`Mark order ${order.waybill || order.id} as packed`}
+                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
                                   >
-                                    <Package className="h-3 w-3" />
+                                    <Package className="h-3 w-3" aria-hidden="true" />
                                     Pack
                                   </button>
                                 )
@@ -1290,9 +1384,10 @@ export default function PackingQueuePage() {
                           {/* Secondary action — always visible */}
                           <button
                             onClick={() => openDetailsModal(order)}
-                            className="inline-flex items-center justify-center gap-1 flex-1 h-5 px-2.5 rounded text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm transition-colors duration-150 whitespace-nowrap"
+                            aria-label={`View details for order ${order.waybill || order.id}`}
+                            className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
                           >
-                            <Eye className="h-3 w-3 text-slate-400" />
+                            <Eye className="h-3 w-3 text-slate-400" aria-hidden="true" />
                             Details
                           </button>
                         </div>

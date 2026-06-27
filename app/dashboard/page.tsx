@@ -16,6 +16,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Cell,
 } from "recharts"
 import { AnimatedNumber } from "@/components/ui/animated-number"
 import { ChartTooltip } from "@/components/ui/chart-tooltip"
@@ -27,6 +28,7 @@ import { formatNumber } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { PremiumDashboardLoading } from "@/components/premium-loading"
 import { BrandLoader } from "@/components/ui/brand-loader"
+import { StatCardSkeleton, CardSkeleton } from "@/components/ui/table-skeleton"
 import { apiGet } from "@/lib/api-client"
 import { formatChartData, calculatePeriodComparison } from "@/lib/dashboard-utils"
 import { getCurrentUser } from "@/lib/auth"
@@ -101,14 +103,29 @@ export default function DashboardPage() {
     fetchData()
   }, [timePeriod, startDate, endDate]) // Refetch when tab OR date filter changes
 
-  // Show loading state with branded loader (consistent with other pages)
+  // Show loading state with skeleton loaders
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">Loading dashboard...</p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="space-y-2">
+            <div className="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+            <div className="h-4 w-72 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-52 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
         </div>
+        {/* KPI cards skeleton — row 1 */}
+        <StatCardSkeleton count={4} />
+        {/* KPI cards skeleton — row 2 */}
+        <StatCardSkeleton count={4} />
+        {/* Charts skeleton */}
+        <div className="grid gap-5 grid-cols-1 lg:grid-cols-3">
+          <CardSkeleton lines={6} />
+          <CardSkeleton lines={6} />
+          <CardSkeleton lines={6} />
+        </div>
+        <span className="sr-only">Loading dashboard, please wait...</span>
       </div>
     )
   }
@@ -187,15 +204,15 @@ export default function DashboardPage() {
       {/* Row 1: Financial Metrics (4 cards) */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Sold */}
-        <Card className="p-5 border-0 shadow-lg">
+        <Card className="p-5 border-0 shadow-lg" role="region" aria-label="Total Sold statistics">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600 shadow-lg shadow-blue-500/30 flex-shrink-0">
+            <div className="p-2.5 rounded-xl bg-blue-600 shadow-lg shadow-blue-500/30 flex-shrink-0" aria-hidden="true">
               <ShoppingCart className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Total Sold</p>
+              <p className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider" id="kpi-total-sold-label">Total Sold</p>
               <div className="flex items-center gap-1">
-                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100 tabular-nums">
+                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100 tabular-nums" aria-labelledby="kpi-total-sold-label">
                   <AnimatedNumber value={stats?.totalSales || 0} duration={1500} />
                 </p>
                 <ComparisonBadge pct={salesChange} />
@@ -696,7 +713,7 @@ export default function DashboardPage() {
                 />
                 <Bar dataKey="count" fill="#3B82F6" radius={[6, 6, 0, 0]} maxBarSize={52}>
                   {stocksCountByStoreData.map((_: any, index: number) => (
-                    <cell key={`cell-${index}`} fill={index === 0 ? '#2563EB' : '#3B82F6'} />
+                    <Cell key={`cell-${index}`} fill={index === 0 ? '#2563EB' : '#3B82F6'} />
                   ))}
                 </Bar>
               </BarChart>

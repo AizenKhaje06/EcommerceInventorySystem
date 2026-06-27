@@ -54,6 +54,7 @@ import { toast } from "sonner"
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api-client"
 import { getCurrentUser } from "@/lib/auth"
 import { BrandLoader } from "@/components/ui/brand-loader"
+import { TableSkeleton } from "@/components/ui/table-skeleton"
 import { ImageUpload } from "@/components/ui/image-upload"
 
 interface Account {
@@ -763,11 +764,18 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <BrandLoader size="lg" />
-          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm font-medium">Loading settings...</p>
+      <div className="max-w-[1400px] mx-auto py-5 space-y-6" aria-live="polite" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
         </div>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-20 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+          ))}
+        </div>
+        <TableSkeleton rows={5} columns={4} />
+        <span className="sr-only">Loading settings, please wait...</span>
       </div>
     )
   }

@@ -156,6 +156,15 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
   }, [])
 
   return (
+    <>
+      {/* Skip to main content — keyboard/screen reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
     <header
       className={cn(
         "fixed z-40",
@@ -270,8 +279,11 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(v => !v)}
-                className="flex items-center focus:outline-none"
-                aria-label="User menu"
+                onKeyDown={(e) => { if (e.key === 'Escape') setShowProfileDropdown(false) }}
+                className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1 rounded-full"
+                aria-label={`${username} — ${userRole}. Open user menu`}
+                aria-haspopup="true"
+                aria-expanded={showProfileDropdown}
               >
                 <div className="h-9 w-9 rounded-full overflow-hidden border-2 border-slate-300 dark:border-amber-900/50 hover:ring-4 hover:ring-blue-400 dark:hover:ring-amber-400 transition-all duration-150 cursor-pointer flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600">
                   {profileImage ? (
@@ -282,32 +294,37 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
                       onError={(e) => { e.currentTarget.style.display = 'none' }}
                     />
                   ) : (
-                    <User className="h-5 w-5 text-white" strokeWidth={2.5} />
+                    <User className="h-5 w-5 text-white" strokeWidth={2.5} aria-hidden="true" />
                   )}
                 </div>
               </button>
 
               {showProfileDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div
+                  role="menu"
+                  aria-label="User menu"
+                  className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden"
+                >
                   {/* User info */}
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800" role="presentation">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600 flex-shrink-0">
                         {profileImage ? (
                           <img
                             src={`/api/image-proxy?url=${encodeURIComponent(profileImage)}`}
-                            alt={username}
+                            alt=""
+                            aria-hidden="true"
                             className="h-full w-full object-cover object-center"
                             onError={(e) => { e.currentTarget.style.display = 'none' }}
                           />
                         ) : (
-                          <User className="h-5 w-5 text-white" strokeWidth={2.5} />
+                          <User className="h-5 w-5 text-white" strokeWidth={2.5} aria-hidden="true" />
                         )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{username}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" aria-hidden="true" />
                           {userRole}
                         </p>
                       </div>
@@ -317,18 +334,20 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
                   <div className="p-1.5 space-y-0.5">
                     {currentUser?.role === 'admin' && (
                       <button
+                        role="menuitem"
                         onClick={() => { setShowProfileDropdown(false); window.location.href = '/dashboard/settings' }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500"
                       >
-                        <Settings className="h-4 w-4 flex-shrink-0 text-slate-400" />
+                        <Settings className="h-4 w-4 flex-shrink-0 text-slate-400" aria-hidden="true" />
                         Settings
                       </button>
                     )}
                     <button
+                      role="menuitem"
                       onClick={() => { setShowProfileDropdown(false); setShowLogoutDialog(true) }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
                     >
-                      <LogOut className="h-4 w-4 flex-shrink-0" />
+                      <LogOut className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                       Sign Out
                     </button>
                   </div>
@@ -393,5 +412,6 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
         </AlertDialogContent>
       </AlertDialog>
     </header>
+    </>
   )
 }
