@@ -1315,7 +1315,7 @@ export default function PackingQueuePage() {
                         </td>
                       )}
                       <td className="py-1.5 px-4">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-4">
                           {/* Primary action — context-aware */}
                           {!order.is_cancelled && (
                             <>

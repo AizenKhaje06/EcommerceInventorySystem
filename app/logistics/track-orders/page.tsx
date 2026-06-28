@@ -128,6 +128,7 @@ export default function LogisticsTrackOrdersPage() {
       filtered = filtered.filter(order =>
         order.orderNumber.toLowerCase().includes(term) ||
         order.customerName.toLowerCase().includes(term) ||
+        order.customerPhone.toLowerCase().includes(term) ||
         order.itemName.toLowerCase().includes(term) ||
         order.trackingNumber?.toLowerCase().includes(term)
       )
@@ -338,7 +339,7 @@ export default function LogisticsTrackOrdersPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search orders..."
+                placeholder="Search order, name, contact, product..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 h-10 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-purple-500/20"
@@ -462,14 +463,13 @@ export default function LogisticsTrackOrdersPage() {
                       </td>
                       <td className="py-2 px-3 text-[10px] text-blue-600 dark:text-blue-400 font-mono">
                         <div className="max-w-[100px] truncate" title={order.trackingNumber}>{order.trackingNumber}</div>
-                        <div className="text-[9px] text-slate-500 mt-0.5 truncate">{order.courier || 'Flash'}</div>
                       </td>
                       <td className="py-2 px-3">
                         <Select 
                           value={order.paymentStatus} 
                           onValueChange={(value) => updateOrderStatus(order.id, undefined, undefined, value)}
                         >
-                          <SelectTrigger className="h-7 w-[85px] text-[10px] border-slate-200 dark:border-slate-700">
+                          <SelectTrigger className="h-7 w-[85px] text-[10px] border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -485,7 +485,7 @@ export default function LogisticsTrackOrdersPage() {
                           value={order.parcelStatus} 
                           onValueChange={(value) => updateOrderStatus(order.id, undefined, value, undefined)}
                         >
-                          <SelectTrigger className="h-7 w-[100px] text-[10px] border-slate-200 dark:border-slate-700">
+                          <SelectTrigger className="h-7 w-[100px] text-[10px] border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

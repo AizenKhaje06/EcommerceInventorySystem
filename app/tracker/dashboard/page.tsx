@@ -281,7 +281,9 @@ export default function TrackerDashboardPage() {
     if (searchTerm) {
       filtered = filtered.filter(order => 
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (order.trackingNumber && order.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+        (order.trackingNumber && order.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customerPhone.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
     
@@ -599,7 +601,7 @@ export default function TrackerDashboardPage() {
             <div className="relative flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search by order # or tracking #..."
+                placeholder="Search order, tracking, name, or contact..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
@@ -829,6 +831,13 @@ export default function TrackerDashboardPage() {
                           </div>
                         </td>
                         <td className="py-1.5 px-2 hidden md:table-cell">
+                          <div className="flex flex-col gap-0.5 max-w-[130px]">
+                            <span className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
+                              {order.trackingNumber}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <span className="text-[11px] text-slate-900 dark:text-white font-medium block truncate max-w-[120px]" title={order.customerName}>
                             {order.customerName}
                           </span>
@@ -843,16 +852,6 @@ export default function TrackerDashboardPage() {
                             {order.customerPhone}
                           </span>
                         </td>
-                        <td className="py-1.5 px-2 hidden md:table-cell">
-                          <div className="flex flex-col gap-0.5 max-w-[130px]">
-                            <span className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
-                              {order.trackingNumber}
-                            </span>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              {order.courier}
-                            </span>
-                          </div>
-                        </td>
                         <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                           <Select 
                             value={order.paymentStatus} 
@@ -860,7 +859,7 @@ export default function TrackerDashboardPage() {
                               updateOrderPaymentStatus(order.id, value as any)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[90px]">
+                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[90px] shadow-sm hover:shadow-md transition-shadow">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -879,7 +878,7 @@ export default function TrackerDashboardPage() {
                               updateOrderStatus(order.id, value)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[120px]">
+                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[120px] shadow-sm hover:shadow-md transition-shadow">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -911,7 +910,7 @@ export default function TrackerDashboardPage() {
                                 })
                               }}
                             >
-                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[190px]">
+                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[190px] shadow-sm hover:shadow-md transition-shadow">
                                 <SelectValue placeholder="Select reason..." />
                               </SelectTrigger>
                               <SelectContent>
@@ -972,7 +971,7 @@ export default function TrackerDashboardPage() {
                               updateOrderStatus(order.id, value)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-[10px] border-slate-200 dark:border-slate-700 w-full">
+                            <SelectTrigger className="h-8 text-[10px] border-slate-200 dark:border-slate-700 w-full shadow-sm hover:shadow-md transition-shadow">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
