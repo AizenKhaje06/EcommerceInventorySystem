@@ -869,14 +869,17 @@ export default function PackerDashboard() {
                       <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '10%' }}>
                         Date
                       </th>
-                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '12%' }}>
-                        Name
+                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '14%' }}>
+                        Tracking
                       </th>
-                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '18%' }}>
-                        Address
+                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '13%' }}>
+                        Name
                       </th>
                       <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '11%' }}>
                         Contact No.
+                      </th>
+                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '10%' }}>
+                        Channel
                       </th>
                       <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '16%' }}>
                         Items
@@ -884,10 +887,7 @@ export default function PackerDashboard() {
                       <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '10%' }}>
                         Price
                       </th>
-                      <th className="text-left py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '11%' }}>
-                        Tracking
-                      </th>
-                      <th className="text-center py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '12%' }}>
+                      <th className="text-center py-4 px-3 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '16%' }}>
                         Action
                       </th>
                     </tr>
@@ -938,19 +938,31 @@ export default function PackerDashboard() {
                           </div>
                         </td>
                         <td className="py-3 px-3 hidden md:table-cell">
-                          <span className="text-[11px] text-slate-900 dark:text-white font-medium whitespace-nowrap">
-                            {order.customerName}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                              {order.waybill}
+                            </span>
+                            {order.is_cancelled && (
+                              <Badge className="bg-red-600 text-white text-[9px] px-1.5 py-0.5 font-bold whitespace-nowrap">
+                                CANCELLED
+                              </Badge>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-3 hidden md:table-cell">
-                          <span className="text-[11px] text-slate-700 dark:text-slate-300 block break-words leading-relaxed">
-                            {order.customerAddress}
+                          <span className="text-[11px] text-slate-900 dark:text-white font-medium whitespace-nowrap">
+                            {order.customerName}
                           </span>
                         </td>
                         <td className="py-3 px-3 hidden md:table-cell">
                           <span className="text-[11px] font-mono text-slate-900 dark:text-white font-medium whitespace-nowrap">
                             {order.customerPhone}
                           </span>
+                        </td>
+                        <td className="py-3 px-3 hidden md:table-cell">
+                          <Badge variant="secondary" className="text-xs font-semibold whitespace-nowrap">
+                            {order.channel}
+                          </Badge>
                         </td>
                         <td className="py-3 px-3 hidden md:table-cell">
                           <div className="flex flex-col gap-0.5">
@@ -968,33 +980,14 @@ export default function PackerDashboard() {
                           </span>
                         </td>
                         <td className="py-3 px-3 hidden md:table-cell">
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-                                {order.waybill}
-                              </span>
-                              {order.is_cancelled && (
-                                <Badge className="bg-red-600 text-white text-[9px] px-1.5 py-0.5 font-bold whitespace-nowrap">
-                                  CANCELLED
-                                </Badge>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                              {order.courier}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 hidden md:table-cell">
                           <div className="flex items-center justify-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
+                            <button
                               onClick={() => handleViewOrder(order)}
-                              className="h-8 px-3 text-[11px] font-medium border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-200 whitespace-nowrap rounded-lg"
+                              className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer bg-transparent border-0 p-0"
                             >
-                              <Eye className="h-3.5 w-3.5 mr-1.5" />
+                              <Eye className="h-3.5 w-3.5 inline mr-1.5" />
                               View Details
-                            </Button>
+                            </button>
                           </div>
                         </td>
 
@@ -1174,24 +1167,6 @@ export default function PackerDashboard() {
                             )
                           })}
                         </ul>
-                      </div>
-
-                      {/* Right: Courier summary box */}
-                      <div className="flex flex-col gap-3 mt-6">
-                        <div className="rounded-lg border border-emerald-200 dark:border-emerald-700/20 bg-white dark:bg-slate-950/40 p-3 space-y-2.5">
-                          <div>
-                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Courier</p>
-                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{selectedOrder.courier || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Waybill</p>
-                            <p className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400">{selectedOrder.waybill || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Channel</p>
-                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{selectedOrder.channel || 'N/A'}</p>
-                          </div>
-                        </div>
                       </div>
 
                       {/* Bottom: Total Amount + Total Items spanning full width */}
