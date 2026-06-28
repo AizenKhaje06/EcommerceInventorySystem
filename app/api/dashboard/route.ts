@@ -584,8 +584,8 @@ export async function GET(request: Request) {
     // totalOrdersCount already declared earlier in the code
     const deliveredPercentage = totalOrdersCount > 0 ? (deliveredOrdersCount || 0) / totalOrdersCount * 100 : 0
 
-    // Update return rate calculation to use (returns / delivered * 100)
-    const returnRateByDelivered = totalDelivered > 0 ? (totalReturns / totalDelivered) * 100 : 0
+    // Update return rate calculation: delivered / returns * 100
+    const returnRateByDelivered = totalReturns > 0 ? (totalDelivered / totalReturns) * 100 : 0
 
     // Return Count by Sales Channel (for KPI cards)
     const returnedOrdersByChannel = returnedOrders.reduce((acc: { [key: string]: { count: number; value: number } }, order) => {

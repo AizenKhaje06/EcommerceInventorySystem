@@ -402,10 +402,10 @@ export default function ReportsPage() {
           <CardContent className="pt-4 pb-2">
             {stats?.storePerformance && stats.storePerformance.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={stats.storePerformance.slice(0, 5)} margin={{ top: 10, bottom: 20, left: 0, right: 10 }}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={stats.storePerformance.slice(0, 5)} margin={{ top: 10, bottom: 55, left: 0, right: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.07} horizontal={true} vertical={false} />
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} interval={0} tick={{ fill: '#64748b' }} />
+                    <XAxis dataKey="name" fontSize={9} tickLine={false} axisLine={false} interval={0} tick={{ fill: '#64748b' }} angle={-35} textAnchor="end" height={60} />
                     <YAxis fontSize={10} tickLine={false} axisLine={false} width={54} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#94a3b8' }} />
                     <Tooltip content={<ChartTooltip formatter={(value) => [formatCurrency(value as number), 'Revenue']} />} cursor={{ fill: 'rgba(16,185,129,0.06)' }} />
                     <Bar dataKey="count" fill="#10B981" radius={[6, 6, 0, 0]} maxBarSize={52}>
@@ -438,6 +438,7 @@ export default function ReportsPage() {
 
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* Return Count by Channel */}
           <Card className="overflow-hidden border-0 shadow-md">
             <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
@@ -532,14 +533,15 @@ export default function ReportsPage() {
               )}
             </CardContent>
           </Card>
+        </div>
       {/* Section */}
       <section>
         <SectionHeader title="Orders Summary" icon={ShoppingCart} color="bg-blue-600" />
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
           <StatCard title="Total Orders"       value={formatNumber(totalOrders)}    icon={List}          color="bg-blue-600"    shadow="shadow-blue-500/30" />
           <StatCard title="Delivered"          value={formatNumber(totalDelivered)} icon={CheckCircle2}  color="bg-emerald-600" shadow="shadow-emerald-500/30" sub={`${fulfilmentRate.toFixed(1)}% fulfilment`} />
-          <StatCard title="Returns"            value={formatNumber(totalReturns)}   icon={RotateCcw}     color="bg-amber-600"   shadow="shadow-amber-500/30"   sub={`${(returnRate*100).toFixed(1)}% rate`} />
-          <StatCard title="Cancelled (Total)"  value={formatNumber(cancelledTotal)} icon={XCircle}       color="bg-rose-600"    shadow="shadow-rose-500/30"    sub={`${(cancellationRate*100).toFixed(1)}% rate`} />
+          <StatCard title="Returns"            value={formatNumber(totalReturns)}   icon={RotateCcw}     color="bg-amber-600"   shadow="shadow-amber-500/30"   sub={`${returnRate.toFixed(1)}% rate`} />
+          <StatCard title="Cancelled (Total)"  value={formatNumber(cancelledTotal)} icon={XCircle}       color="bg-rose-600"    shadow="shadow-rose-500/30"    sub={`${cancellationRate.toFixed(1)}% rate`} />
           <StatCard title="Cancelled (Packing)" value={formatNumber(cancelledPacking)} icon={Package}   color="bg-orange-600"  shadow="shadow-orange-500/30" />
           <StatCard title="Cancelled (Tracked)" value={formatNumber(cancelledTrack)}  icon={Activity}   color="bg-pink-600"    shadow="shadow-pink-500/30" />
         </div>
