@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -256,7 +257,7 @@ export default function TrackerDashboardPage() {
       }
 
       toast.success('Order cancelled and returned to packing queue')
-      toast.info('Inventory restored • Sales data reverted • Order marked as cancelled')
+      toast.info('Inventory restored â€¢ Sales data reverted â€¢ Order marked as cancelled')
       
       // Close modals and reset
       setShowReturnConfirm(false)
@@ -322,7 +323,7 @@ export default function TrackerDashboardPage() {
     toast.success('Filters cleared')
   }
 
-  // ── Bulk selection helpers ─────────────────────────────────────────────────
+  // â”€â”€ Bulk selection helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const isAllSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedIds.has(o.id))
   const isIndeterminate = !isAllSelected && paginatedOrders.some(o => selectedIds.has(o.id))
 
@@ -370,7 +371,7 @@ export default function TrackerDashboardPage() {
       setBulkStatus('')
     } catch (err) {
       console.error('Bulk update error:', err)
-      toast.error('Bulk update failed — please try again')
+      toast.error('Bulk update failed â€” please try again')
       await fetchOrders()
     } finally {
       setBulkUpdating(false)
@@ -505,7 +506,7 @@ export default function TrackerDashboardPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6 pt-4 sm:pt-6 px-2 sm:px-4 lg:px-6 pb-6 sm:pb-8">
+    <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6 pt-4 sm:pt-6 px-2 sm:px-3 lg:px-4 pb-6 sm:pb-8">
       {/* Page Header - Mobile Responsive */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <div>
@@ -695,7 +696,7 @@ export default function TrackerDashboardPage() {
                 {searchTerm ? 'No matching orders' : 'No orders found'}
               </p>
               <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-                {searchTerm ? 'Try different search' : 'All orders tracked! 🎉'}
+                {searchTerm ? 'Try different search' : 'All orders tracked! ðŸŽ‰'}
               </p>
             </div>
           ) : (
@@ -703,14 +704,14 @@ export default function TrackerDashboardPage() {
               {/* Mobile Scroll Hint */}
               <div className="md:hidden px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                 <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 font-medium">
-                  <span className="text-slate-500">←</span>
-                  <span>Swipe to see all columns • Tap row to highlight</span>
-                  <span className="text-blue-500">→</span>
+                  <span className="text-slate-500">â†</span>
+                  <span>Swipe to see all columns â€¢ Tap row to highlight</span>
+                  <span className="text-blue-500">â†’</span>
                 </p>
               </div>
 
               <div className="overflow-x-auto">
-                {/* Bulk Action Bar — shows when items are selected */}
+                {/* Bulk Action Bar â€” shows when items are selected */}
                 {selectedIds.size > 0 && (
                   <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50">
                     <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
@@ -754,45 +755,31 @@ export default function TrackerDashboardPage() {
                   {/* Desktop Header - Hidden on Mobile */}
                   <thead className="sticky top-0 z-10 hidden md:table-header-group">
                     <tr className="bg-slate-900 dark:bg-slate-950 border-b border-slate-700">
-                      {/* Checkbox column */}
-                      <th className="py-4 px-3 text-center border-r border-slate-700/50" style={{ width: '4%' }}>
-                        <input
-                          type="checkbox"
-                          checked={isAllSelected}
-                          ref={el => { if (el) el.indeterminate = isIndeterminate }}
-                          onChange={toggleSelectAll}
-                          className="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer"
-                          title="Select all on page"
-                        />
-                      </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '7%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '6%' }}>
                         Date
                       </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '10%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
                         Name
                       </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '18%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '14%' }}>
                         Address
                       </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
                         Contact No.
                       </th>
-                      <th className="text-right py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
-                        Price
-                      </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '16%' }}>
-                        Items
-                      </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '12%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '13%' }}>
                         Tracking
                       </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
                         Payment
                       </th>
-                      <th className="text-left py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '11%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
                         Status
                       </th>
-                      <th className="text-center py-4 px-2 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '11%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '17%' }}>
+                        Reason
+                      </th>
+                      <th className="text-center py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '9%' }}>
                         Action
                       </th>
                     </tr>
@@ -820,19 +807,10 @@ export default function TrackerDashboardPage() {
                     {paginatedOrders.map((order) => (
                       <tr
                         key={order.id}
-                        className="h-14 transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                        className="transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30"
                       >
                         {/* Desktop View - All Columns */}
-                        {/* Checkbox - desktop only */}
-                        <td className="py-3 px-3 hidden md:table-cell text-center" onClick={e => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(order.id)}
-                            onChange={() => toggleSelect(order.id)}
-                            className="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer"
-                          />
-                        </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <div className="flex flex-col">
                             <span className="text-[11px] font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                               {new Date(order.orderDate).toLocaleDateString('en-US', { 
@@ -850,37 +828,22 @@ export default function TrackerDashboardPage() {
                             </span>
                           </div>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <span className="text-[11px] text-slate-900 dark:text-white font-medium block truncate max-w-[120px]" title={order.customerName}>
                             {order.customerName}
                           </span>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <span className="text-[11px] text-slate-700 dark:text-slate-300 block truncate max-w-[200px]" title={order.customerAddress}>
                             {order.customerAddress}
                           </span>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <span className="text-[11px] font-mono text-slate-900 dark:text-white font-medium block truncate max-w-[100px]" title={order.customerPhone}>
                             {order.customerPhone}
                           </span>
                         </td>
-                        <td className="py-3 px-2 text-right hidden md:table-cell">
-                          <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-                            ₱{order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
-                          <div className="flex flex-col gap-0.5 max-w-[180px]">
-                            <span className="text-[11px] text-slate-900 dark:text-white font-medium truncate" title={order.itemName.replace(/\s*\(\d+\)\s*$/, '')}>
-                              {order.itemName.replace(/\s*\(\d+\)\s*$/, '')}
-                            </span>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                              Qty: {order.quantity}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <div className="flex flex-col gap-0.5 max-w-[130px]">
                             <span className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
                               {order.trackingNumber}
@@ -890,7 +853,7 @@ export default function TrackerDashboardPage() {
                             </span>
                           </div>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                           <Select 
                             value={order.paymentStatus} 
                             onValueChange={(value) => {
@@ -908,7 +871,7 @@ export default function TrackerDashboardPage() {
                             </SelectContent>
                           </Select>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                           <Select 
                             value={order.parcelStatus} 
                             onValueChange={(value) => {
@@ -932,7 +895,43 @@ export default function TrackerDashboardPage() {
                             </SelectContent>
                           </Select>
                         </td>
-                        <td className="py-3 px-2 hidden md:table-cell">
+                        {/* Reason column â€” only active for CANCELLED or RETURNED */}
+                        <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
+                          {(order.parcelStatus === 'CANCELLED' || order.parcelStatus === 'RETURNED') ? (
+                            <Select
+                              value={order.reason || ''}
+                              onValueChange={(value) => {
+                                // Optimistic update
+                                setOrders(prev => prev.map(o => o.id === order.id ? { ...o, reason: value } : o))
+                                setFilteredOrders(prev => prev.map(o => o.id === order.id ? { ...o, reason: value } : o))
+                                fetch(`/api/orders/${order.id}/status`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ reason: value })
+                                })
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[160px]">
+                                <SelectValue placeholder="Select reason..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Customer Refused">Customer Refused</SelectItem>
+                                <SelectItem value="Customer Unreachable">Customer Unreachable</SelectItem>
+                                <SelectItem value="Incorrect Address">Incorrect Address</SelectItem>
+                                <SelectItem value="Consignee Moved">Consignee Moved</SelectItem>
+                                <SelectItem value="No Authorized Receiver">No Authorized Receiver</SelectItem>
+                                <SelectItem value="Failed Delivery Attempt">Failed Delivery Attempt</SelectItem>
+                                <SelectItem value="Shipment Cancelled">Shipment Cancelled</SelectItem>
+                                <SelectItem value="Insufficient Address">Insufficient Address</SelectItem>
+                                <SelectItem value="Out of Delivery Area">Out of Delivery Area</SelectItem>
+                                <SelectItem value="Damaged Shipment">Damaged Shipment</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 dark:text-slate-600 italic select-none">Not available</span>
+                          )}
+                        </td>
+                        <td className="py-1.5 px-2 hidden md:table-cell">
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => openDetailsModal(order)}
@@ -945,7 +944,7 @@ export default function TrackerDashboardPage() {
                         </td>
 
                         {/* Mobile View - Simplified: Date, Waybill, Parcel Status, Action */}
-                        <td className="py-3 px-2 md:hidden" style={{ width: '15%' }}>
+                        <td className="py-1.5 px-2 md:hidden" style={{ width: '15%' }}>
                           <div className="flex flex-col">
                             <span className="text-[10px] font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                               {new Date(order.orderDate).toLocaleDateString('en-US', { 
@@ -962,12 +961,12 @@ export default function TrackerDashboardPage() {
                             </span>
                           </div>
                         </td>
-                        <td className="py-3 px-2 md:hidden" style={{ width: '25%' }}>
+                        <td className="py-1.5 px-2 md:hidden" style={{ width: '25%' }}>
                           <span className="font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap block">
                             {order.trackingNumber}
                           </span>
                         </td>
-                        <td className="py-3 px-2 md:hidden" style={{ width: '35%' }} onClick={(e) => e.stopPropagation()}>
+                        <td className="py-1.5 px-2 md:hidden" style={{ width: '35%' }} onClick={(e) => e.stopPropagation()}>
                           <Select 
                             value={order.parcelStatus} 
                             onValueChange={(value) => {
@@ -990,7 +989,7 @@ export default function TrackerDashboardPage() {
                             </SelectContent>
                           </Select>
                         </td>
-                        <td className="py-3 px-2 md:hidden" style={{ width: '25%' }}>
+                        <td className="py-1.5 px-2 md:hidden" style={{ width: '25%' }}>
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => openDetailsModal(order)}
@@ -1269,7 +1268,7 @@ export default function TrackerDashboardPage() {
                     </div>
                     <div className="bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 space-y-2">
                       <p className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
-                        ⚠️ Order Cancelled
+                        âš ï¸ Order Cancelled
                       </p>
                       {selectedOrder.cancellation_reason && (
                         <div>

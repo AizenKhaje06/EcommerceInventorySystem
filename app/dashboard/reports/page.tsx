@@ -59,12 +59,11 @@ function StatCard({ title, value, icon: Icon, color, shadow, sub }: {
 
 function SectionHeader({ title, icon: Icon, color }: { title: string; icon: any; color: string }) {
   return (
-    <div className="flex items-center gap-2 mb-4">
-      <div className={`p-2 rounded-lg ${color}`}>
+    <div className="flex items-center gap-3 mb-5 pb-3 border-b-2 border-slate-200 dark:border-slate-700">
+      <div className={`p-2 rounded-lg ${color} flex-shrink-0`}>
         <Icon className="h-4 w-4 text-white" />
       </div>
-      <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
-      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700 ml-2" />
+      <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{title}</h3>
     </div>
   )
 }
@@ -169,7 +168,7 @@ export default function ReportsPage() {
   const tickColor = "#94a3b8"
 
   return (
-    <div className="max-w-[1400px] mx-auto py-5 space-y-8">
+    <div className="max-w-[1400px] mx-auto py-5 space-y-12">
 
       {/* Section */}
       <div className="flex items-start justify-between gap-4 flex-wrap">

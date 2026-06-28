@@ -8,27 +8,20 @@ const supabase = createClient(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { status, parcel_status, payment_status } = await request.json()
-    const orderId = params.id
+    const { id: orderId } = await params
+    const { status, parcel_status, payment_status, reason } = await request.json()
 
     const updateData: any = {
       updated_at: new Date().toISOString()
     }
 
-    if (status) {
-      updateData.status = status
-    }
-
-    if (parcel_status) {
-      updateData.parcel_status = parcel_status
-    }
-
-    if (payment_status) {
-      updateData.payment_status = payment_status
-    }
+    if (status) updateData.status = status
+    if (parcel_status) updateData.parcel_status = parcel_status
+    if (payment_status) updateData.payment_status = payment_status
+    if (reason !== undefined) updateData.reason = reason
 
     const { data, error } = await supabase
       .from('orders')
