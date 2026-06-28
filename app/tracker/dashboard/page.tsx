@@ -757,28 +757,25 @@ export default function TrackerDashboardPage() {
                   {/* Desktop Header - Hidden on Mobile */}
                   <thead className="sticky top-0 z-10 hidden md:table-header-group">
                     <tr className="bg-slate-900 dark:bg-slate-950 border-b border-slate-700">
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '6%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
                         Date
                       </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
-                        Name
-                      </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '14%' }}>
-                        Address
-                      </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
-                        Contact No.
-                      </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '13%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '15%' }}>
                         Tracking
                       </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '8%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '12%' }}>
+                        Name
+                      </th>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '11%' }}>
+                        Contact No.
+                      </th>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '10%' }}>
                         Payment
                       </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '11%' }}>
                         Status
                       </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '13%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '16%' }}>
                         Reason
                       </th>
                       <th className="text-center py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '9%' }}>
@@ -840,11 +837,6 @@ export default function TrackerDashboardPage() {
                         <td className="py-1.5 px-2 hidden md:table-cell">
                           <span className="text-[11px] text-slate-900 dark:text-white font-medium block truncate max-w-[120px]" title={order.customerName}>
                             {order.customerName}
-                          </span>
-                        </td>
-                        <td className="py-1.5 px-2 hidden md:table-cell">
-                          <span className="text-[11px] text-slate-700 dark:text-slate-300 block truncate max-w-[200px]" title={order.customerAddress}>
-                            {order.customerAddress}
                           </span>
                         </td>
                         <td className="py-1.5 px-2 hidden md:table-cell">

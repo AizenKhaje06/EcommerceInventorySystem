@@ -142,6 +142,7 @@ export default function ReportsPage() {
   const cancellationRate = stats?.cancellationRate ?? 0
   const fulfilmentRate  = stats?.deliveredPercentage ?? 0
   const topCancelReasons = stats?.topCancellationReasons ?? []
+  const topReturnReasons = stats?.topReturnReasons ?? []
 
   const totalInventoryProducts = items.length
   const lowStockItems   = items.filter(i => i.quantity > 0 && i.quantity <= i.reorderLevel)
@@ -219,7 +220,7 @@ export default function ReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
                     <XAxis dataKey="month" tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={m => new Date(m + "-01").toLocaleDateString("en-US", { month: "short" })} tickLine={false} axisLine={false} />
                     <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
-                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={50} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -241,7 +242,7 @@ export default function ReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.2} />
                     <XAxis type="number" tick={{ fill: tickColor, fontSize: 10 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="name" tick={{ fill: tickColor, fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
-                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Bar dataKey="revenue" radius={[0, 6, 6, 0]} maxBarSize={28}>
                       {depts.map((d, i) => (
                         <Cell key={i} fill={CHANNEL_COLORS[d.name] ?? "#6366f1"} />
@@ -322,7 +323,31 @@ export default function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" opacity={0.07} horizontal={false} vertical={true} />
                       <XAxis type="number" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
                       <YAxis type="category" dataKey="name" fontSize={10} tickLine={false} axisLine={false} width={100} tick={{ fill: '#64748b' }} />
-                      <Tooltip content={<ChartTooltip formatter={(value) => [value.toString(), 'Units Sold']} />} cursor={{ fill: 'rgba(16,185,129,0.06)' }} />
+                      <Tooltip content={({ active, payload }: any) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload
+                          return (
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 text-xs">
+                              <p className="font-semibold text-slate-900 dark:text-white mb-2">{data.name}</p>
+                              <div className="space-y-1">
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Sold:</span>
+                                  <span className="font-bold text-slate-900 dark:text-white">{data.sales}x</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Revenue:</span>
+                                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(data.revenue || 0)}</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Profit:</span>
+                                  <span className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency((data.revenue || 0) * 0.3)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      }} cursor={{ fill: 'rgba(16,185,129,0.06)' }} />
                       <Bar dataKey="sales" fill="#10B981" radius={[0, 6, 6, 0]} maxBarSize={28} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -364,7 +389,31 @@ export default function ReportsPage() {
                       <CartesianGrid strokeDasharray="3 3" opacity={0.07} horizontal={false} vertical={true} />
                       <XAxis type="number" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
                       <YAxis type="category" dataKey="name" fontSize={10} tickLine={false} axisLine={false} width={100} tick={{ fill: '#64748b' }} />
-                      <Tooltip content={<ChartTooltip formatter={(value) => [value.toString(), 'Units Sold']} />} cursor={{ fill: 'rgba(168,85,247,0.06)' }} />
+                      <Tooltip content={({ active, payload }: any) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload
+                          return (
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 text-xs">
+                              <p className="font-semibold text-slate-900 dark:text-white mb-2">{data.name}</p>
+                              <div className="space-y-1">
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Sold:</span>
+                                  <span className="font-bold text-slate-900 dark:text-white">{data.sales}x</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Revenue:</span>
+                                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(data.revenue || 0)}</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                  <span className="text-slate-600 dark:text-slate-400">Total Profit:</span>
+                                  <span className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency((data.revenue || 0) * 0.3)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      }} cursor={{ fill: 'rgba(168,85,247,0.06)' }} />
                       <Bar dataKey="sales" fill="#A855F7" radius={[0, 6, 6, 0]} maxBarSize={28} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -406,7 +455,31 @@ export default function ReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.07} horizontal={true} vertical={false} />
                     <XAxis dataKey="name" fontSize={9} tickLine={false} axisLine={false} interval={0} tick={{ fill: '#64748b' }} angle={-35} textAnchor="end" height={60} />
                     <YAxis fontSize={10} tickLine={false} axisLine={false} width={54} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} tick={{ fill: '#94a3b8' }} />
-                    <Tooltip content={<ChartTooltip formatter={(value) => [formatCurrency(value as number), 'Revenue']} />} cursor={{ fill: 'rgba(16,185,129,0.06)' }} />
+                    <Tooltip content={({ active, payload }: any) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload
+                        return (
+                          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 text-xs">
+                            <p className="font-semibold text-slate-900 dark:text-white mb-2">{data.name}</p>
+                            <div className="space-y-1">
+                              <div className="flex justify-between gap-3">
+                                <span className="text-slate-600 dark:text-slate-400">Total Sold:</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{data.sales || 0}x</span>
+                              </div>
+                              <div className="flex justify-between gap-3">
+                                <span className="text-slate-600 dark:text-slate-400">Total Revenue:</span>
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(data.count)}</span>
+                              </div>
+                              <div className="flex justify-between gap-3">
+                                <span className="text-slate-600 dark:text-slate-400">Total Profit:</span>
+                                <span className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency(data.count * 0.3)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    }} cursor={{ fill: 'rgba(16,185,129,0.06)' }} />
                     <Bar dataKey="count" fill="#10B981" radius={[6, 6, 0, 0]} maxBarSize={52}>
                       {stats.storePerformance.slice(0, 5).map((_: any, i: number) => (
                         <Cell key={i} fill={i === 0 ? '#059669' : '#10B981'} />
@@ -545,24 +618,65 @@ export default function ReportsPage() {
           <StatCard title="Cancelled (Tracked)" value={formatNumber(cancelledTrack)}  icon={Activity}   color="bg-pink-600"    shadow="shadow-pink-500/30" />
         </div>
 
-        {/* Top Cancellation Reasons */}
-        {topCancelReasons.length > 0 && (
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">Top Cancellation Reasons</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {topCancelReasons.slice(0, 8).map((r, i) => (
-                  <div key={i} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-slate-700 dark:text-slate-300 truncate">{r.reason || "Not specified"}</span>
-                    <Badge variant="secondary" className="tabular-nums flex-shrink-0">{r.count}</Badge>
-                  </div>
-                ))}
+        {/* Top Cancellation Reasons - Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Top 5 Cancellation Reasons Card */}
+          {topCancelReasons.length > 0 && (
+            <Card className="overflow-hidden border-0 shadow-md">
+              <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-1 bg-rose-500 rounded-full flex-shrink-0"></div>
+                  <h3 className="text-slate-900 dark:text-white text-sm font-bold tracking-tight">Top 5 Cancellation Reasons</h3>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 ml-3">Most frequent cancellation reasons</p>
               </div>
+              <CardContent className="pt-4 pb-2">
+                <div className="space-y-1.5">
+                  {topCancelReasons.slice(0, 5).map((r, i) => (
+                    <div key={i} className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs ${i === 0 ? 'bg-rose-50 dark:bg-rose-900/20' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`h-5 w-5 rounded flex items-center justify-center text-[10px] font-black flex-shrink-0 ${i === 0 ? 'bg-rose-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>{i + 1}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white truncate" title={r.reason || "Not specified"}>{r.reason || "Not specified"}</span>
+                      </div>
+                      <Badge variant="secondary" className="tabular-nums flex-shrink-0 font-bold">{r.count}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Top 5 Return Reasons Card */}
+          <Card className="overflow-hidden border-0 shadow-md">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-amber-500 rounded-full flex-shrink-0"></div>
+                <h3 className="text-slate-900 dark:text-white text-sm font-bold tracking-tight">Top 5 Return Reasons</h3>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 ml-3">Most frequent return reasons</p>
+            </div>
+            <CardContent className="pt-4 pb-2">
+              {topReturnReasons.length > 0 ? (
+                <div className="space-y-1.5">
+                  {topReturnReasons.slice(0, 5).map((r, i) => (
+                    <div key={i} className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs ${i === 0 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`h-5 w-5 rounded flex items-center justify-center text-[10px] font-black flex-shrink-0 ${i === 0 ? 'bg-amber-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>{i + 1}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white truncate" title={r.reason || "Not specified"}>{r.reason || "Not specified"}</span>
+                      </div>
+                      <Badge variant="secondary" className="tabular-nums flex-shrink-0 font-bold">{r.count}</Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <RotateCcw className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs text-slate-500">No return data available</p>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
+        </div>
       </section>
 
       {/* Section */}
@@ -767,7 +881,7 @@ export default function ReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
                     <XAxis dataKey="month" tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={m => new Date(m + "-01").toLocaleDateString("en-US", { month: "short" })} tickLine={false} axisLine={false} />
                     <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
-                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Gross Profit"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Profit"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 3, fill: "#8b5cf6" }} activeDot={{ r: 5 }} />
                   </LineChart>
                 </ResponsiveContainer>

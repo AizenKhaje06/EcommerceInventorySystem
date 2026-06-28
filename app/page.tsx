@@ -558,7 +558,7 @@ export default function LandingLoginPage() {
                   <ShoppingCart className="h-7 w-7 text-black" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Multi-Channel Operations</h3>
-                <p className="text-slate-400 mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   Unified dashboard for 5 sales channels with dedicated department management and agent assignments.
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -579,10 +579,10 @@ export default function LandingLoginPage() {
                   <Users className="h-7 w-7 text-black" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">6-Tier Role System</h3>
-                <p className="text-slate-400 mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   Hierarchical access control with granular permissions for Administrator, Department Head, Agent, Packer, Tracker, and Logistics roles.
                 </p>
-                <ul className="text-sm text-slate-400 space-y-2">
+                <ul className="text-sm text-slate-300 space-y-2">
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Admin: Full system control + analytics</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Dept. Head: Team oversight + reporting</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Agent: Order creation + customer mgmt</li>
@@ -623,10 +623,10 @@ export default function LandingLoginPage() {
                   <Package className="h-7 w-7 text-black" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Smart Inventory Control</h3>
-                <p className="text-slate-400 mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   Real-time stock management with product bundles, low-stock alerts, cost/profit tracking, and automated inventory deduction on packing.
                 </p>
-                <ul className="text-sm text-slate-400 space-y-2">
+                <ul className="text-sm text-slate-300 space-y-2">
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Products + Bundle management</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Cost price + selling price tracking</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Auto stock deduction on pack</li>
@@ -642,10 +642,10 @@ export default function LandingLoginPage() {
                   <BarChart3 className="h-7 w-7 text-black" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Business Intelligence</h3>
-                <p className="text-slate-400 mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   Comprehensive analytics dashboard with sales by channel, agent performance, profit margins, order fulfillment rates, and return tracking.
                 </p>
-                <ul className="text-sm text-slate-400 space-y-2">
+                <ul className="text-sm text-slate-300 space-y-2">
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Channel-wise revenue breakdown</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Department performance metrics</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Fulfillment & delivery rates</li>
@@ -661,10 +661,10 @@ export default function LandingLoginPage() {
                   <Shield className="h-7 w-7 text-black" strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Enterprise Security</h3>
-                <p className="text-slate-400 mb-6 leading-relaxed">
+                <p className="text-slate-300 mb-6 leading-relaxed">
                   Session-based authentication, activity audit logs, role-based access control, and complete transaction history for compliance.
                 </p>
-                <ul className="text-sm text-slate-400 space-y-2">
+                <ul className="text-sm text-slate-300 space-y-2">
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Secure login system</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Activity logging per user</li>
                   <li className="flex items-center gap-2"><span className="text-amber-500">▸</span> Permission-based features</li>

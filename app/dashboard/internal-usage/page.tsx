@@ -138,6 +138,14 @@ export default function InternalUsagePage() {
       
       // Fetch user profile image from API
       fetchUserProfile(currentUser.username)
+      
+      // Auto-set channel filter for dept-manager
+      if (currentUser.role === 'dept-manager') {
+        const assignedChannel = localStorage.getItem('assignedChannel') || currentUser.assignedChannel || ''
+        if (assignedChannel) {
+          setFilterSalesChannel(assignedChannel)
+        }
+      }
     } else {
       setStaffName('Unknown User')
     }
@@ -328,13 +336,16 @@ export default function InternalUsagePage() {
             Track demo displays, internal consumption, and warehouse transfers with real-time cost analytics
           </p>
         </div>
-        <Button 
-          onClick={openDispatchModal}
-          className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition-colors border-0 px-4 h-10 flex-shrink-0"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Dispatch Items</span>
-        </Button>
+        {/* Dispatch button - Only visible to admin and logistics roles */}
+        {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics') && (
+          <Button 
+            onClick={openDispatchModal}
+            className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition-colors border-0 px-4 h-10 flex-shrink-0"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="text-sm font-medium">Dispatch Items</span>
+          </Button>
+        )}
       </div>
 
       {/* Tabs - Professional Design */}
@@ -772,7 +783,7 @@ export default function InternalUsagePage() {
                   <SelectItem value="internal">Internal Use</SelectItem>
                 </SelectContent>
               </Select>
-              {getCurrentUser()?.role === 'admin' && (
+              {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics') && (
                 <Select value={filterSalesChannel} onValueChange={setFilterSalesChannel}>
                   <SelectTrigger className="w-[200px] h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
                     <SelectValue placeholder="Sales Channel" />

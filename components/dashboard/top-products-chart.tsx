@@ -38,10 +38,33 @@ const CustomTooltip = ({ active, payload }: any) => {
 
   const data = payload[0].payload
 
+  // If this is the "+X more" bar, show all products
+  if (data.isMore && data.allProducts) {
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 max-w-xs">
+        <p className="font-semibold text-slate-900 dark:text-white mb-2 text-xs">All Products:</p>
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {data.allProducts.map((p: any, idx: number) => (
+            <div key={idx} className="text-xs border-b border-slate-100 dark:border-slate-700 last:border-0 pb-2 last:pb-0">
+              <p className="font-semibold text-slate-900 dark:text-white mb-1">{p.name}</p>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                  {formatCurrency(p.revenue)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Regular single product tooltip
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
       <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-2">
-        {data.name}
+        {data.originalName || data.name}
       </p>
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload[0].fill }} />
@@ -54,8 +77,8 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 export function TopProductsChart({ data, loading = false }: TopProductsChartProps) {
-  // Take top 10 products and reverse for display (highest at top)
-  let chartData: TopProduct[] = []
+  // Process data to show only first item + "X more"
+  let chartData: any[] = []
   
   try {
     // Validate data is an array
@@ -63,10 +86,33 @@ export function TopProductsChart({ data, loading = false }: TopProductsChartProp
       console.error('[TopProductsChart] Invalid data: expected array, got:', typeof data)
       chartData = []
     } else {
-      chartData = data
-        .filter(item => item && typeof item.name === 'string' && typeof item.revenue === 'number')
-        .slice(0, 10)
-        .reverse()
+      const validData = data.filter(item => item && typeof item.name === 'string' && typeof item.revenue === 'number')
+      
+      if (validData.length === 0) {
+        chartData = []
+      } else {
+        // Show first product
+        const firstProduct = validData[0]
+        chartData = [{
+          ...firstProduct,
+          name: firstProduct.name.length > 15 ? firstProduct.name.substring(0, 15) + '…' : firstProduct.name,
+          originalName: firstProduct.name,
+          isFirst: true
+        }]
+        
+        // Add "+X more" bar if there are more products
+        if (validData.length > 1) {
+          const remainingCount = validData.length - 1
+          const remainingRevenue = validData.slice(1).reduce((sum, p) => sum + p.revenue, 0)
+          
+          chartData.push({
+            name: `+ ${remainingCount} more`,
+            revenue: remainingRevenue,
+            isMore: true,
+            allProducts: validData
+          })
+        }
+      }
     }
   } catch (error) {
     console.error('[TopProductsChart] Error processing chart data:', error)
@@ -112,11 +158,11 @@ export function TopProductsChart({ data, loading = false }: TopProductsChartProp
             </div>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={140}>
             <BarChart
               data={chartData}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+              margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             >
               <CartesianGrid 
                 strokeDasharray="3 3" 

@@ -265,18 +265,17 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .slice(0, 10)
 
     // ── 4. AGENT RANKING ─────────────────────────────────────────────────────────
-    // Get team member display names (operations + dept-manager)
+    // Get team member display names (operations only - exclude managers and admins)
     const { data: agentUsers } = await supabaseAdmin
       .from('users')
       .select('username, display_name, role')
       .ilike('assigned_channel', channel)
-      .in('role', ['operations', 'dept-manager'])
+      .eq('role', 'operations')  // Only operations role (agents), not dept-manager or admin
+      .neq('username', 'admin')  // Explicitly exclude admin username
 
     const agentNameMap = new Map((agentUsers || []).map(a => [
       a.username,
-      a.role === 'dept-manager'
-        ? `${a.display_name || a.username} (Manager)`
-        : (a.display_name || a.username)
+      a.display_name || a.username
     ]))
 
     const agentRankMap = new Map<string, {
@@ -287,6 +286,10 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
 
     for (const o of allOrders) {
       const agentKey = o.agent_username || o.dispatched_by || 'Unknown'
+      
+      // Skip admin users - they shouldn't appear in agent rankings
+      if (agentKey === 'admin' || agentKey.toLowerCase() === 'admin') continue
+      
       if (!agentRankMap.has(agentKey)) {
         agentRankMap.set(agentKey, {
           username: agentKey,

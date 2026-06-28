@@ -411,21 +411,26 @@ export async function GET(request: Request) {
       })
 
     // Top categories (from inventory items) (for KPI cards)
-    const categorySales = items.reduce((acc: { [key: string]: number }, item: InventoryItem) => {
-      const sales = filteredOrdersForKPIs
-        .filter(order => 
-          order.product?.includes(item.name) && 
-          !EXCLUDED_STATUSES.includes(order.parcel_status)
-        )
-        .reduce((sum, order) => sum + (order.qty || 0), 0)
-      acc[item.category] = (acc[item.category] || 0) + sales
+    const categorySales = items.reduce((acc: { [key: string]: { sales: number; revenue: number } }, item: InventoryItem) => {
+      const categoryOrders = filteredOrdersForKPIs.filter(order => 
+        order.product?.includes(item.name) && 
+        !EXCLUDED_STATUSES.includes(order.parcel_status)
+      )
+      const sales = categoryOrders.reduce((sum, order) => sum + (order.qty || 0), 0)
+      const revenue = categoryOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+      
+      if (!acc[item.category]) {
+        acc[item.category] = { sales: 0, revenue: 0 }
+      }
+      acc[item.category].sales += sales
+      acc[item.category].revenue += revenue
       return acc
     }, {})
 
     const topCategories = Object.entries(categorySales)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => b.sales - a.sales)
       .slice(0, 3)
-      .map(([name, sales]) => ({ name, sales }))
+      .map(([name, data]) => ({ name, sales: data.sales, revenue: data.revenue }))
 
     // Stock metrics by category
     const totalCategories = new Set(items.map((item: InventoryItem) => item.category)).size
@@ -468,14 +473,18 @@ export async function GET(request: Request) {
     // Use the store field directly from orders table
     const storePerformance = filteredOrdersForKPIs
       .filter(o => !EXCLUDED_STATUSES.includes(o.parcel_status)) // Only active orders
-      .reduce((acc: { [key: string]: number }, order) => {
+      .reduce((acc: { [key: string]: { revenue: number; sales: number } }, order) => {
         const storeName = order.store || 'Unknown'
-        acc[storeName] = (acc[storeName] || 0) + (order.total || 0)
+        if (!acc[storeName]) {
+          acc[storeName] = { revenue: 0, sales: 0 }
+        }
+        acc[storeName].revenue += (order.total || 0)
+        acc[storeName].sales += (order.qty || 0)
         return acc
       }, {})
 
     const storePerformanceSorted = Object.entries(storePerformance)
-      .map(([name, revenue]) => ({ name, count: revenue as number }))
+      .map(([name, data]) => ({ name, count: data.revenue, sales: data.sales }))
       .sort((a, b) => b.count - a.count)
 
     // Return metrics from Track Orders (orders with parcel_status = 'RETURNED') (for KPI cards)
@@ -510,13 +519,26 @@ export async function GET(request: Request) {
     const totalOrdersCount = filteredOrdersForKPIs.length
     const cancellationRate = totalOrdersCount > 0 ? (totalCancelledOrders / totalOrdersCount) * 100 : 0
 
-    // Cancellation reasons - use actual cancellation_reason field from orders
+    // Cancellation reasons - use both cancellation_reason AND reason fields
     const cancellationReasonMap = cancelledOrders.reduce((acc: { [key: string]: number }, order) => {
-      const reason = order.cancellation_reason || 'Unknown'
+      // Try cancellation_reason first, then reason, then default to 'Unknown'
+      const reason = order.cancellation_reason || order.reason || 'Unknown'
       acc[reason] = (acc[reason] || 0) + 1
       return acc
     }, {})
     const topCancellationReasons = Object.entries(cancellationReasonMap)
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+
+    // Return reasons - use both cancellation_reason AND reason fields for RETURNED orders
+    const returnReasonMap = returnedOrders.reduce((acc: { [key: string]: number }, order) => {
+      // Try cancellation_reason first, then reason, then default to 'Unknown'
+      const reason = order.cancellation_reason || order.reason || 'Unknown'
+      acc[reason] = (acc[reason] || 0) + 1
+      return acc
+    }, {})
+    const topReturnReasons = Object.entries(returnReasonMap)
       .map(([reason, count]) => ({ reason, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
@@ -719,6 +741,7 @@ export async function GET(request: Request) {
       cancelledOrdersValue,
       cancellationRate,
       topCancellationReasons,
+      topReturnReasons,
       cancelledOrdersByChannel: returnedOrdersByChannel, // Return Count by Sales Channel
       returnsByItem, // Return Count by Item (top 5)
       cancelledPackingQueue: cancelledPackingQueueCount || 0,

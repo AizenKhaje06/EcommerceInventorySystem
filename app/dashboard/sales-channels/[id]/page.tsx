@@ -618,9 +618,9 @@ export default function SalesChannelDetailPage() {
         
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-bold gradient-text mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
               {data.name}
-            </h1>
+            </h2>
             <p className="text-slate-600 dark:text-slate-400 text-base">
               Detailed performance analytics and cash flow
             </p>
@@ -1265,7 +1265,7 @@ export default function SalesChannelDetailPage() {
         <Card className="border-0 shadow-lg bg-white dark:bg-slate-900">
           <CardHeader className="pb-3 px-4 md:px-6">
             <div>
-              <CardTitle className="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <CardTitle className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
                 Top Products
               </CardTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Revenue & quantity by product</p>
@@ -1277,21 +1277,48 @@ export default function SalesChannelDetailPage() {
                 {/* Bar Chart */}
                 <div className="w-full overflow-x-auto">
                   <div className="min-w-[300px]">
-                    <ResponsiveContainer width="100%" height={Math.max(180, data.topProducts.slice(0,5).length * 52)}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <BarChart
-                        data={data.topProducts.slice(0, 5).map(p => ({
-                          ...p,
-                          name: p.name.length > 18 ? p.name.substring(0, 18) + '…' : p.name
-                        }))}
+                        data={(() => {
+                          const products = data.topProducts || []
+                          if (products.length === 0) return []
+                          
+                          const firstProduct = products[0]
+                          const chartData = [{
+                            ...firstProduct,
+                            name: firstProduct.name.length > 15 ? firstProduct.name.substring(0, 15) + '…' : firstProduct.name,
+                            originalName: firstProduct.name,
+                            isFirst: true
+                          }]
+                          
+                          // Add "+X more" bar if there are more products
+                          if (products.length > 1) {
+                            const remainingCount = products.length - 1
+                            // Aggregate revenue from remaining products
+                            const remainingRevenue = products.slice(1).reduce((sum, p) => sum + (p.revenue || 0), 0)
+                            const remainingQuantity = products.slice(1).reduce((sum, p) => sum + (p.quantity || 0), 0)
+                            
+                            chartData.push({
+                              name: `+ ${remainingCount} more`,
+                              revenue: remainingRevenue,
+                              quantity: remainingQuantity,
+                              estimatedProfit: remainingRevenue * 0.3,
+                              isMore: true,
+                              allProducts: products
+                            })
+                          }
+                          
+                          return chartData
+                        })()}
                         layout="vertical"
-                        margin={{ left: 20, right: 20 }}
-                        barCategoryGap="25%"
-                        barGap={3}
+                        margin={{ left: 10, right: 20, top: 10, bottom: 10 }}
+                        barCategoryGap="20%"
+                        barGap={4}
                       >
                         <CartesianGrid strokeDasharray="3 3" opacity={0.3} horizontal={false} />
                         <XAxis
                           type="number"
-                          fontSize={11}
+                          fontSize={10}
                           tickLine={false}
                           axisLine={false}
                           tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
@@ -1299,25 +1326,76 @@ export default function SalesChannelDetailPage() {
                         <YAxis
                           type="category"
                           dataKey="name"
-                          fontSize={11}
+                          fontSize={10}
                           tickLine={false}
                           axisLine={false}
-                          width={120}
+                          width={90}
+                          interval={0}
                           tick={(props) => {
                             const { x, y, payload } = props
                             return (
-                              <text x={x} y={y} dy={4} textAnchor="end" fill="#64748b" fontSize={11}>
+                              <text x={x - 5} y={y} dy={4} textAnchor="end" fill="#64748b" fontSize={10}>
                                 {payload.value}
                               </text>
                             )
                           }}
                         />
                         <Tooltip
-                          formatter={(value: number, name: string) => {
-                            if (name === 'revenue') return [formatCurrency(value), 'Revenue']
-                            if (name === 'estimatedProfit') return [formatCurrency(value), 'Est. Profit']
-                            return [value, name]
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const item = payload[0].payload
+                              // If this is the "+X more" bar, show all products in tooltip
+                              if (item.isMore && item.allProducts) {
+                                return (
+                                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 max-w-xs">
+                                    <p className="font-semibold text-slate-900 dark:text-white mb-2 text-xs">All Products:</p>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                      {item.allProducts.map((p: any, idx: number) => (
+                                        <div key={idx} className="text-xs border-b border-slate-100 dark:border-slate-700 last:border-0 pb-2 last:pb-0">
+                                          <p className="font-semibold text-slate-900 dark:text-white mb-1">{p.name}</p>
+                                          <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                            <div>
+                                              <span className="text-slate-500 dark:text-slate-400">Qty:</span>
+                                              <span className="ml-1 font-bold text-slate-700 dark:text-slate-300">{p.quantity}x</span>
+                                            </div>
+                                            <div>
+                                              <span className="text-slate-500 dark:text-slate-400">Revenue:</span>
+                                              <span className="ml-1 font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(p.revenue)}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )
+                              }
+                              // Regular single item tooltip
+                              return (
+                                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 text-xs">
+                                  <p className="font-semibold text-slate-900 dark:text-white mb-2">{item.originalName || item.name}</p>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between gap-3">
+                                      <span className="text-slate-600 dark:text-slate-400">Quantity:</span>
+                                      <span className="font-bold text-slate-900 dark:text-white">{item.quantity}x</span>
+                                    </div>
+                                    <div className="flex justify-between gap-3">
+                                      <span className="text-slate-600 dark:text-slate-400">Revenue:</span>
+                                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(item.revenue)}</span>
+                                    </div>
+                                    {item.estimatedProfit !== undefined && (
+                                      <div className="flex justify-between gap-3">
+                                        <span className="text-slate-600 dark:text-slate-400">Est. Profit:</span>
+                                        <span className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency(item.estimatedProfit)}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return null
                           }}
+                          cursor={{ fill: 'rgba(59,130,246,0.06)' }}
+                        />
                           contentStyle={{
                             backgroundColor: 'rgba(255,255,255,0.97)',
                             border: '1px solid #e2e8f0',
@@ -1403,7 +1481,7 @@ export default function SalesChannelDetailPage() {
         <Card className="border-0 shadow-lg bg-white dark:bg-slate-900">
           <CardHeader className="pb-3 px-4 md:px-6">
             <div>
-              <CardTitle className="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <CardTitle className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
                 Store Performance
               </CardTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Revenue comparison by store</p>
@@ -1415,19 +1493,47 @@ export default function SalesChannelDetailPage() {
                 {/* Bar Chart - matching Top Products style */}
                 <div className="w-full overflow-x-auto">
                   <div className="min-w-[300px]">
-                    <ResponsiveContainer width="100%" height={Math.max(180, data.storeBreakdown.length * 52)}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <BarChart
-                        data={[...data.storeBreakdown]
-                          .sort((a, b) => b.revenue - a.revenue)
-                          .slice(0, 5)
-                          .map(s => ({ ...s, name: s.name.length > 18 ? s.name.substring(0, 18) + '…' : s.name }))}
+                        data={(() => {
+                          const stores = [...data.storeBreakdown].sort((a, b) => b.revenue - a.revenue)
+                          if (stores.length === 0) return []
+                          
+                          const firstStore = stores[0]
+                          const chartData = [{
+                            ...firstStore,
+                            name: firstStore.name.length > 15 ? firstStore.name.substring(0, 15) + '…' : firstStore.name,
+                            originalName: firstStore.name,
+                            isFirst: true
+                          }]
+                          
+                          // Add "+X more" bar if there are more stores
+                          if (stores.length > 1) {
+                            const remainingCount = stores.length - 1
+                            // Aggregate revenue and profit from remaining stores
+                            const remainingRevenue = stores.slice(1).reduce((sum, s) => sum + (s.revenue || 0), 0)
+                            const remainingProfit = stores.slice(1).reduce((sum, s) => sum + (s.profit || 0), 0)
+                            
+                            chartData.push({
+                              name: `+ ${remainingCount} more`,
+                              revenue: remainingRevenue,
+                              profit: remainingProfit,
+                              isMore: true,
+                              allStores: stores
+                            })
+                          }
+                          
+                          return chartData
+                        })()}
                         layout="vertical"
-                        margin={{ left: 20, right: 20 }}
+                        margin={{ left: 10, right: 20, top: 10, bottom: 10 }}
+                        barCategoryGap="20%"
+                        barGap={4}
                       >
                         <CartesianGrid strokeDasharray="3 3" opacity={0.3} horizontal={false} />
                         <XAxis
                           type="number"
-                          fontSize={11}
+                          fontSize={10}
                           tickLine={false}
                           axisLine={false}
                           tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
@@ -1435,25 +1541,70 @@ export default function SalesChannelDetailPage() {
                         <YAxis
                           type="category"
                           dataKey="name"
-                          fontSize={11}
+                          fontSize={10}
                           tickLine={false}
                           axisLine={false}
-                          width={120}
+                          width={90}
+                          interval={0}
                           tick={(props) => {
                             const { x, y, payload } = props
                             return (
-                              <text x={x} y={y} dy={4} textAnchor="end" fill="#64748b" fontSize={11}>
+                              <text x={x - 5} y={y} dy={4} textAnchor="end" fill="#64748b" fontSize={10}>
                                 {payload.value}
                               </text>
                             )
                           }}
                         />
                         <Tooltip
-                          formatter={(value: number, name: string) => {
-                            if (name === 'revenue') return [formatCurrency(value), 'Revenue']
-                            if (name === 'profit') return [formatCurrency(value), 'Profit']
-                            return [value, name]
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const item = payload[0].payload
+                              // If this is the "+X more" bar, show all stores in tooltip
+                              if (item.isMore && item.allStores) {
+                                return (
+                                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 max-w-xs">
+                                    <p className="font-semibold text-slate-900 dark:text-white mb-2 text-xs">All Stores:</p>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                      {item.allStores.map((s: any, idx: number) => (
+                                        <div key={idx} className="text-xs border-b border-slate-100 dark:border-slate-700 last:border-0 pb-2 last:pb-0">
+                                          <p className="font-semibold text-slate-900 dark:text-white mb-1">{s.name}</p>
+                                          <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                            <div>
+                                              <span className="text-slate-500 dark:text-slate-400">Revenue:</span>
+                                              <span className="ml-1 font-bold text-blue-600 dark:text-blue-400">{formatCurrency(s.revenue)}</span>
+                                            </div>
+                                            <div>
+                                              <span className="text-slate-500 dark:text-slate-400">Profit:</span>
+                                              <span className="ml-1 font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(s.profit)}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )
+                              }
+                              // Regular single store tooltip
+                              return (
+                                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3 text-xs">
+                                  <p className="font-semibold text-slate-900 dark:text-white mb-2">{item.originalName || item.name}</p>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between gap-3">
+                                      <span className="text-slate-600 dark:text-slate-400">Revenue:</span>
+                                      <span className="font-bold text-blue-600 dark:text-blue-400">{formatCurrency(item.revenue)}</span>
+                                    </div>
+                                    <div className="flex justify-between gap-3">
+                                      <span className="text-slate-600 dark:text-slate-400">Profit:</span>
+                                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(item.profit)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return null
                           }}
+                          cursor={{ fill: 'rgba(59,130,246,0.06)' }}
+                        />
                           contentStyle={{
                             backgroundColor: 'rgba(255,255,255,0.97)',
                             border: '1px solid #e2e8f0',
