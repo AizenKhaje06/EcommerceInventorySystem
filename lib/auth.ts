@@ -71,7 +71,8 @@ export const ROLE_PERMISSIONS = {
     '/dashboard/dispatch',
     '/dashboard/internal-usage',
     '/dashboard/settings',
-    '/dashboard/log'
+    '/dashboard/log',
+    '/dashboard/reports'
   ],
   operations: [
     '/dashboard/operations',
