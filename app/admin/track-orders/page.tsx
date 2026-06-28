@@ -355,14 +355,12 @@ export default function TrackOrdersPage() {
                       <td className="py-3 px-4 text-center">{getStatusBadge(order.orderStatus)}</td>
                       <td className="py-3 px-4 text-center">{getPaymentBadge(order.paymentStatus)}</td>
                       <td className="py-3 px-4 text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => openDetailsModal(order)}
-                          className="h-8 text-xs"
+                          className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                         >
                           View Details
-                        </Button>
+                        </button>
                       </td>
                     </tr>
                   ))}

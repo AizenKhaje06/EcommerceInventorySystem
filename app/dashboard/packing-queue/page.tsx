@@ -1385,9 +1385,8 @@ export default function PackingQueuePage() {
                           <button
                             onClick={() => openDetailsModal(order)}
                             aria-label={`View details for order ${order.waybill || order.id}`}
-                            className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
+                            className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                           >
-                            <Eye className="h-3 w-3 text-slate-400" aria-hidden="true" />
                             Details
                           </button>
                         </div>

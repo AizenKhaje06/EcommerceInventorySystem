@@ -1869,14 +1869,12 @@ export default function TrackOrdersPage() {
                         {getParcelStatusBadge(order.parcelStatus)}
                       </td>
                       <td className="py-2 px-2 text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => openDetailsModal(order)}
-                          className="h-6 px-1.5 text-[9px] font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors whitespace-nowrap"
+                          className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                         >
                           View
-                        </Button>
+                        </button>
                       </td>
                     </tr>
                   ))}

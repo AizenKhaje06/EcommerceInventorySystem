@@ -257,7 +257,7 @@ export default function TrackerDashboardPage() {
       }
 
       toast.success('Order cancelled and returned to packing queue')
-      toast.info('Inventory restored â€¢ Sales data reverted â€¢ Order marked as cancelled')
+      toast.info('Inventory restored Ã¢â‚¬Â¢ Sales data reverted Ã¢â‚¬Â¢ Order marked as cancelled')
       
       // Close modals and reset
       setShowReturnConfirm(false)
@@ -323,7 +323,7 @@ export default function TrackerDashboardPage() {
     toast.success('Filters cleared')
   }
 
-  // â”€â”€ Bulk selection helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Bulk selection helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   const isAllSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedIds.has(o.id))
   const isIndeterminate = !isAllSelected && paginatedOrders.some(o => selectedIds.has(o.id))
 
@@ -371,7 +371,7 @@ export default function TrackerDashboardPage() {
       setBulkStatus('')
     } catch (err) {
       console.error('Bulk update error:', err)
-      toast.error('Bulk update failed â€” please try again')
+      toast.error('Bulk update failed Ã¢â‚¬â€ please try again')
       await fetchOrders()
     } finally {
       setBulkUpdating(false)
@@ -696,7 +696,7 @@ export default function TrackerDashboardPage() {
                 {searchTerm ? 'No matching orders' : 'No orders found'}
               </p>
               <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-                {searchTerm ? 'Try different search' : 'All orders tracked! ðŸŽ‰'}
+                {searchTerm ? 'Try different search' : 'All orders tracked! Ã°Å¸Å½â€°'}
               </p>
             </div>
           ) : (
@@ -704,14 +704,14 @@ export default function TrackerDashboardPage() {
               {/* Mobile Scroll Hint */}
               <div className="md:hidden px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                 <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 font-medium">
-                  <span className="text-slate-500">â†</span>
-                  <span>Swipe to see all columns â€¢ Tap row to highlight</span>
-                  <span className="text-blue-500">â†’</span>
+                  <span className="text-slate-500">Ã¢â€ Â</span>
+                  <span>Swipe to see all columns Ã¢â‚¬Â¢ Tap row to highlight</span>
+                  <span className="text-blue-500">Ã¢â€ â€™</span>
                 </p>
               </div>
 
               <div className="overflow-x-auto">
-                {/* Bulk Action Bar â€” shows when items are selected */}
+                {/* Bulk Action Bar Ã¢â‚¬â€ shows when items are selected */}
                 {selectedIds.size > 0 && (
                   <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50">
                     <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
@@ -776,7 +776,7 @@ export default function TrackerDashboardPage() {
                       <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '9%' }}>
                         Status
                       </th>
-                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '17%' }}>
+                      <th className="text-left py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '13%' }}>
                         Reason
                       </th>
                       <th className="text-center py-2 px-2 text-[11px] font-bold text-white uppercase tracking-wider" style={{ width: '9%' }}>
@@ -845,7 +845,7 @@ export default function TrackerDashboardPage() {
                         </td>
                         <td className="py-1.5 px-2 hidden md:table-cell">
                           <div className="flex flex-col gap-0.5 max-w-[130px]">
-                            <span className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
+                            <span className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
                               {order.trackingNumber}
                             </span>
                             <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
@@ -860,7 +860,7 @@ export default function TrackerDashboardPage() {
                               updateOrderPaymentStatus(order.id, value as any)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700">
+                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[90px]">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -879,7 +879,7 @@ export default function TrackerDashboardPage() {
                               updateOrderStatus(order.id, value)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700">
+                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[120px]">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -895,7 +895,7 @@ export default function TrackerDashboardPage() {
                             </SelectContent>
                           </Select>
                         </td>
-                        {/* Reason column â€” only active for CANCELLED or RETURNED */}
+                        {/* Reason column Ã¢â‚¬â€ only active for CANCELLED or RETURNED */}
                         <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                           {(order.parcelStatus === 'CANCELLED' || order.parcelStatus === 'RETURNED') ? (
                             <Select
@@ -911,7 +911,7 @@ export default function TrackerDashboardPage() {
                                 })
                               }}
                             >
-                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[160px]">
+                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[190px]">
                                 <SelectValue placeholder="Select reason..." />
                               </SelectTrigger>
                               <SelectContent>
@@ -935,9 +935,8 @@ export default function TrackerDashboardPage() {
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => openDetailsModal(order)}
-                              className="h-8 px-3 text-[11px] font-medium border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-200 whitespace-nowrap rounded-lg inline-flex items-center gap-1.5"
+                              className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                             >
-                              <Eye className="h-3.5 w-3.5" />
                               View Details
                             </button>
                           </div>
@@ -993,9 +992,8 @@ export default function TrackerDashboardPage() {
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => openDetailsModal(order)}
-                              className="h-8 px-2 text-[9px] font-medium border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 whitespace-nowrap rounded inline-flex items-center gap-1"
+                              className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                             >
-                              <Eye className="h-3 w-3" />
                               View
                             </button>
                           </div>
@@ -1268,7 +1266,7 @@ export default function TrackerDashboardPage() {
                     </div>
                     <div className="bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 space-y-2">
                       <p className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
-                        âš ï¸ Order Cancelled
+                        Ã¢Å¡Â Ã¯Â¸Â Order Cancelled
                       </p>
                       {selectedOrder.cancellation_reason && (
                         <div>
