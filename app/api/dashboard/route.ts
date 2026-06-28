@@ -593,10 +593,23 @@ export async function GET(request: Request) {
       if (!acc[channel]) {
         acc[channel] = { count: 0, value: 0 }
       }
-      acc[channel].count += 1 // Count orders
-      acc[channel].value += order.total || 0 // Sum total value
+      acc[channel].count += 1
+      acc[channel].value += order.total || 0
       return acc
     }, {})
+
+    // Return Count by Item (parcel_status = 'RETURNED', grouped by product)
+    const returnsByItemMap = returnedOrders.reduce((acc: { [key: string]: { count: number; value: number } }, order) => {
+      const product = (order.product || 'Unknown').replace(/\s*\(\d+\)\s*$/, '').trim()
+      if (!acc[product]) acc[product] = { count: 0, value: 0 }
+      acc[product].count += 1
+      acc[product].value += order.total || 0
+      return acc
+    }, {})
+    const returnsByItem = Object.entries(returnsByItemMap)
+      .map(([name, data]) => ({ name, count: data.count, value: data.value }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
 
     // Average order value
     const averageOrderValue = financialMetrics.totalOrders > 0 
@@ -707,6 +720,7 @@ export async function GET(request: Request) {
       cancellationRate,
       topCancellationReasons,
       cancelledOrdersByChannel: returnedOrdersByChannel, // Return Count by Sales Channel
+      returnsByItem, // Return Count by Item (top 5)
       cancelledPackingQueue: cancelledPackingQueueCount || 0,
       cancelledTrackOrders: cancelledTrackOrders,
       totalDelivered: totalDelivered,

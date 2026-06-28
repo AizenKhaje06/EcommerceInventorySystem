@@ -156,6 +156,7 @@ export default function ReportsPage() {
 
   const abcData         = analytics?.abc ?? []
   const turnoverData    = analytics?.turnover ?? []
+  const returnsByItem   = (stats?.returnsByItem ?? []).slice(0, 5)
   const deadStock       = turnoverData.filter(t => t.status === "dead-stock")
   const fastMoving      = turnoverData.filter(t => t.status === "fast-moving")
   const slowMoving      = turnoverData.filter(t => t.status === "slow-moving")
@@ -483,6 +484,50 @@ export default function ReportsPage() {
                   <RotateCcw className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-sm text-slate-500">No returns yet</p>
                   <p className="text-xs text-slate-400 mt-1">Returned orders by channel will appear here</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Return Count by Item */}
+          <Card className="overflow-hidden border-0 shadow-md">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-orange-500 rounded-full flex-shrink-0"></div>
+                <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Return Count by Item</h3>
+              </div>
+              <p className="text-xs mt-0.5 ml-3 text-slate-600 dark:text-slate-400">Top 5 most returned products</p>
+            </div>
+            <CardContent className="pt-4 pb-2">
+              {returnsByItem.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={Math.max(160, returnsByItem.length * 52)}>
+                    <BarChart data={returnsByItem} layout="vertical" margin={{ left: 10, right: 10, top: 5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.07} horizontal={false} vertical={true} />
+                      <XAxis type="number" fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#94a3b8' }} />
+                      <YAxis type="category" dataKey="name" fontSize={10} tickLine={false} axisLine={false} width={100} tick={{ fill: '#64748b' }}
+                        tickFormatter={(v: string) => v.length > 16 ? v.substring(0, 16) + '...' : v} />
+                      <Tooltip content={<ChartTooltip formatter={(value) => [value.toString(), 'Returns']} />} cursor={{ fill: 'rgba(249,115,22,0.06)' }} />
+                      <Bar dataKey="count" fill="#F97316" radius={[0, 6, 6, 0]} maxBarSize={28} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-2 space-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
+                    {returnsByItem.map((r: any, i: number) => (
+                      <div key={r.name} className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs ${i === 0 ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`h-5 w-5 rounded flex items-center justify-center text-[10px] font-black flex-shrink-0 ${i === 0 ? 'bg-orange-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>{i + 1}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white truncate">{r.name}</span>
+                        </div>
+                        <span className="font-bold text-orange-600 dark:text-orange-400 flex-shrink-0">{r.count} returns</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <RotateCcw className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="text-sm text-slate-500">No returned items yet</p>
+                  <p className="text-xs text-slate-400 mt-1">Items with RETURNED parcel status will appear here</p>
                 </div>
               )}
             </CardContent>
