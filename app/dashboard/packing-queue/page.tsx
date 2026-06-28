@@ -112,6 +112,7 @@ export default function PackingQueuePage() {
   // Role detection
   const userRole = getCurrentUserRole()
   const isTeamLeader = false // Team leader role removed
+  const isChannelAgent = currentUser?.assignedChannel ? true : false // Sales channel agents have assigned channel
 
   // Helper function to format date and time - using same logic as Activity Logs
   const formatDateTime = (dateString: string) => {
@@ -1187,21 +1188,8 @@ export default function PackingQueuePage() {
                   </caption>
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-black dark:bg-black">
-                      {/* Sortable: Waybill */}
-                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
-                        <button
-                          onClick={() => setSortBy(sortBy === 'waybill-asc' ? 'waybill-desc' : 'waybill-asc')}
-                          className="flex items-center gap-1 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
-                          aria-label={`Sort by Waybill ${sortBy === 'waybill-asc' ? 'descending' : 'ascending'}`}
-                        >
-                          Waybill No.
-                          <span aria-hidden="true" className="opacity-60">
-                            {sortBy === 'waybill-asc' ? '↑' : sortBy === 'waybill-desc' ? '↓' : '↕'}
-                          </span>
-                        </button>
-                      </th>
-                      {/* Sortable: Date */}
-                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
+                      {/* Sortable: Date & Time */}
+                      <th scope="col" className="text-left py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">
                         <button
                           onClick={() => setSortBy(sortBy === 'date-asc' ? 'date-desc' : 'date-asc')}
                           className="flex items-center gap-1 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
@@ -1213,47 +1201,39 @@ export default function PackingQueuePage() {
                           </span>
                         </button>
                       </th>
-                      <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
+                      {/* Sortable: Waybill No. */}
+                      <th scope="col" className="text-left py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[150px]">
+                        <button
+                          onClick={() => setSortBy(sortBy === 'waybill-asc' ? 'waybill-desc' : 'waybill-asc')}
+                          className="flex items-center gap-1 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
+                          aria-label={`Sort by Waybill ${sortBy === 'waybill-asc' ? 'descending' : 'ascending'}`}
+                        >
+                          Waybill No.
+                          <span aria-hidden="true" className="opacity-60">
+                            {sortBy === 'waybill-asc' ? '↑' : sortBy === 'waybill-desc' ? '↓' : '↕'}
+                          </span>
+                        </button>
+                      </th>
+                      {/* Customer Name */}
+                      <th scope="col" className="text-left py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[180px]">
+                        Customer Name
+                      </th>
+                      {/* Contact Number */}
+                      <th scope="col" className="text-left py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
+                        Contact Number
+                      </th>
+                      {/* Status */}
+                      <th scope="col" className="text-center py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">
                         Status
                       </th>
+                      {/* Channel */}
                       {!isTeamLeader && (
-                        <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
+                        <th scope="col" className="text-center py-2 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
                           Channel
                         </th>
                       )}
-                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[150px]">
-                        Store
-                      </th>
-                      <th scope="col" className="text-left py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[200px]">
-                        Product
-                      </th>
-                      {/* Sortable: Qty */}
-                      <th scope="col" className="text-center py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
-                        <button
-                          onClick={() => setSortBy(sortBy === 'qty-asc' ? 'qty-desc' : 'qty-asc')}
-                          className="flex items-center justify-center gap-1 w-full hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
-                          aria-label={`Sort by Quantity ${sortBy === 'qty-asc' ? 'descending' : 'ascending'}`}
-                        >
-                          Qty
-                          <span aria-hidden="true" className="opacity-60">
-                            {sortBy === 'qty-asc' ? '↑' : sortBy === 'qty-desc' ? '↓' : '↕'}
-                          </span>
-                        </button>
-                      </th>
-                      {/* Sortable: Total */}
-                      <th scope="col" className="text-right py-4 px-4 text-[11px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
-                        <button
-                          onClick={() => setSortBy(sortBy === 'total-asc' ? 'total-desc' : 'total-asc')}
-                          className="flex items-center justify-end gap-1 w-full hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white rounded"
-                          aria-label={`Sort by Total ${sortBy === 'total-asc' ? 'descending' : 'ascending'}`}
-                        >
-                          Total
-                          <span aria-hidden="true" className="opacity-60">
-                            {sortBy === 'total-asc' ? '↑' : sortBy === 'total-desc' ? '↓' : '↕'}
-                          </span>
-                        </button>
-                      </th>
-                      <th scope="col" className="text-center py-4 px-5 text-[11px] font-bold text-white uppercase tracking-wider w-[200px]">
+                      {/* Action */}
+                      <th scope="col" className="text-center py-2 px-5 text-[11px] font-bold text-white uppercase tracking-wider w-[170px]">
                         Action
                       </th>
                     </tr>
@@ -1270,26 +1250,8 @@ export default function PackingQueuePage() {
                             : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'
                         }`}
                       >
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-start gap-2 flex-wrap">
-                            <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">
-                              {order.waybill || order.id || 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
-                              #{(order.id || '').slice(-6).toUpperCase()}
-                            </span>
-                            {order.is_cancelled && (
-                              <Badge className="bg-red-600 text-white text-[9px] px-1.5 py-0 font-bold uppercase">
-                                CANCELLED
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
+                      {/* Date & Time */}
+                      <td className="py-1.5 px-4">
                         <div className="flex flex-col">
                           <span className="text-xs font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                             {parseAsPhilippineTime(order.created_at || order.orderDate || order.date || '').toLocaleDateString('en-US', { 
@@ -1307,7 +1269,33 @@ export default function PackingQueuePage() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      {/* Waybill No. */}
+                      <td className="py-1.5 px-4">
+                        <span className="font-mono text-sm font-bold text-blue-600 dark:text-blue-400 truncate block" title={order.waybill || order.id}>
+                          {order.waybill || order.id || 'N/A'}
+                        </span>
+                      </td>
+                      {/* Customer Name */}
+                      <td className="py-1.5 px-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-sm font-semibold text-slate-900 dark:text-white truncate" title={order.customerName}>
+                            {order.customerName || 'N/A'}
+                          </span>
+                          {order.is_cancelled && (
+                            <Badge className="bg-red-600 text-white text-[9px] px-1.5 py-0 font-bold uppercase w-fit">
+                              CANCELLED
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      {/* Contact Number */}
+                      <td className="py-1.5 px-4">
+                        <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                          {order.customerPhone || 'N/A'}
+                        </span>
+                      </td>
+                      {/* Status */}
+                      <td className="py-1.5 px-4 text-center">
                         {order.confirmation_status === 'Confirmed' ? (
                           <Badge className="bg-green-600 text-white text-[10px] px-2 py-1 font-bold whitespace-nowrap">
                             Confirmed
@@ -1318,36 +1306,15 @@ export default function PackingQueuePage() {
                           </Badge>
                         )}
                       </td>
+                      {/* Channel */}
                       {!isTeamLeader && (
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-1.5 px-4 text-center">
                           <Badge variant="outline" className="text-[10px] font-semibold whitespace-nowrap">
                             {order.sales_channel || order.channel || 'N/A'}
                           </Badge>
                         </td>
                       )}
-                      <td className="py-3 px-4">
-                        <span className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate block">
-                          {order.store}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="max-w-full">
-                          <p className="text-xs text-slate-900 dark:text-white font-medium line-clamp-2 leading-relaxed">
-                            {order.product || order.itemName}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 text-xs font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 rounded-md">
-                          {order.qty || order.quantity}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-                          {formatCurrency(order.total || order.totalAmount || 0)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
+                      <td className="py-1.5 px-4">
                         <div className="flex items-center justify-center gap-2">
                           {/* Primary action — context-aware */}
                           {!order.is_cancelled && (
@@ -1358,22 +1325,22 @@ export default function PackingQueuePage() {
                                     onClick={async () => await handleConfirmOrder(order.id, order.channel || order.sales_channel || 'Unknown')}
                                     disabled={confirming === order.id}
                                     aria-label={`Confirm waybill for order ${order.waybill || order.id}`}
-                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-yellow-400 text-yellow-900 hover:bg-yellow-500 active:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
+                                    className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold bg-yellow-500 text-yellow-950 hover:bg-yellow-600 active:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all duration-150 whitespace-nowrap min-w-[85px]"
                                   >
                                     {confirming === order.id
-                                      ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                                      : <><CheckCircle className="h-3 w-3" aria-hidden="true" />Confirm</>
+                                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                                      : <><CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />Confirm</>
                                     }
                                   </button>
                                 )
                               ) : (
-                                userRole !== 'logistics-admin' && (
+                                !isChannelAgent && (
                                   <button
                                     onClick={() => openConfirmDialog(order)}
                                     aria-label={`Mark order ${order.waybill || order.id} as packed`}
-                                    className="inline-flex items-center justify-center gap-1 flex-1 h-7 px-2.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-colors duration-150 whitespace-nowrap min-w-[44px]"
+                                    className="inline-flex items-center justify-center gap-1.5 h-6 px-5 rounded-sm text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-all duration-150 whitespace-nowrap min-w-[95px]"
                                   >
-                                    <Package className="h-3 w-3" aria-hidden="true" />
+                                    <Package className="h-3.5 w-3.5" aria-hidden="true" />
                                     Pack
                                   </button>
                                 )
@@ -1381,13 +1348,13 @@ export default function PackingQueuePage() {
                             </>
                           )}
 
-                          {/* Secondary action — always visible */}
+                          {/* Secondary action — simple text link */}
                           <button
                             onClick={() => openDetailsModal(order)}
                             aria-label={`View details for order ${order.waybill || order.id}`}
-                            className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
+                            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                           >
-                            Details
+                            View Details
                           </button>
                         </div>
                       </td>
@@ -1935,7 +1902,7 @@ export default function PackingQueuePage() {
                         </div>
                       )}
                       
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 justify-end">
                         {selectedOrder?.is_cancelled ? (
                           <>
                             {/* UNCANCEL button - For admin, dept-manager, and operations roles */}
@@ -2005,8 +1972,8 @@ export default function PackingQueuePage() {
                                 </Button>
                               )
                             ) : (
-                              // CONFIRMED: Show MARK AS PACKED button (hidden for logistics-admin)
-                              userRole !== 'logistics-admin' && (
+                              // CONFIRMED: Show MARK AS PACKED button (hidden for logistics-admin and channel agents)
+                              userRole !== 'logistics-admin' && !isChannelAgent && (
                                 <Button
                                   onClick={() => {
                                     setShowDetailsModal(false)

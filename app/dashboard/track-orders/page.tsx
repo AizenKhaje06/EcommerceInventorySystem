@@ -53,6 +53,7 @@ interface Order {
   notes?: string
   dispatchNotes?: string // User notes from dispatch form
   department?: string // Sales channel (Shopee, Lazada, Flash, etc.)
+  reason?: string // Reason for CANCELLED, RETURNED, PROBLEMATIC
 }
 
 export default function TrackOrdersPage() {
@@ -206,7 +207,8 @@ export default function TrackOrdersPage() {
           store: order.store
         }),
         dispatchNotes: order.dispatch_notes || '',
-        department: order.sales_channel || 'N/A'
+        department: order.sales_channel || 'N/A',
+        reason: order.reason || '' // Reason for CANCELLED, RETURNED, PROBLEMATIC
       }))
       
       // Filter by assigned channel for dept-manager and operations roles
@@ -1787,15 +1789,13 @@ export default function TrackOrdersPage() {
                 <thead>
                   <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">
                     <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">Date & Time</th>
-                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[100px]">Customer</th>
+                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">Waybill No.</th>
+                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">Customer</th>
+                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[100px]">Contact No.</th>
                     {userRole !== 'operations' && (
                       <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[80px]">Channel</th>
                     )}
-                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[100px]">Store</th>
                     <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[160px]">Product</th>
-                    <th className="py-3 px-2 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[40px]">Qty</th>
-                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[70px]">Courier</th>
-                    <th className="py-3 px-2 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[160px]">Waybill</th>
                     <th className="py-3 px-2 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[75px]">Payment</th>
                     <th className="py-3 px-2 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[70px]">Status</th>
                     <th className="py-3 px-2 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[95px]">Parcel Status</th>
@@ -1822,8 +1822,24 @@ export default function TrackOrdersPage() {
                         </div>
                       </td>
                       <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
-                        <div className="text-[11px] text-slate-900 dark:text-white font-semibold truncate max-w-[90px]" title={order.customerName}>
+                        <div className="flex items-center gap-1.5">
+                          <Package className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                          <span className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
+                            {order.trackingNumber || '-'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
+                        <div className="text-[11px] text-slate-900 dark:text-white font-semibold truncate max-w-[120px]" title={order.customerName}>
                           {order.customerName || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                          <span className="font-mono text-[10px] text-slate-700 dark:text-slate-300 truncate" title={order.customerPhone}>
+                            {order.customerPhone || 'N/A'}
+                          </span>
                         </div>
                       </td>
                       {userRole !== 'operations' && (
@@ -1834,27 +1850,9 @@ export default function TrackOrdersPage() {
                         </td>
                       )}
                       <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
-                        <div className="text-[11px] text-slate-900 dark:text-white font-semibold truncate max-w-[90px]" title={order.storeName}>
-                          {order.storeName}
-                        </div>
-                      </td>
-                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
                         <div className="text-[11px] text-slate-900 dark:text-white font-medium line-clamp-2 leading-tight max-h-[2.8em]" title={order.itemName}>
                           {order.itemName}
                         </div>
-                      </td>
-                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center justify-center">
-                          <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-xs font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 rounded-md">
-                            {order.quantity}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
-                        <div className="text-[11px] text-slate-700 dark:text-slate-300">{order.courier || '-'}</div>
-                      </td>
-                      <td className="py-2 px-2 border-r border-slate-100 dark:border-slate-800">
-                        <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 font-semibold whitespace-normal break-all">{order.trackingNumber || '-'}</div>
                       </td>
                       <td className="py-2 px-2 text-center border-r border-slate-100 dark:border-slate-800">
                         {getPaymentBadge(order.paymentStatus)}
@@ -2182,6 +2180,25 @@ export default function TrackOrdersPage() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Reason Field - shown for CANCELLED, RETURNED, PROBLEMATIC */}
+              {['CANCELLED', 'RETURNED', 'PROBLEMATIC'].includes(selectedOrder.parcelStatus) && selectedOrder.reason && (
+                <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-6 border-2 border-red-200 dark:border-red-800">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider mb-2">
+                        Reason for {selectedOrder.parcelStatus}
+                      </p>
+                      <p className="text-base font-semibold text-red-900 dark:text-red-300 leading-relaxed">
+                        {selectedOrder.reason}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
