@@ -108,7 +108,6 @@ export const ROLE_PERMISSIONS = {
     '/dashboard/log',
     '/dashboard/agent-performance',
     '/dashboard/internal-usage',
-    '/dashboard/reports',
     '/dept-manager/agents',
     '/dept-manager/dashboard',
     '/dept-manager/log'  ]

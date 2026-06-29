@@ -116,8 +116,8 @@ export async function GET(request: Request) {
       .select('*')
       .eq('status', 'Packed') // CRITICAL: Only fetch Track Orders (status='Packed'), exclude Packing Queue (status='Pending')
 
-    // DEPARTMENT FILTERING: Operations users only see their department's orders
-    if (userRole === 'operations' && assignedChannel) {
+    // DEPARTMENT FILTERING: Operations and dept-manager users only see their department's orders
+    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
       ordersQuery = ordersQuery.eq('sales_channel', assignedChannel)
     }
     // Admin sees all orders
@@ -551,8 +551,8 @@ export async function GET(request: Request) {
       .eq('status', 'Pending')
       .eq('is_cancelled', true)
 
-    // Apply department filtering for operations users
-    if (userRole === 'operations' && assignedChannel) {
+    // Apply department filtering for operations and dept-manager users
+    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
       cancelledPackingQueueQuery = cancelledPackingQueueQuery.eq('sales_channel', assignedChannel)
     }
 
@@ -582,8 +582,8 @@ export async function GET(request: Request) {
       .eq('status', 'Packed')
       .eq('parcel_status', 'DELIVERED')
 
-    // Apply department filtering for operations users
-    if (userRole === 'operations' && assignedChannel) {
+    // Apply department filtering for operations and dept-manager users
+    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
       deliveredOrdersQuery = deliveredOrdersQuery.eq('sales_channel', assignedChannel)
     }
 

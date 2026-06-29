@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('status', 'Packed') // CRITICAL: Only fetch Track Orders, exclude Packing Queue
 
-    // DEPARTMENT FILTERING: Operations users only see their department's orders
-    if (userRole === 'operations' && assignedChannel) {
+    // DEPARTMENT FILTERING: Operations and dept-manager users only see their department's orders
+    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
       ordersQuery = ordersQuery.eq('sales_channel', assignedChannel)
     }
     // Admin sees all orders
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     let orders = allOrders || []
 
     console.log('[Reports API] Total orders fetched:', orders.length)
-    if (userRole === 'operations') {
+    if (userRole === 'operations' || userRole === 'dept-manager') {
       console.log('[Reports API] Filtered by channel:', assignedChannel)
     }
     console.log('[Reports API] Sample order:', orders[0])
