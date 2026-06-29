@@ -9,6 +9,7 @@ import { formatCurrency, formatNumber } from "@/lib/utils"
 import { apiGet } from "@/lib/api-client"
 import { ChartTooltip } from "@/components/ui/chart-tooltip"
 import { BarChart2 } from "lucide-react"
+import { getCurrentUser } from "@/lib/auth"
 import {
   DollarSign, TrendingUp, TrendingDown, ShoppingCart, Package,
   BarChart3, AlertTriangle, XCircle, CheckCircle2, RotateCcw,
@@ -80,6 +81,11 @@ export default function ReportsPage() {
   const [analytics, setAnalytics] = useState<{ abc: ABCAnalysis[]; turnover: InventoryTurnover[] } | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  
+  // Get current user and check if dept-manager
+  const currentUser = getCurrentUser()
+  const isDeptManager = currentUser?.role === 'dept-manager'
+  const assignedChannel = isDeptManager ? (localStorage.getItem('assignedChannel') || currentUser?.assignedChannel || '') : ''
 
   useEffect(() => { fetchAll() }, [startDate, endDate])
 
@@ -94,17 +100,35 @@ export default function ReportsPage() {
       const deptParams = new URLSearchParams()
       if (sd) deptParams.append("startDate", sd)
       if (ed) deptParams.append("endDate",   ed)
+      
+      // Add channel filter for dept-manager
+      if (isDeptManager && assignedChannel) {
+        deptParams.append("channel", assignedChannel)
+      }
 
       const [r, s, inv, dept, ana] = await Promise.all([
         apiGet<SalesReport>(`/api/reports${qs}`).catch(() => null),
         apiGet<DashboardStats>(`/api/dashboard${qs ? qs + "&period=ID" : "?period=ID"}`).catch(() => null),
         apiGet<InventoryItem[]>("/api/items").catch(() => []),
         apiGet<DepartmentsData>(`/api/departments?${deptParams}`).catch(() => null),
-        apiGet<any>("/api/analytics?type=all").catch(() => null),
+        // Skip analytics for dept-manager (ABC Analysis and Turnover are admin-only)
+        isDeptManager ? Promise.resolve(null) : apiGet<any>("/api/analytics?type=all").catch(() => null),
       ])
 
       setReport(r); setStats(s); setItems(inv)
-      setDepartments(dept); setAnalytics(ana)
+      
+      // Filter departments data for dept-manager
+      if (isDeptManager && assignedChannel && dept) {
+        const filteredDept = {
+          ...dept,
+          departments: dept.departments.filter(d => d.name === assignedChannel)
+        }
+        setDepartments(filteredDept)
+      } else {
+        setDepartments(dept)
+      }
+      
+      setAnalytics(ana)
     } finally {
       setLoading(false); setRefreshing(false)
     }
@@ -732,6 +756,8 @@ export default function ReportsPage() {
 
       </section>
 
+      {/* Analytics & Insights - Admin Only */}
+      {!isDeptManager && (
       <section>
         <SectionHeader title="Analytics &amp; Insights" icon={BarChart3} color="bg-pink-600" />
 
@@ -823,6 +849,7 @@ export default function ReportsPage() {
 
         </div>
       </section>
+      )}
 
       {/* Section */}
       <section>
