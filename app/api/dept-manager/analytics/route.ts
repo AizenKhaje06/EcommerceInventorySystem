@@ -146,15 +146,8 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       query = query.ilike('sales_channel', channel)
     }
 
-    // Date filtering: use 'date' for dispatched orders, 'created_at' for pending/cancelled orders
-    // Apply OR condition: (date within range) OR (date is null AND created_at within range)
-    const startDate = new Date(startManilaKey + 'T00:00:00+08:00').toISOString()
-    const endDate = new Date(endManilaKey + 'T23:59:59+08:00').toISOString()
-    
-    query = query.or(
-      `and(date.gte.${startManilaKey},date.lte.${endManilaKey}),` +
-      `and(date.is.null,created_at.gte.${startDate},created_at.lte.${endDate})`
-    )
+    // Simple date filtering: use 'date' field for dispatched orders
+    query = query.gte('date', startManilaKey).lte('date', endManilaKey)
 
     if (agentFilter !== 'all') {
       query = query.or(`agent_username.eq.${agentFilter},dispatched_by.eq.${agentFilter}`)
@@ -167,7 +160,37 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 })
     }
 
-    const allOrders = orders || []
+    // Also fetch Packing Queue cancelled orders (they might not have 'date' set yet)
+    let pendingCancelledQuery = supabaseAdmin
+      .from('orders')
+      .select(`
+        id, date, sales_channel, store, courier, waybill,
+        qty, cogs, total, product,
+        status, is_cancelled, cancellation_reason, cancelled_at,
+        parcel_status, reason,
+        dispatched_by, agent_username,
+        packed_at, packed_by,
+        created_at
+      `)
+      .eq('status', 'Pending')
+      .eq('is_cancelled', true)
+      .is('deleted_at', null)
+    
+    if (user.role === 'dept-manager') {
+      pendingCancelledQuery = pendingCancelledQuery.or(`sales_channel.ilike.${channel},agent_username.eq.${user.username}`)
+    } else {
+      pendingCancelledQuery = pendingCancelledQuery.ilike('sales_channel', channel)
+    }
+    
+    // Filter by created_at for pending orders
+    const startDate = new Date(startManilaKey + 'T00:00:00+08:00').toISOString()
+    const endDate = new Date(endManilaKey + 'T23:59:59+08:00').toISOString()
+    pendingCancelledQuery = pendingCancelledQuery.gte('created_at', startDate).lte('created_at', endDate)
+    
+    const { data: pendingCancelled } = await pendingCancelledQuery
+    
+    // Combine both queries
+    const allOrders = [...(orders || []), ...(pendingCancelled || [])]
     const activeOrders = allOrders.filter(o => !o.is_cancelled)
 
     // Debug: Log cancelled and returned orders
@@ -457,10 +480,14 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .sort((a, b) => b.activeDays - a.activeDays)
 
     // ── 10. TOP 5 PRODUCT CANCELLATIONS WITH REASONS ─────────────────────────────
-    // From Track Orders only: status='Packed' AND parcel_status='CANCELLED'
-    const cancelledOrdersList = allOrders.filter(o => 
-      o.status === 'Packed' && o.parcel_status === 'CANCELLED'
-    )
+    // Include BOTH sources:
+    // 1. Packing Queue cancellations: status='Pending' AND is_cancelled=true
+    // 2. Track Orders cancellations: status='Packed' AND parcel_status='CANCELLED'
+    const cancelledOrdersList = allOrders.filter(o => {
+      const isPackingQueueCancelled = o.status === 'Pending' && o.is_cancelled
+      const isTrackOrdersCancelled = o.status === 'Packed' && o.parcel_status === 'CANCELLED'
+      return isPackingQueueCancelled || isTrackOrdersCancelled
+    })
     
     const productCancelMap = new Map<string, { product: string; count: number; reasons: Map<string, number> }>()
     
@@ -473,8 +500,8 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
         }
         const entry = productCancelMap.get(name)!
         entry.count++
-        // Use 'reason' field for Track Orders cancellations
-        const reason = (o.reason || 'No reason given').trim() || 'No reason given'
+        // Use 'cancellation_reason' for Packing Queue, 'reason' for Track Orders
+        const reason = (o.cancellation_reason || o.reason || 'No reason given').trim() || 'No reason given'
         entry.reasons.set(reason, (entry.reasons.get(reason) || 0) + 1)
       }
     }
