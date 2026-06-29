@@ -189,15 +189,33 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
     
     const { data: pendingCancelled } = await pendingCancelledQuery
     
-    // Combine both queries
-    const allOrders = [...(orders || []), ...(pendingCancelled || [])]
-    const activeOrders = allOrders.filter(o => !o.is_cancelled)
+    // Combine both queries and remove duplicates
+    const allOrdersMap = new Map()
+    for (const order of [...(orders || []), ...(pendingCancelled || [])]) {
+      allOrdersMap.set(order.id, order)
+    }
+    const allOrders = Array.from(allOrdersMap.values())
+    const activeOrders = allOrders.filter(o => !o.is_cancelled && o.parcel_status !== 'CANCELLED')
 
     // Debug: Log cancelled and returned orders
-    console.log('[Analytics] Total orders:', allOrders.length)
-    console.log('[Analytics] Cancelled orders (is_cancelled=true):', allOrders.filter(o => o.is_cancelled).length)
-    console.log('[Analytics] Returned orders (parcel_status=RETURNED):', allOrders.filter(o => o.parcel_status === 'RETURNED').length)
-    console.log('[Analytics] Sample cancelled order:', allOrders.find(o => o.is_cancelled))
+    console.log('[Analytics] Date range:', startManilaKey, '→', endManilaKey)
+    console.log('[Analytics] Total orders from main query:', orders?.length || 0)
+    console.log('[Analytics] Pending cancelled orders:', pendingCancelled?.length || 0)
+    console.log('[Analytics] Total unique orders:', allOrders.length)
+    console.log('[Analytics] Cancelled orders (is_cancelled=true OR parcel_status=CANCELLED):', 
+      allOrders.filter(o => o.is_cancelled || o.parcel_status === 'CANCELLED').length)
+    console.log('[Analytics] Packing Queue cancelled (status=Pending, is_cancelled=true):', 
+      allOrders.filter(o => o.status === 'Pending' && o.is_cancelled).length)
+    console.log('[Analytics] Track Orders cancelled (status=Packed, parcel_status=CANCELLED):', 
+      allOrders.filter(o => o.status === 'Packed' && o.parcel_status === 'CANCELLED').length)
+    console.log('[Analytics] Returned orders (parcel_status=RETURNED):', 
+      allOrders.filter(o => o.parcel_status === 'RETURNED').length)
+    console.log('[Analytics] Sample Packing Queue cancelled:', 
+      allOrders.find(o => o.status === 'Pending' && o.is_cancelled))
+    console.log('[Analytics] Sample Track Orders cancelled:', 
+      allOrders.find(o => o.status === 'Packed' && o.parcel_status === 'CANCELLED'))
+    console.log('[Analytics] Sample returned order:', 
+      allOrders.find(o => o.parcel_status === 'RETURNED'))
     console.log('[Analytics] Sample returned order:', allOrders.find(o => o.parcel_status === 'RETURNED'))
 
     // ── 1. SALES TREND ──────────────────────────────────────────────────────────

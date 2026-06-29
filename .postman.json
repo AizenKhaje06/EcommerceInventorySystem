@@ -4410,6 +4410,298 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "Get Analytics Dashboard (dept-manager)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dept-manager/analytics?period=month&channel=&agent=all",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "dept-manager", "analytics"],
+                  "query": [
+                    { "key": "period", "value": "month", "description": "Time period: today | week | month" },
+                    { "key": "channel", "value": "", "description": "Override channel (admin only). Leave empty to use assigned channel" },
+                    { "key": "agent", "value": "all", "description": "Filter by specific agent username or 'all'" },
+                    { "key": "startDate", "value": "", "description": "Custom start date (ISO string) - overrides period", "disabled": true },
+                    { "key": "endDate", "value": "", "description": "Custom end date (ISO string) - overrides period", "disabled": true }
+                  ]
+                },
+                "description": "Returns comprehensive analytics dashboard data: sales trend, product sales, store sales, agent ranking, revenue share, cancellation reasons, courier breakdown, agent metrics, top cancelled products, top returned products, and summary stats. Role: dept-manager or admin."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response is a JSON object', function () {",
+                      "    pm.response.to.be.json;",
+                      "    pm.expect(pm.response.json()).to.be.an('object');",
+                      "});",
+                      "",
+                      "pm.test('Response has all required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('salesTrend');",
+                      "    pm.expect(body).to.have.property('productSales');",
+                      "    pm.expect(body).to.have.property('storeSales');",
+                      "    pm.expect(body).to.have.property('agentRanking');",
+                      "    pm.expect(body).to.have.property('revenueShare');",
+                      "    pm.expect(body).to.have.property('cancellationReasons');",
+                      "    pm.expect(body).to.have.property('courierBreakdown');",
+                      "    pm.expect(body).to.have.property('agentMetrics');",
+                      "    pm.expect(body).to.have.property('topCancelledProducts');",
+                      "    pm.expect(body).to.have.property('topReturnedProducts');",
+                      "    pm.expect(body).to.have.property('summary');",
+                      "});",
+                      "",
+                      "pm.test('salesTrend is an array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.salesTrend).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('productSales is an array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.productSales).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('storeSales is an array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.storeSales).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('agentRanking is an array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.agentRanking).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('summary has required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.summary).to.have.property('totalRevenue');",
+                      "    pm.expect(body.summary).to.have.property('totalOrders');",
+                      "    pm.expect(body.summary).to.have.property('cancelledOrders');",
+                      "    pm.expect(body.summary).to.have.property('avgOrderValue');",
+                      "    pm.expect(body.summary).to.have.property('totalQty');",
+                      "    pm.expect(body.summary).to.have.property('grossMargin');",
+                      "});",
+                      "",
+                      "pm.test('summary numbers are non-negative', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.summary.totalRevenue).to.be.at.least(0);",
+                      "    pm.expect(body.summary.totalOrders).to.be.at.least(0);",
+                      "    pm.expect(body.summary.cancelledOrders).to.be.at.least(0);",
+                      "    pm.expect(body.summary.avgOrderValue).to.be.at.least(0);",
+                      "    pm.expect(body.summary.totalQty).to.be.at.least(0);",
+                      "});",
+                      "",
+                      "pm.test('Each agent in ranking has required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    if (body.agentRanking.length > 0) {",
+                      "        body.agentRanking.forEach(function (agent) {",
+                      "            pm.expect(agent).to.have.property('username');",
+                      "            pm.expect(agent).to.have.property('displayName');",
+                      "            pm.expect(agent).to.have.property('revenue');",
+                      "            pm.expect(agent).to.have.property('orders');",
+                      "            pm.expect(agent).to.have.property('cancelled');",
+                      "            pm.expect(agent).to.have.property('topStore');",
+                      "            pm.expect(agent).to.have.property('topProduct');",
+                      "        });",
+                      "    }",
+                      "});",
+                      "",
+                      "pm.test('Admin users excluded from agent rankings', function () {",
+                      "    const body = pm.response.json();",
+                      "    body.agentRanking.forEach(function (agent) {",
+                      "        pm.expect(agent.username.toLowerCase()).to.not.equal('admin');",
+                      "    });",
+                      "});",
+                      "",
+                      "pm.test('topCancelledProducts has correct structure', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.topCancelledProducts).to.be.an('array');",
+                      "    if (body.topCancelledProducts.length > 0) {",
+                      "        const product = body.topCancelledProducts[0];",
+                      "        pm.expect(product).to.have.property('product');",
+                      "        pm.expect(product).to.have.property('count');",
+                      "        pm.expect(product).to.have.property('topReasons');",
+                      "        pm.expect(product.topReasons).to.be.an('array');",
+                      "    }",
+                      "});",
+                      "",
+                      "pm.test('topReturnedProducts has correct structure', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.topReturnedProducts).to.be.an('array');",
+                      "    if (body.topReturnedProducts.length > 0) {",
+                      "        const product = body.topReturnedProducts[0];",
+                      "        pm.expect(product).to.have.property('product');",
+                      "        pm.expect(product).to.have.property('count');",
+                      "        pm.expect(product).to.have.property('topReasons');",
+                      "        pm.expect(product.topReasons).to.be.an('array');",
+                      "    }",
+                      "});",
+                      "",
+                      "pm.test('Response time is acceptable', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Analytics — Period: today",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dept-manager/analytics?period=today",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "dept-manager", "analytics"],
+                  "query": [
+                    { "key": "period", "value": "today" }
+                  ]
+                },
+                "description": "Returns analytics for today only, grouped by hour (24-hour breakdown)."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('salesTrend has hourly data', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.salesTrend).to.be.an('array');",
+                      "    // Should have entries for each hour",
+                      "    if (body.salesTrend.length > 0) {",
+                      "        const firstEntry = body.salesTrend[0];",
+                      "        pm.expect(firstEntry.label).to.match(/\\d{1,2}(AM|PM)/);",
+                      "    }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Analytics — Period: week",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dept-manager/analytics?period=week",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "dept-manager", "analytics"],
+                  "query": [
+                    { "key": "period", "value": "week" }
+                  ]
+                },
+                "description": "Returns analytics for the last 7 days, grouped by day."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('salesTrend has 7 days of data', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.salesTrend).to.be.an('array');",
+                      "    pm.expect(body.salesTrend.length).to.equal(7);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Analytics — Custom Date Range",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dept-manager/analytics?startDate=2026-01-01&endDate=2026-01-31",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "dept-manager", "analytics"],
+                  "query": [
+                    { "key": "startDate", "value": "2026-01-01" },
+                    { "key": "endDate", "value": "2026-01-31" }
+                  ]
+                },
+                "description": "Returns analytics for a custom date range (January 2026)."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('salesTrend covers date range', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.salesTrend).to.be.an('array');",
+                      "    // Should have 31 days for January",
+                      "    pm.expect(body.salesTrend.length).to.equal(31);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Analytics — Unauthorized (no token)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dept-manager/analytics",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "dept-manager", "analytics"]
+                },
+                "description": "Should return 401 when no auth token is provided."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }

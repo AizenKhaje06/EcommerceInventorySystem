@@ -43,6 +43,7 @@ interface Order {
   notes?: string
   dispatchNotes?: string
   department?: string
+  reason?: string // Reason for CANCELLED, RETURNED, PROBLEMATIC
 }
 
 export default function LogisticsTrackOrdersPage() {
@@ -107,7 +108,8 @@ export default function LogisticsTrackOrdersPage() {
           store: order.store
         }),
         dispatchNotes: order.dispatch_notes || '',
-        department: order.sales_channel || 'N/A'
+        department: order.sales_channel || 'N/A',
+        reason: order.reason || '' // Reason for CANCELLED, RETURNED, PROBLEMATIC
       }))
       
       setOrders(transformedOrders)
@@ -327,6 +329,60 @@ export default function LogisticsTrackOrdersPage() {
         </div>
       </div>
 
+      {/* KPI Cards - Mobile Optimized */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        {/* Total Orders */}
+        <Card className="p-5 border-0 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-600 shadow-lg shadow-blue-500/30 flex-shrink-0">
+              <Package className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Total Orders</p>
+              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100 tabular-nums">{filteredOrders.length}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-500 flex items-center gap-1 mt-0.5">
+                <Package className="h-3 w-3" />
+                All tracked
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Delivered */}
+        <Card className="p-5 border-0 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-green-600 shadow-lg shadow-green-500/30 flex-shrink-0">
+              <CheckCircle className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-wider">Delivered</p>
+              <p className="text-2xl font-bold text-green-900 dark:text-green-100 tabular-nums">{filteredOrders.filter(o => o.parcelStatus === 'DELIVERED').length}</p>
+              <p className="text-xs text-green-600 dark:text-green-500 flex items-center gap-1 mt-0.5">
+                <CheckCircle className="h-3 w-3" />
+                {filteredOrders.length > 0 ? `${Math.round((filteredOrders.filter(o => o.parcelStatus === 'DELIVERED').length / filteredOrders.length) * 100)}% rate` : 'No orders'}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Returned */}
+        <Card className="p-5 border-0 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-orange-600 shadow-lg shadow-orange-500/30 flex-shrink-0">
+              <RotateCcw className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wider">Returned</p>
+              <p className="text-2xl font-bold text-orange-900 dark:text-orange-100 tabular-nums">{filteredOrders.filter(o => o.parcelStatus === 'RETURNED').length}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-500 flex items-center gap-1 mt-0.5">
+                <RotateCcw className="h-3 w-3" />
+                {filteredOrders.length > 0 ? `${Math.round((filteredOrders.filter(o => o.parcelStatus === 'RETURNED').length / filteredOrders.length) * 100)}% rate` : 'No returns'}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card className="mb-6 border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <CardContent className="pt-6">
@@ -417,59 +473,72 @@ export default function LogisticsTrackOrdersPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full table-fixed">
                 <thead>
-                  <tr className="bg-slate-900 dark:bg-black border-b-2 border-slate-700">
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Date</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Name</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Address</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Contact No.</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Price</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Items</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Tracking</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Payment</th>
-                    <th className="py-2.5 px-3 text-left font-bold text-[10px] text-white uppercase tracking-wider">Status</th>
-                    <th className="py-2.5 px-3 text-center font-bold text-[10px] text-white uppercase tracking-wider">Action</th>
+                  <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">
+                    <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">Date & Time</th>
+                    <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[140px]">Waybill No.</th>
+                    <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[150px]">Customer</th>
+                    <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">Contact No.</th>
+                    <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[200px]">Product</th>
+                    <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[110px]">Payment</th>
+                    <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[130px]">Parcel Status</th>
+                    <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[180px]">Reason</th>
+                    <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider w-[80px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {paginatedOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors duration-150 h-14">
-                      <td className="py-2 px-3 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                        <div className="whitespace-nowrap">
-                          {new Date(order.orderDate).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: '2-digit', 
-                            year: 'numeric'
-                          })}
-                        </div>
-                        <div className="text-[10px] text-slate-500">{new Date(order.orderDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
-                      </td>
-                      <td className="py-2 px-3 text-[11px] font-medium text-slate-900 dark:text-slate-100">
-                        <div className="max-w-[120px] truncate" title={order.customerName}>{order.customerName}</div>
-                      </td>
-                      <td className="py-2 px-3 text-[11px] text-slate-700 dark:text-slate-300">
-                        <div className="max-w-[180px] truncate" title={order.customerAddress}>{order.customerAddress}</div>
-                      </td>
-                      <td className="py-2 px-3 text-[11px] text-slate-600 dark:text-slate-400">
-                        <div className="max-w-[110px] truncate" title={order.customerPhone}>{order.customerPhone}</div>
-                      </td>
-                      <td className="py-2 px-3 text-[11px] font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatCurrency(order.totalAmount)}</td>
-                      <td className="py-2 px-3 text-[11px] text-slate-700 dark:text-slate-300">
-                        <div className="max-w-[150px]">
-                          <div className="truncate font-medium" title={order.itemName}>{order.itemName}</div>
-                          <div className="text-[10px] text-slate-500">Qty: {order.quantity}</div>
+                    <tr key={order.id} className="group hover:bg-blue-50 dark:hover:bg-slate-800/50 transition-all duration-200 h-16">
+                      <td className="py-2 px-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                          <div>
+                            <span className="text-[11px] font-medium text-slate-900 dark:text-white block">
+                              {new Date(order.orderDate).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: '2-digit', 
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                              {new Date(order.orderDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                            </span>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-2 px-3 text-[10px] text-blue-600 dark:text-blue-400 font-mono">
-                        <div className="max-w-[100px] truncate" title={order.trackingNumber}>{order.trackingNumber}</div>
+                      <td className="py-2 px-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-1.5">
+                          <Package className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                          <span className="font-mono text-[12px] font-bold text-blue-600 dark:text-blue-400 truncate" title={order.trackingNumber}>
+                            {order.trackingNumber || '-'}
+                          </span>
+                        </div>
                       </td>
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="text-[11px] text-slate-900 dark:text-white font-semibold truncate" title={order.customerName}>
+                          {order.customerName || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="py-2 px-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                          <span className="font-mono text-[11px] text-slate-700 dark:text-slate-300 truncate" title={order.customerPhone}>
+                            {order.customerPhone || 'N/A'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2 px-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="text-[11px] text-slate-900 dark:text-white font-medium line-clamp-2 leading-tight max-h-[2.8em]" title={order.itemName}>
+                          {order.itemName}
+                        </div>
+                      </td>
+                      <td className="py-2 px-3 text-center border-r border-slate-100 dark:border-slate-800">
                         <Select 
                           value={order.paymentStatus} 
                           onValueChange={(value) => updateOrderStatus(order.id, undefined, undefined, value)}
                         >
-                          <SelectTrigger className="h-7 w-[85px] text-[10px] border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                          <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[90px] shadow-sm hover:shadow-md transition-shadow mx-auto">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -480,12 +549,12 @@ export default function LogisticsTrackOrdersPage() {
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 text-center border-r border-slate-100 dark:border-slate-800">
                         <Select 
                           value={order.parcelStatus} 
                           onValueChange={(value) => updateOrderStatus(order.id, undefined, value, undefined)}
                         >
-                          <SelectTrigger className="h-7 w-[100px] text-[10px] border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                          <SelectTrigger className="h-8 text-xs font-bold text-purple-600 dark:text-purple-400 border-slate-200 dark:border-slate-700 min-w-[90px] shadow-sm hover:shadow-md transition-shadow mx-auto">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -501,18 +570,59 @@ export default function LogisticsTrackOrdersPage() {
                           </SelectContent>
                         </Select>
                       </td>
+                      {/* Reason column - only active for CANCELLED or RETURNED */}
+                      <td className="py-2 px-3 text-center border-r border-slate-100 dark:border-slate-800">
+                        {(order.parcelStatus === 'CANCELLED' || order.parcelStatus === 'RETURNED') ? (
+                          <Select
+                            value={order.reason || ''}
+                            onValueChange={(value) => {
+                              // Optimistic update
+                              setOrders(prev => prev.map(o => o.id === order.id ? { ...o, reason: value } : o))
+                              setFilteredOrders(prev => prev.map(o => o.id === order.id ? { ...o, reason: value } : o))
+                              fetch(`/api/orders/${order.id}/status`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason: value })
+                              }).catch(err => {
+                                console.error('Failed to update reason:', err)
+                                toast.error('Failed to update reason')
+                                fetchOrders() // Revert on error
+                              })
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs font-bold text-red-600 dark:text-red-400 border-slate-200 dark:border-slate-700 w-full min-w-[160px] shadow-sm hover:shadow-md transition-shadow mx-auto">
+                              <SelectValue placeholder="Select reason..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Customer Refused">Customer Refused</SelectItem>
+                              <SelectItem value="Customer Unreachable">Customer Unreachable</SelectItem>
+                              <SelectItem value="Customer Changed Mind">Customer Changed Mind</SelectItem>
+                              <SelectItem value="Incorrect Address">Incorrect Address</SelectItem>
+                              <SelectItem value="Consignee Moved">Consignee Moved</SelectItem>
+                              <SelectItem value="No Authorized Receiver">No Authorized Receiver</SelectItem>
+                              <SelectItem value="Failed Delivery Attempt">Failed Delivery Attempt</SelectItem>
+                              <SelectItem value="Shipment Cancelled">Shipment Cancelled</SelectItem>
+                              <SelectItem value="Payment Declined">Payment Declined</SelectItem>
+                              <SelectItem value="Insufficient Address">Insufficient Address</SelectItem>
+                              <SelectItem value="Out of Delivery Area">Out of Delivery Area</SelectItem>
+                              <SelectItem value="Wrong Item">Wrong Item</SelectItem>
+                              <SelectItem value="Damaged Shipment">Damaged Shipment</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <span className="text-[11px] text-slate-400 dark:text-slate-600 italic">Not available</span>
+                        )}
+                      </td>
                       <td className="py-2 px-3 text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => {
                             setSelectedOrder(order)
                             setShowDetailsModal(true)
                           }}
-                          className="h-7 px-3 text-[10px] hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300"
+                          className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
                         >
-                          👁️ View Details
-                        </Button>
+                          View
+                        </button>
                       </td>
                     </tr>
                   ))}

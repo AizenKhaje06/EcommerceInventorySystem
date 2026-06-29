@@ -512,7 +512,7 @@ export default function TrackerDashboardPage() {
       {/* Page Header - Mobile Responsive */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold gradient-text mb-1 sm:mb-2">Tracker Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-light gradient-text mb-1 sm:mb-2">Track Orders</h1>
           <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
             Update parcel status and manage order tracking
           </p>
@@ -870,7 +870,7 @@ export default function TrackerDashboardPage() {
                               updateOrderStatus(order.id, value)
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 min-w-[120px] shadow-sm hover:shadow-md transition-shadow">
+                            <SelectTrigger className="h-8 text-xs font-bold text-purple-600 dark:text-purple-400 border-slate-200 dark:border-slate-700 min-w-[120px] shadow-sm hover:shadow-md transition-shadow">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -902,19 +902,22 @@ export default function TrackerDashboardPage() {
                                 })
                               }}
                             >
-                              <SelectTrigger className="h-8 text-xs border-slate-200 dark:border-slate-700 w-full min-w-[190px] shadow-sm hover:shadow-md transition-shadow">
+                              <SelectTrigger className="h-8 text-xs font-bold text-red-600 dark:text-red-400 border-slate-200 dark:border-slate-700 w-full min-w-[190px] shadow-sm hover:shadow-md transition-shadow">
                                 <SelectValue placeholder="Select reason..." />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="Customer Refused">Customer Refused</SelectItem>
                                 <SelectItem value="Customer Unreachable">Customer Unreachable</SelectItem>
+                                <SelectItem value="Customer Changed Mind">Customer Changed Mind</SelectItem>
                                 <SelectItem value="Incorrect Address">Incorrect Address</SelectItem>
                                 <SelectItem value="Consignee Moved">Consignee Moved</SelectItem>
                                 <SelectItem value="No Authorized Receiver">No Authorized Receiver</SelectItem>
                                 <SelectItem value="Failed Delivery Attempt">Failed Delivery Attempt</SelectItem>
                                 <SelectItem value="Shipment Cancelled">Shipment Cancelled</SelectItem>
+                                <SelectItem value="Payment Declined">Payment Declined</SelectItem>
                                 <SelectItem value="Insufficient Address">Insufficient Address</SelectItem>
                                 <SelectItem value="Out of Delivery Area">Out of Delivery Area</SelectItem>
+                                <SelectItem value="Wrong Item">Wrong Item</SelectItem>
                                 <SelectItem value="Damaged Shipment">Damaged Shipment</SelectItem>
                               </SelectContent>
                             </Select>

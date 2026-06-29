@@ -172,7 +172,10 @@ export default function POSPage() {
 
   async function fetchStorageRooms() {
     try {
-      const data = await apiGet<Array<{id: string, store_name: string, sales_channel: string}>>('/api/stores')
+      // Add cache-busting timestamp to force fresh data
+      const data = await apiGet<Array<{id: string, store_name: string, sales_channel: string}>>(`/api/stores?t=${Date.now()}`)
+      console.log('[POS] Stores fetched:', data.length, 'stores')
+      console.log('[POS] Sales channels available:', Array.from(new Set(data.map(s => s.sales_channel))))
       setStores(data)
     } catch (error) {
       console.error('Error fetching stores:', error)

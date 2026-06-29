@@ -59,20 +59,38 @@ export default function InventoryPage() {
   const userRole = getCurrentUserRole()
   const isTeamLeader = false // Team leader role removed
   
-  // Department detection - check if user is an operations user with assigned channel
+  // Department detection - Agent role for filtering and restrictions
   const [isDepartment, setIsDepartment] = useState(false)
   const [userDepartment, setUserDepartment] = useState<string>("")
+  
+  // Separate flag for read-only access (no edit/delete)
+  const [isReadOnly, setIsReadOnly] = useState(false)
   
   useEffect(() => {
     const checkDepartment = () => {
       const user = getCurrentUser()
       const role = getCurrentUserRole()
       
+      // Operations (agent) - restricted to assigned channel only
       if (role === 'operations' && user?.assignedChannel) {
         setIsDepartment(true)
+        setIsReadOnly(true)
         setUserDepartment(user.assignedChannel)
         // Pre-fill sales channel for departments
         setNewStore({ name: "", salesChannel: user.assignedChannel })
+      } 
+      // Department Manager - read-only but restricted to assigned channel for stores
+      else if (role === 'dept-manager' && user?.assignedChannel) {
+        setIsDepartment(true) // Restrict to assigned channel for stores
+        setIsReadOnly(true) // No edit/delete on products
+        setUserDepartment(user.assignedChannel)
+        // Pre-fill sales channel for dept-manager
+        setNewStore({ name: "", salesChannel: user.assignedChannel })
+      }
+      // Department Manager without assigned channel - full access to stores/bundles
+      else if (role === 'dept-manager') {
+        setIsReadOnly(true)
+        // dept-manager has no assigned channel, full access to stores/bundles
       }
     }
     
@@ -1122,39 +1140,42 @@ export default function InventoryPage() {
         
         {/* Action Buttons - Top Right */}
         <div className="flex items-center gap-2">
-          {/* Categories, Stores & Bundle - hidden for operations (agents) */}
-          {!isDepartment && (
-            <>
-              <Button
-                onClick={() => setCategoryDialogOpen(true)}
-                variant="outline"
-                className="h-7 w-[100px] px-2.5 text-xs border-slate-200 dark:border-slate-700 rounded-md"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Categories
-              </Button>
-
-              <Button
-                onClick={() => setStoreDialogOpen(true)}
-                variant="outline"
-                className="h-7 w-[100px] px-2.5 text-xs border-slate-200 dark:border-slate-700 rounded-md"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Stores
-              </Button>
-
-              <Button
-                onClick={() => setCreateBundleOpen(true)}
-                className="h-7 w-[100px] px-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-md"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Bundle
-              </Button>
-            </>
+          {/* Categories - Hidden for operations (agents) and dept-manager */}
+          {!isReadOnly && (
+            <Button
+              onClick={() => setCategoryDialogOpen(true)}
+              variant="outline"
+              className="h-7 w-[100px] px-2.5 text-xs border-slate-200 dark:border-slate-700 rounded-md"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Categories
+            </Button>
           )}
 
-          {/* Add Product - Main Admin & Logistics Admin only */}
-          {!isDepartment && (
+          {/* Stores - Hidden for operations (agents) only */}
+          {userRole !== 'operations' && (
+            <Button
+              onClick={() => setStoreDialogOpen(true)}
+              className="h-7 w-[100px] px-2.5 text-xs bg-orange-600 hover:bg-orange-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Stores
+            </Button>
+          )}
+
+          {/* Bundle - Hidden for operations (agents) only */}
+          {userRole !== 'operations' && (
+            <Button
+              onClick={() => setCreateBundleOpen(true)}
+              className="h-7 w-[100px] px-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Bundle
+            </Button>
+          )}
+
+          {/* Add Product - Hidden for operations (agents) and dept-manager */}
+          {!isReadOnly && (
             <Button
               onClick={() => setAddDialogOpen(true)}
               className="h-7 w-[100px] px-2.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md"
@@ -1187,7 +1208,7 @@ export default function InventoryPage() {
             {/* Stats Row - Responsive Grid (4 cards for admin, 3 cards for department agents) */}
             <div className={cn(
               "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4",
-              isDepartment ? "lg:grid-cols-3" : "lg:grid-cols-4"
+              isReadOnly ? "lg:grid-cols-3" : "lg:grid-cols-4"
             )}>
               {/* Total Items - Indigo Gradient */}
               <div className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-xl bg-white dark:bg-slate-900">
@@ -1250,7 +1271,7 @@ export default function InventoryPage() {
               </div>
 
               {/* Total COGS - Orange Gradient - Hidden for Department Agents */}
-              {!isDepartment && (
+              {!isReadOnly && (
                 <div className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-xl bg-white dark:bg-slate-900">
                   <div className="relative">
                     <div className="flex items-center justify-between mb-2">
@@ -1368,47 +1389,47 @@ export default function InventoryPage() {
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isDepartment ? "w-[20%]" : "w-[25%]"
+                        !isReadOnly ? "w-[20%]" : "w-[25%]"
                       )}>
                         Product
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isDepartment ? "w-[16%]" : "w-[15%]"
+                        !isReadOnly ? "w-[16%]" : "w-[15%]"
                       )}>
                         Category
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isDepartment ? "w-[9%]" : "w-[10%]"
+                        !isReadOnly ? "w-[9%]" : "w-[10%]"
                       )}>
                         Status
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isDepartment ? "w-[11%]" : "w-[15%]"
+                        !isReadOnly ? "w-[11%]" : "w-[15%]"
                       )}>
                         Stock
                       </th>
                       {/* Hide Cost column for department agents (operations role) */}
-                      {!isDepartment && (
+                      {!isReadOnly && (
                         <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[10%]">
                           Cost
                         </th>
                       )}
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isDepartment ? "w-[10%]" : "w-[12%]"
+                        !isReadOnly ? "w-[10%]" : "w-[12%]"
                       )}>
                         Price
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        isDepartment ? "w-[12%]" : "w-[8%]"
+                        isReadOnly ? "w-[12%]" : "w-[8%]"
                       )}>
                         Margin
                       </th>
-                      {!isDepartment && (
+                      {!isReadOnly && (
                         <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[16%]">
                           Actions
                         </th>
@@ -1539,7 +1560,7 @@ export default function InventoryPage() {
                           </td>
 
                           {/* Cost - Hidden for department agents (operations role) */}
-                          {!isDepartment && (
+                          {!isReadOnly && (
                             <td className="py-2 px-3">
                               <span className="text-xs font-medium text-slate-800 dark:text-slate-200 tabular-nums">
                                 {formatCurrency(item.costPrice)}
@@ -1567,14 +1588,14 @@ export default function InventoryPage() {
                             </div>
                           </td>
 
-                          {/* Actions Column - Hidden for agents (operations) */}
-                          {!isDepartment && (
+                          {/* Actions Column - Hidden for agents (operations) and dept-manager */}
+                          {!isReadOnly && (
                             <td className="py-2 px-3">
                               <TooltipProvider>
                                 <div className="flex justify-start gap-0.5">
 
-                                  {/* Restock - only for non-bundles, non-department users */}
-                                  {!isDepartment && !isBundle && (
+                                  {/* Restock - only for non-bundles, non-read-only users */}
+                                  {!isReadOnly && !isBundle && (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <Button
@@ -1591,7 +1612,7 @@ export default function InventoryPage() {
                                   )}
 
                                   {/* Edit - for non-bundles: admins only; for bundles: everyone */}
-                                  {(!isBundle && !isDepartment) || isBundle ? (
+                                  {(!isBundle && !isReadOnly) || isBundle ? (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <Button
@@ -1608,7 +1629,7 @@ export default function InventoryPage() {
                                   ) : null}
 
                                   {/* Delete - for non-bundles: admins only; for bundles: everyone */}
-                                  {(!isBundle && !isDepartment) || isBundle ? (
+                                  {(!isBundle && !isReadOnly) || isBundle ? (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <Button

@@ -11,12 +11,18 @@ export const GET = withAuth(async (request, { user }) => {
       5 * 60 * 1000 // 5 minutes
     )
 
-    // DEPARTMENT FILTERING: Operations users only see their department's stores
+    console.log('[Stores API] User role:', user.role, 'assigned channel:', user.assignedChannel)
+    console.log('[Stores API] Total stores fetched:', stores.length)
+
+    // DEPARTMENT FILTERING: Operations and dept-manager users only see their department's stores
     let filteredStores = stores
-    if (user.role === 'operations' && user.assignedChannel) {
+    if ((user.role === 'operations' || user.role === 'dept-manager') && user.assignedChannel) {
       filteredStores = stores.filter(store => store.sales_channel === user.assignedChannel)
+      console.log('[Stores API] Filtered to assigned channel. Filtered count:', filteredStores.length)
+    } else {
+      console.log('[Stores API] No filtering applied. User sees all stores.')
     }
-    // Admin sees all stores
+    // Admin and dept-manager without assigned channel see all stores
 
     return NextResponse.json(filteredStores)
   } catch (error) {
