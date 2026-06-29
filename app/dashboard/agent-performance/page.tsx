@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Users, ShoppingCart, XCircle, CheckCircle, TrendingUp,
   RefreshCw, Trophy, Store, Package, BarChart3, Truck,
-  Activity, DollarSign, Percent
+  Activity, DollarSign, Percent, AlertTriangle
 } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { apiGet } from '@/lib/api-client'

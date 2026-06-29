@@ -131,7 +131,7 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .select(`
         id, date, sales_channel, store, courier, waybill,
         qty, cogs, total, product,
-        status, is_cancelled, cancellation_reason,
+        status, is_cancelled, cancellation_reason, cancelled_at,
         parcel_status, reason,
         dispatched_by, agent_username,
         packed_at, packed_by,
@@ -146,7 +146,15 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       query = query.ilike('sales_channel', channel)
     }
 
-    query = query.gte('date', startManilaKey).lte('date', endManilaKey)
+    // Date filtering: use 'date' for dispatched orders, 'created_at' for pending/cancelled orders
+    // Apply OR condition: (date within range) OR (date is null AND created_at within range)
+    const startDate = new Date(startManilaKey + 'T00:00:00+08:00').toISOString()
+    const endDate = new Date(endManilaKey + 'T23:59:59+08:00').toISOString()
+    
+    query = query.or(
+      `and(date.gte.${startManilaKey},date.lte.${endManilaKey}),` +
+      `and(date.is.null,created_at.gte.${startDate},created_at.lte.${endDate})`
+    )
 
     if (agentFilter !== 'all') {
       query = query.or(`agent_username.eq.${agentFilter},dispatched_by.eq.${agentFilter}`)
@@ -161,6 +169,13 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
 
     const allOrders = orders || []
     const activeOrders = allOrders.filter(o => !o.is_cancelled)
+
+    // Debug: Log cancelled and returned orders
+    console.log('[Analytics] Total orders:', allOrders.length)
+    console.log('[Analytics] Cancelled orders (is_cancelled=true):', allOrders.filter(o => o.is_cancelled).length)
+    console.log('[Analytics] Returned orders (parcel_status=RETURNED):', allOrders.filter(o => o.parcel_status === 'RETURNED').length)
+    console.log('[Analytics] Sample cancelled order:', allOrders.find(o => o.is_cancelled))
+    console.log('[Analytics] Sample returned order:', allOrders.find(o => o.parcel_status === 'RETURNED'))
 
     // ── 1. SALES TREND ──────────────────────────────────────────────────────────
     const trendMap = new Map<string, { label: string; revenue: number; orders: number; cancelled: number }>()
@@ -442,10 +457,14 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .sort((a, b) => b.activeDays - a.activeDays)
 
     // ── 10. TOP 5 PRODUCT CANCELLATIONS WITH REASONS ─────────────────────────────
-    const cancelledOrders = allOrders.filter(o => o.is_cancelled)
+    // From Track Orders only: status='Packed' AND parcel_status='CANCELLED'
+    const cancelledOrdersList = allOrders.filter(o => 
+      o.status === 'Packed' && o.parcel_status === 'CANCELLED'
+    )
+    
     const productCancelMap = new Map<string, { product: string; count: number; reasons: Map<string, number> }>()
     
-    for (const o of cancelledOrders) {
+    for (const o of cancelledOrdersList) {
       const products = o.product ? o.product.split(',').map((p: string) => p.trim()) : ['Unknown']
       for (const rawProduct of products) {
         const name = rawProduct.replace(/\s*\(\d+\)\s*$/, '').trim() || 'Unknown'
@@ -454,7 +473,8 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
         }
         const entry = productCancelMap.get(name)!
         entry.count++
-        const reason = (o.cancellation_reason || 'No reason given').trim() || 'No reason given'
+        // Use 'reason' field for Track Orders cancellations
+        const reason = (o.reason || 'No reason given').trim() || 'No reason given'
         entry.reasons.set(reason, (entry.reasons.get(reason) || 0) + 1)
       }
     }
