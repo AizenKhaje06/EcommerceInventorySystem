@@ -132,6 +132,7 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
         id, date, sales_channel, store, courier, waybill,
         qty, cogs, total, product,
         status, is_cancelled, cancellation_reason,
+        parcel_status, reason,
         dispatched_by, agent_username,
         packed_at, packed_by,
         created_at
@@ -440,6 +441,66 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       }))
       .sort((a, b) => b.activeDays - a.activeDays)
 
+    // ── 10. TOP 5 PRODUCT CANCELLATIONS WITH REASONS ─────────────────────────────
+    const cancelledOrders = allOrders.filter(o => o.is_cancelled)
+    const productCancelMap = new Map<string, { product: string; count: number; reasons: Map<string, number> }>()
+    
+    for (const o of cancelledOrders) {
+      const products = o.product ? o.product.split(',').map((p: string) => p.trim()) : ['Unknown']
+      for (const rawProduct of products) {
+        const name = rawProduct.replace(/\s*\(\d+\)\s*$/, '').trim() || 'Unknown'
+        if (!productCancelMap.has(name)) {
+          productCancelMap.set(name, { product: name, count: 0, reasons: new Map() })
+        }
+        const entry = productCancelMap.get(name)!
+        entry.count++
+        const reason = (o.cancellation_reason || 'No reason given').trim() || 'No reason given'
+        entry.reasons.set(reason, (entry.reasons.get(reason) || 0) + 1)
+      }
+    }
+
+    const topCancelledProducts = Array.from(productCancelMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(p => ({
+        product: p.product,
+        count: p.count,
+        topReasons: Array.from(p.reasons.entries())
+          .map(([reason, count]) => ({ reason, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3)
+      }))
+
+    // ── 11. TOP 5 PRODUCT RETURNS WITH REASONS ───────────────────────────────────
+    const returnedOrders = allOrders.filter(o => o.parcel_status === 'RETURNED')
+    const productReturnMap = new Map<string, { product: string; count: number; reasons: Map<string, number> }>()
+    
+    for (const o of returnedOrders) {
+      const products = o.product ? o.product.split(',').map((p: string) => p.trim()) : ['Unknown']
+      for (const rawProduct of products) {
+        const name = rawProduct.replace(/\s*\(\d+\)\s*$/, '').trim() || 'Unknown'
+        if (!productReturnMap.has(name)) {
+          productReturnMap.set(name, { product: name, count: 0, reasons: new Map() })
+        }
+        const entry = productReturnMap.get(name)!
+        entry.count++
+        const reason = (o.reason || 'No reason given').trim() || 'No reason given'
+        entry.reasons.set(reason, (entry.reasons.get(reason) || 0) + 1)
+      }
+    }
+
+    const topReturnedProducts = Array.from(productReturnMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(p => ({
+        product: p.product,
+        count: p.count,
+        topReasons: Array.from(p.reasons.entries())
+          .map(([reason, count]) => ({ reason, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3)
+      }))
+
     return NextResponse.json({
       salesTrend,
       productSales,
@@ -449,6 +510,8 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       cancellationReasons,
       courierBreakdown,
       agentMetrics,
+      topCancelledProducts,
+      topReturnedProducts,
       summary: {
         totalRevenue,
         totalOrders,
