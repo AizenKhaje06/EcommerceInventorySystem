@@ -9,6 +9,7 @@ export const GET = withAuth(async (request, { user }) => {
   try {
     const searchParams = request.nextUrl.searchParams
     const search = searchParams.get("search")
+    const status = searchParams.get("status") // 'good', 'bad', or 'all'
 
     let items
     try {
@@ -29,6 +30,14 @@ export const GET = withAuth(async (request, { user }) => {
       console.error("[API] Database error fetching items (returning empty list):", dbError)
       return NextResponse.json([])
     }
+
+    // Filter by item status (good/bad)
+    if (status === 'good') {
+      items = items.filter(item => item.item_status !== 'bad')
+    } else if (status === 'bad') {
+      items = items.filter(item => item.item_status === 'bad')
+    }
+    // If status === 'all' or null/undefined, return all items
 
     // Products are universal - all roles can see all products (including bundles)
     // No department/channel filtering needed

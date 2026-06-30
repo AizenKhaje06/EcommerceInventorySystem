@@ -57,6 +57,10 @@ export async function getInventoryItems(): Promise<InventoryItem[]> {
     lastUpdated: item.lastUpdated,
     imageUrl: item.imageUrl || null,  // FIXED: Use camelCase to match view alias
     productType: item.productType,  // ADDED: Include productType to detect bundles
+    // Bad Item Tracking
+    item_status: item.item_status || 'good',
+    bad_item_reason: item.bad_item_reason || null,
+    bad_item_quantity: item.bad_item_quantity || 0,
   }))
 }
 
@@ -108,6 +112,10 @@ export async function updateInventoryItem(id: string, updates: Partial<Inventory
   if (updates.sellingPrice !== undefined) updateData.selling_price = updates.sellingPrice
   if (updates.reorderLevel !== undefined) updateData.reorder_level = updates.reorderLevel
   if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl || null
+  // Bad Item Tracking
+  if (updates.item_status !== undefined) updateData.item_status = updates.item_status
+  if (updates.bad_item_reason !== undefined) updateData.bad_item_reason = updates.bad_item_reason
+  if (updates.bad_item_quantity !== undefined) updateData.bad_item_quantity = updates.bad_item_quantity
 
   // Recalculate totalCOGS if quantity or costPrice changed
   if (updates.quantity !== undefined || updates.costPrice !== undefined) {

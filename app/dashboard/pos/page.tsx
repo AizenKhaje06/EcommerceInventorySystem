@@ -157,13 +157,19 @@ export default function POSPage() {
 
   async function fetchItems() {
     try {
-      // Fetch from unified products view (includes both inventory and bundles)
-      const data = await apiGet<InventoryItem[]>("/api/products")
+      // Fetch ONLY good (sellable) items for POS - exclude defective items
+      const data = await apiGet<InventoryItem[]>("/api/products?status=good")
       const itemsArray = Array.isArray(data) ? data : []
+      
+      // Extra safety filter: ensure no bad items slip through
+      const sellableItems = itemsArray.filter(item => item.item_status !== 'bad' && item.quantity > 0)
+      
       console.log('[POS] Fetched items count:', itemsArray.length)
-      console.log('[POS] First 5 items:', itemsArray.slice(0, 5))
-      console.log('[POS] Product types:', itemsArray.map(i => i.productType))
-      setItems(itemsArray)
+      console.log('[POS] Sellable items count:', sellableItems.length)
+      console.log('[POS] Filtered out bad items:', itemsArray.length - sellableItems.length)
+      console.log('[POS] First 5 items:', sellableItems.slice(0, 5))
+      
+      setItems(sellableItems)
     } catch (error) {
       console.error("[POS] Error fetching items:", error)
       setItems([])

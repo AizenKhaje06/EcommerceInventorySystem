@@ -18,6 +18,10 @@ export interface InventoryItem {
   images?: string[]
   imageUrl?: string | null // Product image URL from Supabase Storage
   productType?: 'regular' | 'bundle' // NEW: Identify if product is a bundle
+  // Bad Item Tracking
+  item_status?: 'good' | 'bad' // Item condition: good (sellable) or bad (defective/damaged)
+  bad_item_reason?: string // Reason why item was marked as bad
+  bad_item_quantity?: number // Number of units that are defective
 }
 
 export interface Transaction {

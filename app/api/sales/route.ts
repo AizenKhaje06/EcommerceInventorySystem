@@ -7,7 +7,7 @@ import { supabaseAdmin as supabase } from "@/lib/supabase"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { items, department, staffName, notes } = body
+    const { items, department, staffName, notes, skipStockUpdate } = body
 
     // Get user from headers for department filtering
     const userRole = request.headers.get('x-user-role')
@@ -229,8 +229,8 @@ export async function POST(request: NextRequest) {
           ])
         }
       } else {
-        // Regular sale/demo/internal use - just subtract from inventory
-        const [transaction] = await Promise.all([
+        // Regular sale/demo/internal use - subtract from inventory (unless skipStockUpdate is true)
+        const transactionPromises: Promise<any>[] = [
           addTransaction({
             itemId: inventoryItem.id,
             itemName: inventoryItem.name,
@@ -246,17 +246,25 @@ export async function POST(request: NextRequest) {
             staffName,
             notes,
           }),
-          updateInventoryItem(inventoryItem.id, {
-            quantity: inventoryItem.quantity - saleItem.quantity,
-          }),
           addLog({
             operation: transactionType === 'sale' ? 'sale' : transactionType === 'demo' ? 'demo-display' : transactionType === 'internal' ? 'internal-usage' : 'warehouse',
             itemId: inventoryItem.id,
             itemName: inventoryItem.name,
             details: `${transactionType === 'sale' ? 'Dispatched' : transactionType === 'demo' ? 'Demo/Display' : transactionType === 'internal' ? 'Internal Use' : 'Transferred'} "${inventoryItem.name}" - Qty: ${saleItem.quantity}, ${transactionType === 'sale' ? `Total: ₱${totalRevenue.toFixed(2)}, ` : ''}Department: ${department}, Staff: ${staffName || 'N/A'}`
           })
-        ])
+        ]
+        
+        // Only update inventory if skipStockUpdate is not true
+        // skipStockUpdate is used when stock is already updated (e.g., stock adjustment/reduce)
+        if (!skipStockUpdate) {
+          transactionPromises.push(
+            updateInventoryItem(inventoryItem.id, {
+              quantity: inventoryItem.quantity - saleItem.quantity,
+            })
+          )
+        }
 
+        const [transaction] = await Promise.all(transactionPromises)
         transactions.push(transaction)
       }
     }

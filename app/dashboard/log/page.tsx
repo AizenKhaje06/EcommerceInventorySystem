@@ -42,6 +42,7 @@ const OPERATION_CONFIG = {
   update: { label: "Update", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800", icon: Edit },
   delete: { label: "Delete", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800", icon: Trash2 },
   restock: { label: "Restock", color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800", icon: RefreshCw },
+  reduce: { label: "Reduce", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200 dark:border-rose-800", icon: Package },
   sale: { label: "Sale", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800", icon: ShoppingCart },
   cancel: { label: "Cancelled", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800", icon: X },
   uncancel: { label: "Uncancelled", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800", icon: RefreshCw },
@@ -542,6 +543,7 @@ export default function LogPage() {
               <SelectItem value="update">Update</SelectItem>
               <SelectItem value="delete">Delete</SelectItem>
               <SelectItem value="restock">Restock</SelectItem>
+              <SelectItem value="reduce">Reduce</SelectItem>
               <SelectItem value="sale">Sale</SelectItem>
               <SelectItem value="to-be-packed">To Be Packed</SelectItem>
               {!isDepartment && <SelectItem value="cancel">Cancelled Orders</SelectItem>}

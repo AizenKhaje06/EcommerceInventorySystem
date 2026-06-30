@@ -38,15 +38,20 @@ export default function InventoryPage() {
   const [salesChannelFilter, setSalesChannelFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [productTypeFilter, setProductTypeFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "good" | "bad">("all")
   const [sortBy, setSortBy] = useState("name-asc")
   const [loading, setLoading] = useState(true)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
-  const [restockDialogOpen, setRestockDialogOpen] = useState(false)
-  const [selectedRestockItem, setSelectedRestockItem] = useState<InventoryItem | null>(null)
-  const [restockAmount, setRestockAmount] = useState(0)
-  const [restockReason, setRestockReason] = useState("")
+  
+  // Adjust Stock Modal (replaces old restock dialog)
+  const [adjustStockDialogOpen, setAdjustStockDialogOpen] = useState(false)
+  const [adjustmentType, setAdjustmentType] = useState<'restock' | 'reduce'>('restock')
+  const [selectedAdjustItem, setSelectedAdjustItem] = useState<InventoryItem | null>(null)
+  const [adjustAmount, setAdjustAmount] = useState(0)
+  const [adjustReason, setAdjustReason] = useState("")
+  const [adjustNotes, setAdjustNotes] = useState("")
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -296,6 +301,13 @@ export default function InventoryPage() {
       filtered = filtered.filter((item) => (item as any).productType === 'bundle' || (item as any).product_type === 'bundle')
     }
 
+    // Status filter (good vs bad items)
+    if (statusFilter === "good") {
+      filtered = filtered.filter((item) => item.item_status !== 'bad')
+    } else if (statusFilter === "bad") {
+      filtered = filtered.filter((item) => item.item_status === 'bad')
+    }
+
     // Stock status filter
     if (salesChannelFilter === "low-stock") {
       filtered = filtered.filter((item) => item.quantity > 0 && item.quantity <= item.reorderLevel)
@@ -319,7 +331,7 @@ export default function InventoryPage() {
     }
 
     setFilteredItems(filtered)
-  }, [search, salesChannelFilter, categoryFilter, productTypeFilter, sortBy, items])
+  }, [search, salesChannelFilter, categoryFilter, productTypeFilter, statusFilter, sortBy, items])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredItems.length / pageSize)
@@ -503,30 +515,46 @@ export default function InventoryPage() {
     }
   }
 
-  function handleRestock(item: InventoryItem) {
-    setSelectedRestockItem(item)
-    setRestockAmount(0)
-    setRestockReason("")
-    setRestockDialogOpen(true)
+  function handleAdjustStock(item: InventoryItem, type: 'restock' | 'reduce' = 'restock') {
+    setSelectedAdjustItem(item)
+    setAdjustmentType(type)
+    setAdjustAmount(0)
+    setAdjustReason("")
+    setAdjustNotes("")
+    setAdjustStockDialogOpen(true)
   }
 
-  async function handleRestockSubmit() {
-    if (!selectedRestockItem || restockAmount <= 0 || !restockReason) return
+  async function handleAdjustStockSubmit() {
+    if (!selectedAdjustItem || adjustAmount <= 0 || !adjustReason) {
+      showError("Please fill in all required fields")
+      return
+    }
 
     try {
-      await apiPost(`/api/items/${selectedRestockItem.id}/restock`, {
-        amount: restockAmount,
-        reason: restockReason
-      })
+      if (adjustmentType === 'restock') {
+        await apiPost(`/api/items/${selectedAdjustItem.id}/restock`, {
+          amount: adjustAmount,
+          reason: adjustReason
+        })
+        showSuccess(`Stock increased by ${adjustAmount} units!`)
+      } else {
+        await apiPost(`/api/items/${selectedAdjustItem.id}/reduce`, {
+          amount: adjustAmount,
+          reason: adjustReason,
+          notes: adjustNotes
+        })
+        showSuccess(`Stock reduced by ${adjustAmount} units!`)
+      }
 
-      setRestockDialogOpen(false)
-      setSelectedRestockItem(null)
-      setRestockReason("")
-      fetchItems()
-      showSuccess("Item restocked successfully!")
+      setAdjustStockDialogOpen(false)
+      setSelectedAdjustItem(null)
+      setAdjustAmount(0)
+      setAdjustReason("")
+      setAdjustNotes("")
+      await fetchItems()
     } catch (error) {
-      console.error("[Inventory] Error restocking item:", error)
-      showError("Failed to restock item")
+      console.error("[Inventory] Error adjusting stock:", error)
+      showError(`Failed to ${adjustmentType === 'restock' ? 'increase' : 'reduce'} stock`)
     }
   }
 
@@ -1343,6 +1371,16 @@ export default function InventoryPage() {
                   <SelectItem value="bundle">Bundle</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={statusFilter} onValueChange={(value: "all" | "good" | "bad") => setStatusFilter(value)}>
+                <SelectTrigger className="w-full lg:w-[180px] h-7 text-xs border-slate-200 dark:border-slate-700">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="good">Good Stock</SelectItem>
+                  <SelectItem value="bad">Bad Stock</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -1395,13 +1433,13 @@ export default function InventoryPage() {
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[16%]" : "w-[15%]"
+                        !isReadOnly ? "w-[12%]" : "w-[13%]"
                       )}>
                         Category
                       </th>
                       <th className={cn(
                         "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[9%]" : "w-[10%]"
+                        !isReadOnly ? "w-[12%]" : "w-[13%]"
                       )}>
                         Status
                       </th>
@@ -1430,7 +1468,7 @@ export default function InventoryPage() {
                         Margin
                       </th>
                       {!isReadOnly && (
-                        <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[16%]">
+                        <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[11%]">
                           Actions
                         </th>
                       )}
@@ -1517,45 +1555,76 @@ export default function InventoryPage() {
                             </span>
                           </td>
 
-                          {/* Stock Status */}
+                          {/* Stock Status - WITH DUAL BARS */}
                           <td className="py-2 px-3">
-                            <div className="flex justify-start">
-                              {isOutOfStock ? (
-                                <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800 text-xs px-1.5 py-0.5">
-                                  Out
-                                </Badge>
-                              ) : isLowStock ? (
-                                <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-xs px-1.5 py-0.5">
-                                  Low
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800 text-xs px-1.5 py-0.5">
-                                  OK
-                                </Badge>
-                              )}
-                            </div>
+                            {(() => {
+                              const badQty = item.bad_item_quantity || 0
+                              const goodQty = item.quantity - badQty
+                              const hasBadItems = badQty > 0
+                              
+                              const goodPercent = item.quantity > 0 ? (goodQty / item.quantity) * 100 : 0
+                              const badPercent = item.quantity > 0 ? (badQty / item.quantity) * 100 : 0
+                              
+                              return (
+                                <div className="flex flex-col gap-1 items-start">
+                                  {hasBadItems ? (
+                                    <>
+                                      {/* Green bar - Good items */}
+                                      <div className="flex items-center gap-2 w-full max-w-[160px]">
+                                        <span className="text-[10px] font-semibold text-green-700 dark:text-green-400 min-w-[35px] text-left tabular-nums">
+                                          {formatNumber(goodQty)}
+                                        </span>
+                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                          <div 
+                                            className="h-full bg-green-500 transition-all" 
+                                            style={{ width: `${goodPercent}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Red bar - Bad items */}
+                                      <div className="flex items-center gap-2 w-full max-w-[160px]">
+                                        <span className="text-[10px] font-semibold text-red-700 dark:text-red-400 min-w-[35px] text-left tabular-nums">
+                                          {formatNumber(badQty)}
+                                        </span>
+                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                          <div 
+                                            className="h-full bg-red-500 transition-all" 
+                                            style={{ width: `${badPercent}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    /* Single green bar - all good */
+                                    <div className="flex items-center gap-2 w-full max-w-[160px]">
+                                      <span className="text-[10px] font-semibold text-green-700 dark:text-green-400 min-w-[35px] text-left tabular-nums">
+                                        {formatNumber(goodQty)}
+                                      </span>
+                                      <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div 
+                                          className="h-full bg-green-500 transition-all" 
+                                          style={{ width: '100%' }}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })()}
                           </td>
 
-                          {/* Stock with Progress */}
+                          {/* Stock - JUST TOTAL NUMBER */}
                           <td className="py-2 px-3">
-                            <div className="flex flex-col items-start gap-1">
-                              <span className={
+                            <div className="flex items-center justify-center">
+                              <span className={cn(
+                                "text-lg font-bold tabular-nums",
                                 isSelected 
-                                  ? "text-xs font-bold tabular-nums text-blue-900 dark:text-blue-100" 
-                                  : "text-xs font-bold tabular-nums text-slate-900 dark:text-white"
-                              }>
+                                  ? "text-blue-900 dark:text-blue-100" 
+                                  : "text-slate-900 dark:text-white"
+                              )}>
                                 {formatNumber(item.quantity)}
                               </span>
-                              <div className="w-full max-w-[80px] h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full transition-all ${
-                                    isOutOfStock ? 'bg-red-500' :
-                                    isLowStock ? 'bg-amber-500' : 
-                                    'bg-green-500'
-                                  }`}
-                                  style={{ width: `${stockPercentage}%` }}
-                                />
-                              </div>
                             </div>
                           </td>
 
@@ -1592,22 +1661,22 @@ export default function InventoryPage() {
                           {!isReadOnly && (
                             <td className="py-2 px-3">
                               <TooltipProvider>
-                                <div className="flex justify-start gap-0.5">
+                                <div className="flex justify-start gap-0">
 
-                                  {/* Restock - only for non-bundles, non-read-only users */}
+                                  {/* Adjust Stock - only for non-bundles, non-read-only users */}
                                   {!isReadOnly && !isBundle && (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          onClick={(e) => { e.stopPropagation(); handleRestock(item) }}
-                                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 h-9 w-9 p-0"
+                                          onClick={(e) => { e.stopPropagation(); handleAdjustStock(item) }}
+                                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 h-8 w-8 p-0"
                                         >
-                                          <PackagePlus className="h-4 w-4" />
+                                          <PackagePlus className="h-3.5 w-3.5" />
                                         </Button>
                                       </TooltipTrigger>
-                                      <TooltipContent><p>Restock</p></TooltipContent>
+                                      <TooltipContent><p>Adjust Stock</p></TooltipContent>
                                     </Tooltip>
                                   )}
 
@@ -1619,9 +1688,9 @@ export default function InventoryPage() {
                                           variant="ghost"
                                           size="sm"
                                           onClick={(e) => { e.stopPropagation(); handleEdit(item) }}
-                                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-9 w-9 p-0"
+                                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8 p-0"
                                         >
-                                          <Pencil className="h-4 w-4" />
+                                          <Pencil className="h-3.5 w-3.5" />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent><p>Edit</p></TooltipContent>
@@ -1636,9 +1705,9 @@ export default function InventoryPage() {
                                           variant="ghost"
                                           size="sm"
                                           onClick={(e) => { e.stopPropagation(); openDeleteDialog(item.id, item.name) }}
-                                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-9 w-9 p-0"
+                                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
                                         >
-                                          <Trash2 className="h-4 w-4" />
+                                          <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent><p>Delete</p></TooltipContent>
@@ -1710,10 +1779,10 @@ export default function InventoryPage() {
         />
       )}
 
-      {selectedRestockItem && (
-        <Dialog open={restockDialogOpen} onOpenChange={setRestockDialogOpen}>
+      {/* Adjust Stock Dialog */}
+      {selectedAdjustItem && (
+        <Dialog open={adjustStockDialogOpen} onOpenChange={setAdjustStockDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
-            {/* Professional Header with Dark Gradient */}
             <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-8 py-6 border-b border-slate-600 flex-shrink-0">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
@@ -1721,66 +1790,119 @@ export default function InventoryPage() {
                     <Package className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-white text-lg font-medium">Restock Product</span>
-                    <span className="text-white text-xl font-bold capitalize">{selectedRestockItem.name.toLowerCase()}</span>
+                    <span className="text-white text-lg font-medium">Adjust Stock</span>
+                    <span className="text-white text-xl font-bold capitalize">{selectedAdjustItem.name.toLowerCase()}</span>
                   </div>
                 </DialogTitle>
                 <DialogDescription className="text-slate-200 text-sm mt-2 font-medium">
-                  This item is currently out of stock. Reorder level: {selectedRestockItem.reorderLevel}
+                  Current stock: {selectedAdjustItem.quantity} units
                 </DialogDescription>
               </DialogHeader>
             </div>
             
             <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4 min-h-0">
+              {/* Adjustment Type */}
               <div>
-                <Label htmlFor="restock-amount" className="text-slate-700 dark:text-slate-300 font-medium">Amount to Restock</Label>
+                <Label className="text-slate-700 dark:text-slate-300 font-medium">Adjustment Type</Label>
+                <div className="flex gap-3 mt-2">
+                  <Button
+                    type="button"
+                    variant={adjustmentType === 'restock' ? 'default' : 'outline'}
+                    onClick={() => setAdjustmentType('restock')}
+                    className="flex-1"
+                  >
+                    <PackagePlus className="h-4 w-4 mr-2" />
+                    Increase Stock
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={adjustmentType === 'reduce' ? 'default' : 'outline'}
+                    onClick={() => setAdjustmentType('reduce')}
+                    className="flex-1"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Reduce Stock
+                  </Button>
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div>
+                <Label htmlFor="adjust-amount" className="text-slate-700 dark:text-slate-300 font-medium">
+                  Amount to {adjustmentType === 'restock' ? 'Add' : 'Reduce'}
+                </Label>
                 <Input
-                  id="restock-amount"
+                  id="adjust-amount"
                   type="number"
                   min="1"
-                  value={restockAmount}
-                  onChange={(e) => setRestockAmount(Number.parseInt(e.target.value) || 0)}
+                  value={adjustAmount}
+                  onChange={(e) => setAdjustAmount(Number.parseInt(e.target.value) || 0)}
                   placeholder="Enter amount"
-                  className="mt-1.5 h-10 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  className="mt-1.5 h-10 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Suggested: {selectedRestockItem.reorderLevel} units
-                </p>
               </div>
+
+              {/* Reason */}
               <div>
-                <Label htmlFor="restock-reason" className="text-slate-700 dark:text-slate-300 font-medium">Reason for Restock</Label>
-                <Select value={restockReason} onValueChange={setRestockReason}>
-                  <SelectTrigger id="restock-reason" className="mt-1.5 h-10 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20">
+                <Label htmlFor="adjust-reason" className="text-slate-700 dark:text-slate-300 font-medium">Reason</Label>
+                <Select value={adjustReason} onValueChange={setAdjustReason}>
+                  <SelectTrigger id="adjust-reason" className="mt-1.5 h-10 rounded-lg border-2">
                     <SelectValue placeholder="Select a reason" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                    <SelectItem value="new-stock">New Stock Arrival</SelectItem>
-                    <SelectItem value="damaged-return">Damaged Item Return</SelectItem>
-                    <SelectItem value="customer-return">Customer Return</SelectItem>
-                    <SelectItem value="inventory-adjustment">Inventory Adjustment</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                  <SelectContent>
+                    {adjustmentType === 'restock' ? (
+                      <>
+                        <SelectItem value="new-stock">New Stock Arrival</SelectItem>
+                        <SelectItem value="customer-return">Customer Return</SelectItem>
+                        <SelectItem value="inventory-adjustment">Inventory Adjustment</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="sold">Sold</SelectItem>
+                        <SelectItem value="damage">Damage</SelectItem>
+                        <SelectItem value="defect">Defect</SelectItem>
+                        <SelectItem value="expired">Expired</SelectItem>
+                        <SelectItem value="lost">Lost/Missing</SelectItem>
+                        <SelectItem value="internal-use">Internal Use</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Notes (for reduce only) */}
+              {adjustmentType === 'reduce' && (
+                <div>
+                  <Label htmlFor="adjust-notes" className="text-slate-700 dark:text-slate-300 font-medium">Notes (Optional)</Label>
+                  <Input
+                    id="adjust-notes"
+                    value={adjustNotes}
+                    onChange={(e) => setAdjustNotes(e.target.value)}
+                    placeholder="Additional details..."
+                    className="mt-1.5 h-10 rounded-lg border-2"
+                  />
+                </div>
+              )}
             </div>
             
-            {/* Professional Footer */}
             <div className="bg-slate-50 dark:bg-slate-900/50 px-8 py-6 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 flex-shrink-0">
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setRestockDialogOpen(false)}
+                onClick={() => setAdjustStockDialogOpen(false)}
                 className="px-6 border-2 font-semibold"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
-                onClick={handleRestockSubmit} 
-                disabled={restockAmount <= 0 || !restockReason} 
+                onClick={handleAdjustStockSubmit} 
+                disabled={adjustAmount <= 0 || !adjustReason} 
                 className="px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg"
               >
-                Restock Item
+                {adjustmentType === 'restock' ? 'Increase Stock' : 'Reduce Stock'}
               </Button>
             </div>
           </DialogContent>

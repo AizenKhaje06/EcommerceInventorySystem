@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -148,7 +148,7 @@ export default function ReportsPage() {
     )
   }
 
-  // â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Derived values ───────────────────────────────────────────────────────────
   const totalRevenue    = report?.totalRevenue    ?? 0
   const totalCost       = report?.totalCost       ?? 0
   const totalProfit     = report?.totalProfit     ?? 0
@@ -200,7 +200,7 @@ export default function ReportsPage() {
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Comprehensive Report</h2>
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-            Full business overview â€” sales, inventory, orders & analytics
+            Full business overview - sales, inventory, orders & analytics
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -243,7 +243,7 @@ export default function ReportsPage() {
                   <BarChart data={monthlySales} margin={{ top: 5, right: 20, bottom: 30, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
                     <XAxis dataKey="month" tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={m => new Date(m + "-01").toLocaleDateString("en-US", { month: "short" })} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
+                    <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `?${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
                     <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={50} />
                   </BarChart>
@@ -264,7 +264,7 @@ export default function ReportsPage() {
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={depts} layout="vertical" margin={{ top: 5, right: 20, bottom: 5, left: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.2} />
-                    <XAxis type="number" tick={{ fill: tickColor, fontSize: 10 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
+                    <XAxis type="number" tick={{ fill: tickColor, fontSize: 10 }} tickFormatter={v => `?${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="name" tick={{ fill: tickColor, fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
                     <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Revenue"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Bar dataKey="revenue" radius={[0, 6, 6, 0]} maxBarSize={28}>
@@ -645,16 +645,16 @@ export default function ReportsPage() {
         {/* Top Cancellation Reasons - Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Top 5 Cancellation Reasons Card */}
-          {topCancelReasons.length > 0 && (
-            <Card className="overflow-hidden border-0 shadow-md">
-              <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-1 bg-rose-500 rounded-full flex-shrink-0"></div>
-                  <h3 className="text-slate-900 dark:text-white text-sm font-bold tracking-tight">Top 5 Cancellation Reasons</h3>
-                </div>
-                <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 ml-3">Most frequent cancellation reasons</p>
+          <Card className="overflow-hidden border-0 shadow-md">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-rose-500 rounded-full flex-shrink-0"></div>
+                <h3 className="text-slate-900 dark:text-white text-sm font-bold tracking-tight">Top 5 Cancellation Reasons</h3>
               </div>
-              <CardContent className="pt-4 pb-2">
+              <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 ml-3">Most frequent cancellation reasons</p>
+            </div>
+            <CardContent className="pt-4 pb-2">
+              {topCancelReasons.length > 0 ? (
                 <div className="space-y-1.5">
                   {topCancelReasons.slice(0, 5).map((r, i) => (
                     <div key={i} className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs ${i === 0 ? 'bg-rose-50 dark:bg-rose-900/20' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
@@ -666,9 +666,14 @@ export default function ReportsPage() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="text-center py-8">
+                  <XCircle className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs text-slate-500">No cancellation data available</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Top 5 Return Reasons Card */}
           <Card className="overflow-hidden border-0 shadow-md">
@@ -883,13 +888,13 @@ export default function ReportsPage() {
                 <div className="text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider">Revenue per Item</p>
                   <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums">
-                    {itemsSold > 0 ? formatCurrency(totalRevenue / itemsSold) : "₱0.00"}
+                    {itemsSold > 0 ? formatCurrency(totalRevenue / itemsSold) : "?0.00"}
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider">Profit per Order</p>
                   <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums">
-                    {totalOrders > 0 ? formatCurrency(totalProfit / totalOrders) : "₱0.00"}
+                    {totalOrders > 0 ? formatCurrency(totalProfit / totalOrders) : "?0.00"}
                   </p>
                 </div>
               </div>
@@ -907,7 +912,7 @@ export default function ReportsPage() {
                   <LineChart data={monthlySales} margin={{ top: 5, right: 20, bottom: 30, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
                     <XAxis dataKey="month" tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={m => new Date(m + "-01").toLocaleDateString("en-US", { month: "short" })} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
+                    <YAxis tick={{ fill: tickColor, fontSize: 11 }} tickFormatter={v => `?${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} width={50} />
                     <Tooltip formatter={(v: number) => [formatCurrency(v), "Total Profit"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                     <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 3, fill: "#8b5cf6" }} activeDot={{ r: 5 }} />
                   </LineChart>
