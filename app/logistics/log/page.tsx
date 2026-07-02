@@ -484,8 +484,9 @@ export default function LogisticsLogPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
+                <div className="min-w-[900px]">
+                  <table className="w-full text-sm">
+                    <thead>
                     <tr className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                       <th className="py-4 px-6 text-left font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider">Date & Time</th>
                       <th className="py-4 px-6 text-left font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider">Operation</th>
@@ -535,6 +536,7 @@ export default function LogisticsLogPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Pagination */}

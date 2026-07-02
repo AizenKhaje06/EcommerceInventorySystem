@@ -48,9 +48,32 @@ export async function POST(
     console.log('[Reduce API] Updating inventory:', { oldQuantity: item.quantity, newQuantity })
 
     // Determine if item should be marked as "bad" based on reason
-    // Bad reasons: damage, spoilage, theft/loss, quality rejection, defective returns
-    // Good reasons: internal-use, other (these items are still sellable, just used internally)
-    const badItemReasons = ['damage', 'spoilage', 'theft-loss', 'quality-rejection', 'customer-return-defective']
+    // All reduce reasons are now considered "bad" items (except sold/internal-use)
+    const badItemReasons = [
+      'damaged',
+      'defective',
+      'expired',
+      'quality-failed',
+      'customer-return',
+      'supplier-return',
+      'broken-packaging',
+      'missing-parts',
+      'water-damage',
+      'incorrect-storage',
+      'obsolete',
+      'contaminated',
+      'pest-damage',
+      'mishandling',
+      'other',
+      // Legacy reasons (keep for backward compatibility)
+      'damage', 
+      'defect', 
+      'lost',
+      'spoilage', 
+      'theft-loss', 
+      'quality-rejection', 
+      'customer-return-defective'
+    ]
     const shouldMarkAsBad = badItemReasons.includes(reason)
 
     console.log('[Reduce API] Item status check:', {
@@ -69,18 +92,24 @@ export async function POST(
       // Mark item as bad and update bad quantity
       const newBadQuantity = (item.bad_item_quantity || 0) + amount
       
+      // Update bad items breakdown
+      const breakdown = (item.bad_items_breakdown || {}) as Record<string, number>
+      breakdown[reason] = (breakdown[reason] || 0) + amount
+      
       await updateInventoryItem(id, {
         quantity: newQuantity,
         item_status: 'bad',
         bad_item_reason: reasonFormatted,
-        bad_item_quantity: newBadQuantity
+        bad_item_quantity: newBadQuantity,
+        bad_items_breakdown: breakdown
       })
       
       console.log('[Reduce API] Item marked as BAD:', {
         itemId: id,
         itemName: item.name,
         reason: reasonFormatted,
-        badQuantity: newBadQuantity
+        badQuantity: newBadQuantity,
+        breakdown
       })
     } else {
       // Keep item as good (internal use, etc.)
@@ -138,11 +167,22 @@ export async function POST(
 
     // Log the operation
     console.log('[Reduce API] Adding log entry...')
+    
+    // Get current timestamp
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+    
     await addLog({
       operation: "reduce",
       itemId: id,
       itemName: item.name,
-      details: `Reduced ${amount} units (Reason: ${reasonFormatted}${notes ? ` - ${notes}` : ''})`,
+      details: `Reduced ${amount} units (Reason: ${reasonFormatted}${notes ? ` - ${notes}` : ''}) | By: ${displayName} (${username}) | ${timestamp}`,
     })
 
     console.log('[Reduce API] Operation completed successfully')

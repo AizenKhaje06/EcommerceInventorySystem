@@ -22,6 +22,7 @@ export interface InventoryItem {
   item_status?: 'good' | 'bad' // Item condition: good (sellable) or bad (defective/damaged)
   bad_item_reason?: string // Reason why item was marked as bad
   bad_item_quantity?: number // Number of units that are defective
+  bad_items_breakdown?: Record<string, number> // JSONB: Breakdown of bad items by reason {damage: 50, defect: 30}
 }
 
 export interface Transaction {

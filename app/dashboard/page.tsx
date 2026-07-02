@@ -136,6 +136,12 @@ export default function DashboardPage() {
   const lowStockCount = lowStockItems.length
   const outOfStockCount = outOfStockItems.length
 
+  // Calculate Bad Stock metrics
+  const badStockItems = items?.filter((item: InventoryItem) => item.item_status === 'bad') || []
+  const totalBadQty = badStockItems.reduce((sum, item) => sum + (item.bad_item_quantity || 0), 0)
+  const totalBadCOGS = badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.costPrice), 0)
+  const totalBadRevenueLost = badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.sellingPrice), 0)
+
   const stocksCountData = stats?.stocksCountByCategory?.map((cat) => ({
     name: cat.name,
     count: cat.count,
@@ -391,6 +397,40 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* Row 3: Bad Stock Card - Admin & Logistics Only */}
+      {(currentUser?.role === 'admin' || currentUser?.role === 'logistics-admin') && (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Total Bad Stock */}
+          <Card className="p-5 border-0 shadow-lg lg:col-span-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-red-600 shadow-lg shadow-red-500/30 flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Total Bad Stock</p>
+                <p className="text-2xl font-bold text-red-900 dark:text-red-100 tabular-nums mb-2">
+                  <AnimatedNumber value={totalBadQty} duration={1500} /> units
+                </p>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-red-600/80 dark:text-red-400/80">COGS Lost:</span>
+                    <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
+                      ₱<AnimatedNumber value={totalBadCOGS} duration={1500} />
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-red-600/80 dark:text-red-400/80">Revenue Lost:</span>
+                    <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
+                      ₱<AnimatedNumber value={totalBadRevenueLost} duration={1500} />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Quick Actions & Alerts */}
       <div className={cn(

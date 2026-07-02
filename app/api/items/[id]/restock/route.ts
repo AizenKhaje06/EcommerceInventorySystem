@@ -32,6 +32,20 @@ export async function POST(
       quantity: newQuantity,
     })
 
+    // Get user information from headers
+    const username = request.headers.get('x-user-username') || 'Unknown'
+    const displayName = request.headers.get('x-user-display-name') || username
+    
+    // Get current timestamp
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+
     // Record as restock
     await addRestock({
       itemId: id,
@@ -42,12 +56,12 @@ export async function POST(
       reason,
     })
 
-    // Log the operation with reason
+    // Log the operation with reason, user, and timestamp
     await addLog({
       operation: "restock",
       itemId: id,
       itemName: item.name,
-      details: `Added ${amount} units (total cost: ₱${(item.costPrice * amount).toFixed(2)}) - Reason: ${reason}`,
+      details: `Added ${amount} units (total cost: ₱${(item.costPrice * amount).toFixed(2)}) - Reason: ${reason} | By: ${displayName} (${username}) | ${timestamp}`,
     })
 
     return NextResponse.json({ 

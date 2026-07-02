@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Search, Pencil, Trash2, PackagePlus, Package, Filter, X, ArrowUpDown, AlertCircle, TrendingUp, Warehouse, Tag, Loader2, LayoutGrid, LayoutList, Eye, ShoppingCart, Check, Building2, FileDown, FileSpreadsheet, ChevronDown } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, PackagePlus, Package, Filter, X, ArrowUpDown, AlertCircle, TrendingUp, Warehouse, Tag, Loader2, LayoutGrid, LayoutList, Eye, ShoppingCart, Check, Building2, FileDown, FileSpreadsheet, ChevronDown, AlertTriangle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -1168,8 +1168,8 @@ export default function InventoryPage() {
         
         {/* Action Buttons - Top Right */}
         <div className="flex items-center gap-2">
-          {/* Categories - Hidden for operations (agents) and dept-manager */}
-          {!isReadOnly && (
+          {/* Categories - Hidden for operations (agents), dept-manager, and logistics-admin */}
+          {!isReadOnly && userRole !== 'logistics-admin' && (
             <Button
               onClick={() => setCategoryDialogOpen(true)}
               variant="outline"
@@ -1180,8 +1180,8 @@ export default function InventoryPage() {
             </Button>
           )}
 
-          {/* Stores - Hidden for operations (agents) only */}
-          {userRole !== 'operations' && (
+          {/* Stores - Hidden for operations (agents) and logistics-admin */}
+          {userRole !== 'operations' && userRole !== 'logistics-admin' && (
             <Button
               onClick={() => setStoreDialogOpen(true)}
               className="h-7 w-[100px] px-2.5 text-xs bg-orange-600 hover:bg-orange-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
@@ -1191,8 +1191,8 @@ export default function InventoryPage() {
             </Button>
           )}
 
-          {/* Bundle - Hidden for operations (agents) only */}
-          {userRole !== 'operations' && (
+          {/* Bundle - Hidden for operations (agents) and logistics-admin */}
+          {userRole !== 'operations' && userRole !== 'logistics-admin' && (
             <Button
               onClick={() => setCreateBundleOpen(true)}
               className="h-7 w-[100px] px-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
@@ -1233,10 +1233,10 @@ export default function InventoryPage() {
               </div>
             </div>
             
-            {/* Stats Row - Responsive Grid (4 cards for admin, 3 cards for department agents) */}
+            {/* Stats Row - Responsive Grid (5 cards for admin, 3 cards for department agents) */}
             <div className={cn(
               "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4",
-              isReadOnly ? "lg:grid-cols-3" : "lg:grid-cols-4"
+              isReadOnly ? "lg:grid-cols-3" : "lg:grid-cols-5"
             )}>
               {/* Total Items - Indigo Gradient */}
               <div className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-xl bg-white dark:bg-slate-900">
@@ -1316,6 +1316,35 @@ export default function InventoryPage() {
                         Filtered: {formatCurrency(Array.isArray(filteredItems) ? filteredItems.reduce((sum, item) => sum + (item.totalCOGS || (item.costPrice * item.quantity)), 0) : 0)}
                       </p>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Total Bad Stock - Red Gradient - Hidden for Department Agents */}
+              {!isReadOnly && (
+                <div className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-xl bg-white dark:bg-slate-900">
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                        <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wide">Total Bad Stock</p>
+                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-red-600 to-red-700 bg-clip-text text-transparent tabular-nums mb-2">
+                      {formatNumber(Array.isArray(items) ? items.filter(item => item.item_status === 'bad').reduce((sum, item) => sum + (item.bad_item_quantity || 0), 0) : 0)} units
+                    </p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        COGS Lost: <span className="font-semibold text-red-600 dark:text-red-400">
+                          {formatCurrency(Array.isArray(items) ? items.filter(item => item.item_status === 'bad').reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.costPrice), 0) : 0)}
+                        </span>
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        Revenue Lost: <span className="font-semibold text-red-600 dark:text-red-400">
+                          {formatCurrency(Array.isArray(items) ? items.filter(item => item.item_status === 'bad').reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.sellingPrice), 0) : 0)}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1418,59 +1447,138 @@ export default function InventoryPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <div className="min-w-[1100px]">
+                  <table className="w-full text-sm">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">
-                      {/* Image Column */}
-                      <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
-                        Image
-                      </th>
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[20%]" : "w-[25%]"
-                      )}>
-                        Product
-                      </th>
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[12%]" : "w-[13%]"
-                      )}>
-                        Category
-                      </th>
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[12%]" : "w-[13%]"
-                      )}>
-                        Status
-                      </th>
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[11%]" : "w-[15%]"
-                      )}>
-                        Stock
-                      </th>
-                      {/* Hide Cost column for department agents (operations role) */}
-                      {!isReadOnly && (
-                        <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[10%]">
-                          Cost
-                        </th>
-                      )}
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        !isReadOnly ? "w-[10%]" : "w-[12%]"
-                      )}>
-                        Price
-                      </th>
-                      <th className={cn(
-                        "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
-                        isReadOnly ? "w-[12%]" : "w-[8%]"
-                      )}>
-                        Margin
-                      </th>
-                      {!isReadOnly && (
-                        <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[11%]">
-                          Actions
-                        </th>
+                      {statusFilter === "bad" ? (
+                        /* Bad Stock Table Headers - Complete Reasons */
+                        <>
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky left-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[80px]">
+                            Image
+                          </th>
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky left-[80px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[180px]">
+                            Item Name
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-red-300 uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                            Damaged
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-orange-300 uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                            Defective
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-yellow-300 uppercase tracking-wider border-r border-slate-700/50 w-[85px]">
+                            Expired
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-green-300 uppercase tracking-wider border-r border-slate-700/50 w-[100px]">
+                            Quality Failed
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-blue-300 uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
+                            Customer Return
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-indigo-300 uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
+                            Supplier Return
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-pink-300 uppercase tracking-wider border-r border-slate-700/50 w-[115px]">
+                            Broken Pkg
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-cyan-300 uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
+                            Missing Parts
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-teal-300 uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
+                            Water Damage
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-amber-300 uppercase tracking-wider border-r border-slate-700/50 w-[120px]">
+                            Incorrect Storage
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-lime-300 uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                            Obsolete
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-rose-300 uppercase tracking-wider border-r border-slate-700/50 w-[110px]">
+                            Contaminated
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-fuchsia-300 uppercase tracking-wider border-r border-slate-700/50 w-[100px]">
+                            Pest Damage
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-violet-300 uppercase tracking-wider border-r border-slate-700/50 w-[100px]">
+                            Mishandling
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-purple-300 uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
+                            Lost
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-orange-200 uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                            Spoilage
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-red-200 uppercase tracking-wider border-r border-slate-700/50 w-[95px]">
+                            Theft/Loss
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-slate-300 uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
+                            Other
+                          </th>
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky right-[180px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                            Total Bad
+                          </th>
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky right-[90px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                            Cost
+                          </th>
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider sticky right-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                            COGS Lost
+                          </th>
+                        </>
+                      ) : (
+                        /* Normal Table Headers */
+                        <>
+                          {/* Image Column */}
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                            Image
+                          </th>
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            !isReadOnly ? "w-[20%]" : "w-[25%]"
+                          )}>
+                            Product
+                          </th>
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            !isReadOnly ? "w-[12%]" : "w-[13%]"
+                          )}>
+                            Category
+                          </th>
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            !isReadOnly ? "w-[12%]" : "w-[13%]"
+                          )}>
+                            Status
+                          </th>
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            !isReadOnly ? "w-[11%]" : "w-[15%]"
+                          )}>
+                            Stock
+                          </th>
+                          {/* Hide Cost column for department agents (operations role) */}
+                          {!isReadOnly && (
+                            <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[10%]">
+                              Cost
+                            </th>
+                          )}
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            !isReadOnly ? "w-[10%]" : "w-[12%]"
+                          )}>
+                            Price
+                          </th>
+                          <th className={cn(
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            isReadOnly ? "w-[12%]" : "w-[8%]"
+                          )}>
+                            Margin
+                          </th>
+                          {!isReadOnly && (
+                            <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[11%]">
+                              Actions
+                            </th>
+                          )}
+                        </>
                       )}
                     </tr>
                   </thead>
@@ -1483,6 +1591,279 @@ export default function InventoryPage() {
                       const isSelected = selectedRowId === item.id
                       const isBundle = (item as any).productType === 'bundle' || (item as any).product_type === 'bundle'
                       
+                      // Bad stock breakdown - Individual reason quantities
+                      const breakdown = (item.bad_items_breakdown || {}) as Record<string, number>
+                      const totalBadQty = item.bad_item_quantity || 0
+                      const totalCost = totalBadQty * item.costPrice
+                      
+                      // Individual reason columns (exact match from database keys)
+                      const damagedQty = (breakdown['damaged'] || 0) + (breakdown['damage'] || 0)
+                      const defectiveQty = (breakdown['defective'] || 0) + (breakdown['defect'] || 0)
+                      const expiredQty = (breakdown['expired'] || 0)
+                      const qualityFailedQty = (breakdown['quality-failed'] || 0) + (breakdown['quality-rejection'] || 0)
+                      const customerReturnQty = (breakdown['customer-return'] || 0) + (breakdown['customer-return-defective'] || 0)
+                      const supplierReturnQty = (breakdown['supplier-return'] || 0)
+                      const brokenPackagingQty = (breakdown['broken-packaging'] || 0)
+                      const missingPartsQty = (breakdown['missing-parts'] || 0)
+                      const waterDamageQty = (breakdown['water-damage'] || 0)
+                      const incorrectStorageQty = (breakdown['incorrect-storage'] || 0)
+                      const obsoleteQty = (breakdown['obsolete'] || 0)
+                      const contaminatedQty = (breakdown['contaminated'] || 0)
+                      const pestDamageQty = (breakdown['pest-damage'] || 0)
+                      const mishandlingQty = (breakdown['mishandling'] || 0)
+                      const lostQty = (breakdown['lost'] || 0)
+                      const spoilageQty = (breakdown['spoilage'] || 0)
+                      const theftLossQty = (breakdown['theft-loss'] || 0)
+                      const otherQty = (breakdown['other'] || 0)
+                      
+                      // If in bad stock view, render specialized row
+                      if (statusFilter === "bad") {
+                        return (
+                          <tr 
+                            key={item.id} 
+                            onClick={() => setSelectedRowId(isSelected ? null : item.id)}
+                            className={
+                              isSelected
+                                ? "transition-all duration-200 cursor-pointer bg-red-50 dark:bg-red-900/20 ring-2 ring-red-500 dark:ring-red-400 ring-inset"
+                                : "transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                            }
+                          >
+                            {/* Image - Sticky Left */}
+                            <td className="py-2 px-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
+                              <div className="flex items-center justify-center">
+                                {item.imageUrl ? (
+                                  <div className="w-10 h-10 rounded overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 border-2 border-red-300 dark:border-red-700">
+                                    <img 
+                                      src={item.imageUrl} 
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        if (target.parentElement) {
+                                          target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-400"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg></div>'
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-10 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-2 border-red-300 dark:border-red-700">
+                                    <span className="text-red-400 text-lg">📦</span>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            
+                            {/* Item Name - Sticky Left */}
+                            <td className="py-2 px-3 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r border-slate-200 dark:border-slate-700">
+                              <div className="font-medium text-slate-900 dark:text-white">{item.name}</div>
+                            </td>
+                            
+                            {/* Damaged */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                damagedQty > 0 ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300" : "text-slate-400"
+                              )}>
+                                {damagedQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Defective */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                defectiveQty > 0 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300" : "text-slate-400"
+                              )}>
+                                {defectiveQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Expired */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                expiredQty > 0 ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300" : "text-slate-400"
+                              )}>
+                                {expiredQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Quality Failed */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                qualityFailedQty > 0 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300" : "text-slate-400"
+                              )}>
+                                {qualityFailedQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Customer Return */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                customerReturnQty > 0 ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" : "text-slate-400"
+                              )}>
+                                {customerReturnQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Supplier Return */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                supplierReturnQty > 0 ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300" : "text-slate-400"
+                              )}>
+                                {supplierReturnQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Broken Packaging */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                brokenPackagingQty > 0 ? "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300" : "text-slate-400"
+                              )}>
+                                {brokenPackagingQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Missing Parts */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                missingPartsQty > 0 ? "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300" : "text-slate-400"
+                              )}>
+                                {missingPartsQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Water Damage */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                waterDamageQty > 0 ? "bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300" : "text-slate-400"
+                              )}>
+                                {waterDamageQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Incorrect Storage */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                incorrectStorageQty > 0 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300" : "text-slate-400"
+                              )}>
+                                {incorrectStorageQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Obsolete */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                obsoleteQty > 0 ? "bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300" : "text-slate-400"
+                              )}>
+                                {obsoleteQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Contaminated */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                contaminatedQty > 0 ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300" : "text-slate-400"
+                              )}>
+                                {contaminatedQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Pest Damage */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                pestDamageQty > 0 ? "bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300" : "text-slate-400"
+                              )}>
+                                {pestDamageQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Mishandling */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                mishandlingQty > 0 ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300" : "text-slate-400"
+                              )}>
+                                {mishandlingQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Lost */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                lostQty > 0 ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300" : "text-slate-400"
+                              )}>
+                                {lostQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Spoilage */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                spoilageQty > 0 ? "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-200" : "text-slate-400"
+                              )}>
+                                {spoilageQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Theft/Loss */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                theftLossQty > 0 ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-200" : "text-slate-400"
+                              )}>
+                                {theftLossQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Other */}
+                            <td className="py-2 px-3 text-center">
+                              <span className={cn(
+                                "inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded font-semibold text-xs",
+                                otherQty > 0 ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300" : "text-slate-400"
+                              )}>
+                                {otherQty || "-"}
+                              </span>
+                            </td>
+                            
+                            {/* Total Bad */}
+                            <td className="py-2 px-3 text-center sticky right-[180px] bg-white dark:bg-slate-900">
+                              <span className="inline-flex items-center justify-center min-w-[50px] px-2.5 py-1 rounded-lg font-bold text-sm bg-red-600 text-white">
+                                {totalBadQty}
+                              </span>
+                            </td>
+                            
+                            {/* Cost */}
+                            <td className="py-2 px-3 sticky right-[90px] bg-white dark:bg-slate-900">
+                              <div className="text-slate-700 dark:text-slate-300 font-medium">
+                                ₱{item.costPrice.toFixed(2)}
+                              </div>
+                            </td>
+                            
+                            {/* COGS Lost */}
+                            <td className="py-2 px-3 sticky right-0 bg-white dark:bg-slate-900">
+                              <div className="text-red-700 dark:text-red-300 font-bold">
+                                ₱{totalCost.toFixed(2)}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      }
+                      
+                      // Normal table row rendering
                       return (
                         <tr 
                           key={item.id} 
@@ -1555,13 +1936,155 @@ export default function InventoryPage() {
                             </span>
                           </td>
 
-                          {/* Stock Status - WITH DUAL BARS */}
+                          {/* Stock Status - CONDITIONAL DISPLAY */}
                           <td className="py-2 px-3">
                             {(() => {
                               const badQty = item.bad_item_quantity || 0
                               const goodQty = item.quantity - badQty
                               const hasBadItems = badQty > 0
+                              const breakdown = item.bad_items_breakdown || {}
+                              const hasBreakdown = Object.keys(breakdown).length > 0
                               
+                              // If filtered to "Bad Stock", show breakdown by reason OR just red bar
+                              if (statusFilter === "bad" && hasBadItems) {
+                                // If we have breakdown data, show multiple bars
+                                if (hasBreakdown) {
+                                  const totalBad = Object.values(breakdown).reduce((sum: number, qty) => sum + (qty as number), 0)
+                                
+                                // Color mapping for different reasons
+                                const reasonColors: Record<string, string> = {
+                                  // New comprehensive reasons
+                                  damaged: 'bg-red-500',
+                                  defective: 'bg-orange-500',
+                                  expired: 'bg-yellow-500',
+                                  'quality-failed': 'bg-amber-600',
+                                  'customer-return': 'bg-rose-500',
+                                  'supplier-return': 'bg-purple-500',
+                                  'broken-packaging': 'bg-pink-500',
+                                  'missing-parts': 'bg-indigo-500',
+                                  'water-damage': 'bg-blue-500',
+                                  'incorrect-storage': 'bg-cyan-500',
+                                  obsolete: 'bg-gray-500',
+                                  contaminated: 'bg-lime-600',
+                                  'pest-damage': 'bg-green-600',
+                                  mishandling: 'bg-orange-600',
+                                  other: 'bg-slate-500',
+                                  // Legacy reasons (backward compatibility)
+                                  damage: 'bg-red-500',
+                                  defect: 'bg-orange-500',
+                                  lost: 'bg-purple-500',
+                                  spoilage: 'bg-pink-500',
+                                  'theft-loss': 'bg-gray-500',
+                                  'quality-rejection': 'bg-amber-500',
+                                  'customer-return-defective': 'bg-rose-500'
+                                }
+                                
+                                const textColors: Record<string, string> = {
+                                  // New comprehensive reasons
+                                  damaged: 'text-red-700 dark:text-red-400',
+                                  defective: 'text-orange-700 dark:text-orange-400',
+                                  expired: 'text-yellow-700 dark:text-yellow-400',
+                                  'quality-failed': 'text-amber-700 dark:text-amber-400',
+                                  'customer-return': 'text-rose-700 dark:text-rose-400',
+                                  'supplier-return': 'text-purple-700 dark:text-purple-400',
+                                  'broken-packaging': 'text-pink-700 dark:text-pink-400',
+                                  'missing-parts': 'text-indigo-700 dark:text-indigo-400',
+                                  'water-damage': 'text-blue-700 dark:text-blue-400',
+                                  'incorrect-storage': 'text-cyan-700 dark:text-cyan-400',
+                                  obsolete: 'text-gray-700 dark:text-gray-400',
+                                  contaminated: 'text-lime-700 dark:text-lime-400',
+                                  'pest-damage': 'text-green-700 dark:text-green-400',
+                                  mishandling: 'text-orange-700 dark:text-orange-400',
+                                  other: 'text-slate-700 dark:text-slate-400',
+                                  // Legacy reasons
+                                  damage: 'text-red-700 dark:text-red-400',
+                                  defect: 'text-orange-700 dark:text-orange-400',
+                                  lost: 'text-purple-700 dark:text-purple-400',
+                                  spoilage: 'text-pink-700 dark:text-pink-400',
+                                  'theft-loss': 'text-gray-700 dark:text-gray-400',
+                                  'quality-rejection': 'text-amber-700 dark:text-amber-400',
+                                  'customer-return-defective': 'text-rose-700 dark:text-rose-400'
+                                }
+                                
+                                const reasonLabels: Record<string, string> = {
+                                  // New comprehensive reasons
+                                  damaged: 'Damaged',
+                                  defective: 'Defective',
+                                  expired: 'Expired',
+                                  'quality-failed': 'Qual Fail',
+                                  'customer-return': 'Cust Ret',
+                                  'supplier-return': 'Supp Ret',
+                                  'broken-packaging': 'Broken Pkg',
+                                  'missing-parts': 'Miss Parts',
+                                  'water-damage': 'Water Dmg',
+                                  'incorrect-storage': 'Bad Store',
+                                  obsolete: 'Obsolete',
+                                  contaminated: 'Contam',
+                                  'pest-damage': 'Pest Dmg',
+                                  mishandling: 'Mishandle',
+                                  other: 'Other',
+                                  // Legacy reasons
+                                  damage: 'Damage',
+                                  defect: 'Defect',
+                                  lost: 'Lost',
+                                  spoilage: 'Spoilage',
+                                  'theft-loss': 'Theft',
+                                  'quality-rejection': 'Rejected',
+                                  'customer-return-defective': 'Return'
+                                }
+                                
+                                return (
+                                  <div className="flex flex-col gap-1 items-start">
+                                    {Object.entries(breakdown)
+                                      .filter(([_, qty]) => (qty as number) > 0)
+                                      .map(([reason, qty]) => {
+                                        const percentage = totalBad > 0 ? ((qty as number) / totalBad) * 100 : 0
+                                        return (
+                                          <div key={reason} className="flex items-center gap-2 w-full max-w-[180px]">
+                                            <span className={cn(
+                                              "text-[10px] font-semibold min-w-[35px] text-left tabular-nums",
+                                              textColors[reason] || 'text-red-700 dark:text-red-400'
+                                            )}>
+                                              {formatNumber(qty as number)}
+                                            </span>
+                                            <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                              <div 
+                                                className={cn("h-full transition-all", reasonColors[reason] || 'bg-red-500')}
+                                                style={{ width: `${percentage}%` }}
+                                              />
+                                            </div>
+                                            <span className="text-[9px] text-slate-500 dark:text-slate-400 min-w-[40px]">
+                                              {reasonLabels[reason] || reason}
+                                            </span>
+                                          </div>
+                                        )
+                                      })}
+                                  </div>
+                                )
+                                } else {
+                                  // No breakdown data, show single red bar for bad items
+                                  return (
+                                    <div className="flex flex-col gap-1 items-start">
+                                      <div className="flex items-center gap-2 w-full max-w-[160px]">
+                                        <span className="text-[10px] font-semibold text-red-700 dark:text-red-400 min-w-[35px] text-left tabular-nums">
+                                          {formatNumber(badQty)}
+                                        </span>
+                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                          <div 
+                                            className="h-full bg-red-500 transition-all" 
+                                            style={{ width: '100%' }}
+                                          />
+                                        </div>
+                                        <span className="text-[9px] text-slate-500 dark:text-slate-400 min-w-[40px]">
+                                          Bad
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                              }
+                              
+                              // Default display (All Status or Good Stock filter)
                               const goodPercent = item.quantity > 0 ? (goodQty / item.quantity) * 100 : 0
                               const badPercent = item.quantity > 0 ? (badQty / item.quantity) * 100 : 0
                               
@@ -1614,17 +2137,37 @@ export default function InventoryPage() {
                             })()}
                           </td>
 
-                          {/* Stock - JUST TOTAL NUMBER */}
+                          {/* Stock - CONDITIONAL TOTAL */}
                           <td className="py-2 px-3">
                             <div className="flex items-center justify-center">
-                              <span className={cn(
-                                "text-lg font-bold tabular-nums",
-                                isSelected 
-                                  ? "text-blue-900 dark:text-blue-100" 
-                                  : "text-slate-900 dark:text-white"
-                              )}>
-                                {formatNumber(item.quantity)}
-                              </span>
+                              {(() => {
+                                // If filtered to "Bad Stock", show only bad count
+                                if (statusFilter === "bad") {
+                                  const badQty = item.bad_item_quantity || 0
+                                  return (
+                                    <span className={cn(
+                                      "text-lg font-bold tabular-nums",
+                                      isSelected 
+                                        ? "text-red-900 dark:text-red-100" 
+                                        : "text-red-700 dark:text-red-400"
+                                    )}>
+                                      {formatNumber(badQty)}
+                                    </span>
+                                  )
+                                }
+                                
+                                // Default: show total quantity
+                                return (
+                                  <span className={cn(
+                                    "text-lg font-bold tabular-nums",
+                                    isSelected 
+                                      ? "text-blue-900 dark:text-blue-100" 
+                                      : "text-slate-900 dark:text-white"
+                                  )}>
+                                    {formatNumber(item.quantity)}
+                                  </span>
+                                )
+                              })()}
                             </div>
                           </td>
 
@@ -1723,6 +2266,7 @@ export default function InventoryPage() {
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Pagination */}
@@ -1859,13 +2403,21 @@ export default function InventoryPage() {
                       </>
                     ) : (
                       <>
-                        <SelectItem value="sold">Sold</SelectItem>
-                        <SelectItem value="damage">Damage</SelectItem>
-                        <SelectItem value="defect">Defect</SelectItem>
+                        <SelectItem value="damaged">Damaged</SelectItem>
+                        <SelectItem value="defective">Defective</SelectItem>
                         <SelectItem value="expired">Expired</SelectItem>
-                        <SelectItem value="lost">Lost/Missing</SelectItem>
-                        <SelectItem value="internal-use">Internal Use</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="quality-failed">Quality Failed</SelectItem>
+                        <SelectItem value="customer-return">Customer Return</SelectItem>
+                        <SelectItem value="supplier-return">Supplier Return</SelectItem>
+                        <SelectItem value="broken-packaging">Broken Packaging</SelectItem>
+                        <SelectItem value="missing-parts">Missing Parts</SelectItem>
+                        <SelectItem value="water-damage">Water Damage</SelectItem>
+                        <SelectItem value="incorrect-storage">Incorrect Storage</SelectItem>
+                        <SelectItem value="obsolete">Obsolete</SelectItem>
+                        <SelectItem value="contaminated">Contaminated</SelectItem>
+                        <SelectItem value="pest-damage">Pest Damage</SelectItem>
+                        <SelectItem value="mishandling">Mishandling</SelectItem>
+                        <SelectItem value="other">Other (with remarks)</SelectItem>
                       </>
                     )}
                   </SelectContent>

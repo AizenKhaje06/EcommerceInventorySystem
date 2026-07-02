@@ -87,6 +87,7 @@ export default function LogisticsAdminDashboard() {
   const [packingQueue, setPackingQueue] = useState<PackingQueueOrder[]>([])
   const [packedHistory, setPackedHistory] = useState<PackedOrder[]>([])
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([])
+  const [items, setItems] = useState<any[]>([]) // Add items state
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
@@ -172,6 +173,23 @@ export default function LogisticsAdminDashboard() {
   const deliveryRate = totalOrders > 0
     ? Math.round(((statusCounts['DELIVERED'] || 0) / totalOrders) * 100) : 0
 
+  // Calculate Bad Stock metrics
+  const badStockItems = useMemo(() => 
+    items.filter((item: any) => item.item_status === 'bad')
+  , [items])
+  
+  const totalBadQty = useMemo(() =>
+    badStockItems.reduce((sum, item) => sum + (item.bad_item_quantity || 0), 0)
+  , [badStockItems])
+  
+  const totalBadCOGS = useMemo(() =>
+    badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * (item.costPrice || 0)), 0)
+  , [badStockItems])
+  
+  const totalBadRevenueLost = useMemo(() =>
+    badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * (item.sellingPrice || 0)), 0)
+  , [badStockItems])
+
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
@@ -183,16 +201,18 @@ export default function LogisticsAdminDashboard() {
   const fetchAllData = async (silent = false) => {
     try {
       if (!silent) { setLoading(true); setRefreshing(true) }
-      const [queueRes, historyRes, ordersRes] = await Promise.all([
+      const [queueRes, historyRes, ordersRes, itemsRes] = await Promise.all([
         fetch('/api/packer/queue'),
         fetch('/api/packer/history'),
-        fetch('/api/orders?status=Packed')
+        fetch('/api/orders?status=Packed'),
+        fetch('/api/items')
       ])
-      const [queueData, historyData, ordersData] = await Promise.all([
-        queueRes.json(), historyRes.json(), ordersRes.json()
+      const [queueData, historyData, ordersData, itemsData] = await Promise.all([
+        queueRes.json(), historyRes.json(), ordersRes.json(), itemsRes.json()
       ])
       if (queueData.success) setPackingQueue(queueData.queue || [])
       if (historyData.success) setPackedHistory(historyData.history || [])
+      if (Array.isArray(itemsData)) setItems(itemsData)
       if (Array.isArray(ordersData)) {
         setTrackedOrders(ordersData.map(o => ({
           id: o.id,
@@ -268,7 +288,7 @@ export default function LogisticsAdminDashboard() {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'Packing Queue',         value: filteredQueue.length,         sub: filteredQueue.length === 0 ? 'All caught up' : `${filteredQueue.length} awaiting`,     icon: Package,    from: 'from-orange-500', to: 'to-amber-500',  bg: 'bg-orange-50 dark:bg-orange-900/20',   ic: 'text-orange-600 dark:text-orange-400',   ring: 'ring-orange-200 dark:ring-orange-800' },
             { label: 'Packed (Period)',        value: packedInPeriod.length,        sub: `${packedInPeriod.length} completed`,                                                   icon: PackageCheck,from: 'from-emerald-500',to: 'to-green-500',  bg: 'bg-emerald-50 dark:bg-emerald-900/20', ic: 'text-emerald-600 dark:text-emerald-400', ring: 'ring-emerald-200 dark:ring-emerald-800' },
@@ -289,6 +309,37 @@ export default function LogisticsAdminDashboard() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Total Bad Stock Card */}
+          <Card className="border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 rounded-xl bg-red-600 shadow-lg shadow-red-500/30 flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Total Bad Stock</p>
+                  <p className="text-2xl font-bold text-red-900 dark:text-red-100 tabular-nums">
+                    <AnimatedNumber value={totalBadQty} duration={1500} /> units
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-red-600/80 dark:text-red-400/80">COGS Lost:</span>
+                  <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
+                    ₱<AnimatedNumber value={totalBadCOGS} duration={1500} />
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-red-600/80 dark:text-red-400/80">Revenue Lost:</span>
+                  <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
+                    ₱<AnimatedNumber value={totalBadRevenueLost} duration={1500} />
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* PARCEL STATUS AREA CHART */}

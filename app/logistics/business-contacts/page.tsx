@@ -384,7 +384,8 @@ export default function BusinessContactsPage() {
       ) : (
         <>
           <div className="overflow-x-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-0 shadow-lg">
-            <table className="w-full text-sm">
+            <div className="min-w-[800px]">
+              <table className="w-full text-sm">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-black dark:bg-black">
                   <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50" style={{ width: '18%' }}>Name/Company</th>
@@ -493,6 +494,7 @@ export default function BusinessContactsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Pagination - Professional Design */}

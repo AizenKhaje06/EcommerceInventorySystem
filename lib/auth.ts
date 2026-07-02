@@ -93,6 +93,12 @@ export const ROLE_PERMISSIONS = {
   ],
   'logistics-admin': [
     '/logistics/dashboard',
+    '/logistics/products',
+    '/logistics/packing-queue',
+    '/logistics/track-orders',
+    '/logistics/business-contacts',
+    '/logistics/log',
+    '/dashboard/inventory/**',
     '/dashboard/log',
     '/dashboard/track-orders'
   ],

@@ -337,7 +337,7 @@ export default function InternalUsagePage() {
           </p>
         </div>
         {/* Dispatch button - Only visible to admin and logistics roles */}
-        {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics') && (
+        {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics-admin') && (
           <Button 
             onClick={openDispatchModal}
             className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition-colors border-0 px-4 h-10 flex-shrink-0"
@@ -783,7 +783,7 @@ export default function InternalUsagePage() {
                   <SelectItem value="internal">Internal Use</SelectItem>
                 </SelectContent>
               </Select>
-              {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics') && (
+              {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics-admin') && (
                 <Select value={filterSalesChannel} onValueChange={setFilterSalesChannel}>
                   <SelectTrigger className="w-[200px] h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
                     <SelectValue placeholder="Sales Channel" />

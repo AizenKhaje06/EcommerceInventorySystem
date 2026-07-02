@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, RefreshCw } from 'lucide-react'
+import { LogOut, RefreshCw, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -51,6 +51,7 @@ export function RoleLayout({
   const router = useRouter()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [currentTime, setCurrentTime] = useState('')
   const [currentDate, setCurrentDate] = useState('')
   const [displayName, setDisplayName] = useState(defaultDisplayName)
@@ -171,7 +172,8 @@ export function RoleLayout({
                 <div className="sm:hidden text-xs font-semibold text-slate-900 dark:text-white">{displayName}</div>
               </div>
 
-              <nav aria-label="Main navigation" className="flex items-center h-12 sm:h-14">
+              {/* Desktop Navigation - Hidden on mobile */}
+              <nav aria-label="Main navigation" className="hidden md:flex items-center h-12 sm:h-14">
                 {navItems.map(item => {
                   const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                   return (
@@ -180,7 +182,7 @@ export function RoleLayout({
                       href={item.href}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        'h-full flex items-center px-2 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative border-b-2',
+                        'h-full flex items-center px-2 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative border-b-2 whitespace-nowrap',
                         isActive
                           ? 'text-slate-900 dark:text-white border-slate-900 dark:border-white'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-transparent'
@@ -191,6 +193,17 @@ export function RoleLayout({
                   )
                 })}
               </nav>
+
+              {/* Mobile Hamburger Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMobileMenu(true)}
+                aria-label="Open navigation menu"
+                className="md:hidden h-9 w-9 p-0 text-slate-600 dark:text-slate-400"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
             </div>
 
             {/* Right: Clock + Actions */}
@@ -335,6 +348,61 @@ export function RoleLayout({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Mobile Menu Overlay */}
+      {showMobileMenu && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+            onClick={() => setShowMobileMenu(false)}
+            aria-hidden="true"
+          />
+          
+          {/* Slide-out Menu */}
+          <div className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-slate-900 z-[70] md:hidden shadow-2xl">
+            {/* Menu Header */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <img src="/Vertex-icon.png" alt="" aria-hidden="true" className="h-6 w-auto object-contain dark:hidden" />
+                <img src="/Vertex-icon-2.png" alt="" aria-hidden="true" className="h-6 w-auto object-contain hidden dark:block" />
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{displayName}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMobileMenu(false)}
+                aria-label="Close menu"
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Menu Items */}
+            <nav className="p-2">
+              {navItems.map(item => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={cn(
+                      'flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors mb-1',
+                      isActive
+                        ? 'bg-slate-900 dark:bg-slate-800 text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+        </>
+      )}
     </div>
   )
 }

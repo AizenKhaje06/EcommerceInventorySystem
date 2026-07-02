@@ -61,6 +61,7 @@ export async function getInventoryItems(): Promise<InventoryItem[]> {
     item_status: item.item_status || 'good',
     bad_item_reason: item.bad_item_reason || null,
     bad_item_quantity: item.bad_item_quantity || 0,
+    bad_items_breakdown: item.bad_items_breakdown || {},  // ADDED: Include breakdown for bad stock table
   }))
 }
 
@@ -116,6 +117,7 @@ export async function updateInventoryItem(id: string, updates: Partial<Inventory
   if (updates.item_status !== undefined) updateData.item_status = updates.item_status
   if (updates.bad_item_reason !== undefined) updateData.bad_item_reason = updates.bad_item_reason
   if (updates.bad_item_quantity !== undefined) updateData.bad_item_quantity = updates.bad_item_quantity
+  if (updates.bad_items_breakdown !== undefined) updateData.bad_items_breakdown = updates.bad_items_breakdown
 
   // Recalculate totalCOGS if quantity or costPrice changed
   if (updates.quantity !== undefined || updates.costPrice !== undefined) {
