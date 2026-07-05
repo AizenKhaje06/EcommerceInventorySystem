@@ -138,31 +138,32 @@ export default function DeptManagerLogPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">Order Log</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Full order history for {assignedChannel} — all agents
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={fetchLog}
-            className="h-8 w-8 p-0 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+            className="w-full sm:w-8 h-8 sm:p-0 text-slate-500 hover:text-slate-900 dark:hover:text-white"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className="h-3.5 w-3.5 sm:mx-auto" />
+            <span className="sm:hidden ml-2">Refresh</span>
           </Button>
           <EnterpriseDateRangePicker
             startDate={startDate}
             endDate={endDate}
             onDateChange={(s, e) => { setStartDate(s); setEndDate(e) }}
+            className="w-full sm:w-auto"
           />
         </div>
       </div>
-
       {/* Filters */}
       <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
         <CardContent className="p-4">

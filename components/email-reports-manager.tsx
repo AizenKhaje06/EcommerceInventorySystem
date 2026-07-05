@@ -18,12 +18,12 @@ import {
   X,
   Check,
   Calendar,
-  RefreshCw,
-  Loader2
+  RefreshCw
 } from "lucide-react"
 import { toast } from "sonner"
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api-client"
 import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 interface EmailSchedule {
   id: string
@@ -355,7 +355,7 @@ export function EmailReportsManager() {
       <div className="space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <CustomLoader size="lg" />
           </div>
         ) : schedules.length === 0 ? (
           <Card className="border border-dashed border-slate-300 dark:border-slate-700">

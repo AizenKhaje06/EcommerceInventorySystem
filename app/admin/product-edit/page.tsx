@@ -200,7 +200,7 @@ export default function ProductEditPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-slate-50 dark:bg-slate-800/50">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide w-[25%]">Product</th>
+                  <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-800/50 shadow-[2px_0_4px_rgba(0,0,0,0.1)] px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide w-[25%]">Product</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide w-[12%]">Category</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide w-[10%]">Status</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide w-[10%]">Stock</th>
@@ -215,7 +215,7 @@ export default function ProductEditPage() {
               <tbody>
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="border-b border-border hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-foreground w-[25%]">{item.name}</td>
+                    <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 shadow-[2px_0_4px_rgba(0,0,0,0.1)] px-4 py-3 text-sm font-medium text-foreground w-[25%]">{item.name}</td>
                     <td className="px-4 py-3 text-sm text-muted-foreground w-[12%]">{item.category}</td>
                     <td className="px-4 py-3 text-center text-sm w-[10%]"><span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">OK</span></td>
                     <td className="px-4 py-3 text-right text-sm font-semibold text-foreground w-[10%]">{item.quantity}</td>

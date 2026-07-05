@@ -198,8 +198,8 @@ export default function ReportsPage() {
       {/* Section */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Comprehensive Report</h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">Comprehensive Report</h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
             Full business overview - sales, inventory, orders & analytics
           </p>
         </div>
@@ -286,20 +286,30 @@ export default function ReportsPage() {
       {depts.length > 0 && (
         <Card className="border-0 shadow-md mt-4">
           <CardContent className="p-0">
+            {/* Mobile Scroll Hint */}
+            <div className="md:hidden px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-blue-100 dark:border-blue-800">
+              <p className="text-xs text-blue-700 dark:text-blue-300 flex items-center justify-center gap-2 font-medium">
+                <span className="text-blue-500">←</span>
+                <span>Swipe to see all columns</span>
+                <span className="text-blue-500">→</span>
+              </p>
+            </div>
+            
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-slate-100 dark:bg-slate-800 text-left">
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Channel</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Revenue</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Cost</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Profit</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Margin</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Orders</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Items Sold</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="min-w-[800px]">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-800 text-left">
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Channel</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Revenue</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Cost</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Profit</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Margin</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Orders</th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Items Sold</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {depts.map((d) => {
                     const margin = d.revenue > 0 ? (d.profit / d.revenue * 100) : 0
                     return (
@@ -321,6 +331,7 @@ export default function ReportsPage() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </CardContent>
         </Card>

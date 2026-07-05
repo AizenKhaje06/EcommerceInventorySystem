@@ -2,10 +2,11 @@
 
 import { useState, useRef, useCallback } from "react"
 import imageCompression from "browser-image-compression"
-import { ImageIcon, Upload, X, Loader2 } from "lucide-react"
+import { ImageIcon, Upload, X } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { ImageCropper } from "@/components/ui/image-cropper"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 interface ImageUploadProps {
   currentImageUrl?: string | null
@@ -241,7 +242,7 @@ export function ImageUpload({
           <div className="flex flex-col items-center justify-center h-full gap-2 px-4 text-center">
             {uploading ? (
               <>
-                <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+                <CustomLoader size="lg" />
                 <p className="text-sm text-slate-500 dark:text-slate-400">Compressing & uploading...</p>
               </>
             ) : (
@@ -266,7 +267,7 @@ export function ImageUpload({
         {uploading && preview && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-8 w-8 text-white animate-spin" />
+              <CustomLoader size="lg" />
               <p className="text-white text-xs font-medium">Uploading...</p>
             </div>
           </div>

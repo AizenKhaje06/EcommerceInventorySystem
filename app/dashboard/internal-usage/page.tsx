@@ -329,10 +329,10 @@ export default function InternalUsagePage() {
       {/* Page Header - Professional */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1 leading-tight">
             Internal Usage Overview
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             Track demo displays, internal consumption, and warehouse transfers with real-time cost analytics
           </p>
         </div>
@@ -348,36 +348,38 @@ export default function InternalUsagePage() {
         )}
       </div>
 
-      {/* Tabs - Professional Design */}
+      {/* Tabs - Professional Design - Mobile Responsive */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-lg h-auto gap-1">
           <TabsTrigger 
             value="overview" 
-            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2 text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400"
+            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400 flex items-center justify-center gap-1.5 sm:gap-2"
           >
-            <PieChart className="h-4 w-4 mr-2" />
-            Overview
+            <PieChart className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="truncate">Overview</span>
           </TabsTrigger>
           <TabsTrigger 
             value="sales-channels"
-            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2 text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400"
+            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400 flex items-center justify-center gap-1.5 sm:gap-2"
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Sales Channels
+            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="truncate hidden xs:inline">Sales Channels</span>
+            <span className="truncate xs:hidden">Channels</span>
           </TabsTrigger>
           <TabsTrigger 
             value="cost-analysis"
-            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2 text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400"
+            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400 flex items-center justify-center gap-1.5 sm:gap-2"
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Cost Analysis
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="truncate hidden xs:inline">Cost Analysis</span>
+            <span className="truncate xs:hidden">Cost</span>
           </TabsTrigger>
           <TabsTrigger 
             value="transaction-history"
-            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2 text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400"
+            className="data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-md py-2.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors data-[state=inactive]:text-slate-600 dark:data-[state=inactive]:text-slate-400 flex items-center justify-center gap-1.5 sm:gap-2"
           >
-            <Calendar className="h-4 w-4 mr-2" />
-            History
+            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="truncate">History</span>
           </TabsTrigger>
         </TabsList>
 
@@ -758,23 +760,23 @@ export default function InternalUsagePage() {
 
         {/* Transaction History Tab - Professional Table Design */}
         <TabsContent value="transaction-history" className="space-y-6">
-          {/* Filters and Search */}
-          <div className="flex items-center gap-3 mt-6">
-            {/* Search Input - Half Width */}
-            <div className="relative w-1/2">
+          {/* Filters and Search - Mobile Responsive */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-6">
+            {/* Search Input - Full width on mobile, half on desktop */}
+            <div className="relative w-full sm:w-1/2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search by item, department, or staff..."
                 value={searchTable}
                 onChange={(e) => setSearchTable(e.target.value)}
-                className="pl-10 h-10 focus:ring-2 focus:ring-blue-500/20"
+                className="pl-10 h-11 sm:h-10 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             
-            {/* Filters - Right Side */}
-            <div className="flex items-center gap-3 ml-auto">
+            {/* Filters - Full width on mobile, right side on desktop */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:ml-auto w-full sm:w-auto">
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-[200px] h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
+                <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] h-11 sm:h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -785,7 +787,7 @@ export default function InternalUsagePage() {
               </Select>
               {(getCurrentUser()?.role === 'admin' || getCurrentUser()?.role === 'logistics-admin') && (
                 <Select value={filterSalesChannel} onValueChange={setFilterSalesChannel}>
-                  <SelectTrigger className="w-[200px] h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
+                  <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] h-11 sm:h-10 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500/20">
                     <SelectValue placeholder="Sales Channel" />
                   </SelectTrigger>
                   <SelectContent>

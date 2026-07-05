@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Search, Pencil, Trash2, PackagePlus, Package, Filter, X, ArrowUpDown, AlertCircle, TrendingUp, Warehouse, Tag, Loader2, LayoutGrid, LayoutList, Eye, ShoppingCart, Check, Building2, FileDown, FileSpreadsheet, ChevronDown, AlertTriangle } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, PackagePlus, Package, Filter, X, ArrowUpDown, AlertCircle, TrendingUp, Warehouse, Tag, LayoutGrid, LayoutList, Eye, ShoppingCart, Check, Building2, FileDown, FileSpreadsheet, ChevronDown, AlertTriangle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -24,17 +24,20 @@ import { getCurrentUser } from "@/lib/auth"
 import { apiGet, apiDelete, apiPost, apiPut } from "@/lib/api-client"
 import { getCurrentUserRole } from '@/lib/role-utils'
 import { toast } from 'sonner'
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 const SALES_CHANNELS = ['Shopee', 'Lazada', 'Facebook', 'TikTok', 'Physical Store'] as const
 
 import { TableSkeleton, CardSkeleton, StatCardSkeleton } from '@/components/ui/table-skeleton'
 import { BrandLoader } from '@/components/ui/brand-loader'
 import { TablePagination } from "@/components/ui/table-pagination"
+import { useDebounce } from "@/hooks/useDebounce"
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([])
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([])
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebounce(search, 300) // Debounce search input
   const [salesChannelFilter, setSalesChannelFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [productTypeFilter, setProductTypeFilter] = useState("all")
@@ -279,8 +282,8 @@ export default function InventoryPage() {
   useEffect(() => {
     let filtered = items
 
-    if (search) {
-      const searchLower = search.toLowerCase()
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase()
       filtered = filtered.filter(
         (item) =>
           item.name.toLowerCase().includes(searchLower) ||
@@ -331,7 +334,7 @@ export default function InventoryPage() {
     }
 
     setFilteredItems(filtered)
-  }, [search, salesChannelFilter, categoryFilter, productTypeFilter, statusFilter, sortBy, items])
+  }, [debouncedSearch, salesChannelFilter, categoryFilter, productTypeFilter, statusFilter, sortBy, items])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredItems.length / pageSize)
@@ -1154,64 +1157,69 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header - Professional */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">
+    <div className="max-w-[1400px] mx-auto py-4 px-4 sm:px-6 space-y-5 sm:space-y-6">
+      {/* Page Header - Professional & Mobile-Optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1.5 leading-tight">
             Inventory Overview
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             Comprehensive product inventory control and management
           </p>
         </div>
         
-        {/* Action Buttons - Top Right */}
-        <div className="flex items-center gap-2">
-          {/* Categories - Hidden for operations (agents), dept-manager, and logistics-admin */}
-          {!isReadOnly && userRole !== 'logistics-admin' && (
-            <Button
-              onClick={() => setCategoryDialogOpen(true)}
-              variant="outline"
-              className="h-7 w-[100px] px-2.5 text-xs border-slate-200 dark:border-slate-700 rounded-md"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Categories
-            </Button>
-          )}
-
-          {/* Stores - Hidden for operations (agents) and logistics-admin */}
-          {userRole !== 'operations' && userRole !== 'logistics-admin' && (
-            <Button
-              onClick={() => setStoreDialogOpen(true)}
-              className="h-7 w-[100px] px-2.5 text-xs bg-orange-600 hover:bg-orange-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Stores
-            </Button>
-          )}
-
-          {/* Bundle - Hidden for operations (agents) and logistics-admin */}
-          {userRole !== 'operations' && userRole !== 'logistics-admin' && (
-            <Button
-              onClick={() => setCreateBundleOpen(true)}
-              className="h-7 w-[100px] px-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-md shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Bundle
-            </Button>
-          )}
-
-          {/* Add Product - Hidden for operations (agents) and dept-manager */}
+        {/* Action Buttons - Mobile-Optimized Layout */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+          {/* Add Product - Primary Action - Full width on mobile */}
           {!isReadOnly && (
             <Button
               onClick={() => setAddDialogOpen(true)}
-              className="h-7 w-[100px] px-2.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+              className="w-full sm:w-auto h-11 sm:h-9 px-4 sm:px-3 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-md shadow-sm"
             >
-              <Plus className="h-3 w-3 mr-1" />
-              Product
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
             </Button>
           )}
+          
+          {/* Secondary Actions - Grid on mobile, flex on desktop */}
+          <div className="grid grid-cols-3 sm:flex gap-2">
+            {/* Categories - Hidden for operations (agents), dept-manager, and logistics-admin */}
+            {!isReadOnly && userRole !== 'logistics-admin' && (
+              <Button
+                onClick={() => setCategoryDialogOpen(true)}
+                variant="outline"
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm border-slate-200 dark:border-slate-700 rounded-lg sm:rounded-md"
+              >
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                <span className="hidden sm:inline">Categories</span>
+                <span className="sm:hidden">Category</span>
+              </Button>
+            )}
+
+            {/* Stores - Hidden for operations (agents) and logistics-admin */}
+            {userRole !== 'operations' && userRole !== 'logistics-admin' && (
+              <Button
+                onClick={() => setStoreDialogOpen(true)}
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-lg sm:rounded-md shadow-sm"
+              >
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                <span className="hidden sm:inline">Stores</span>
+                <span className="sm:hidden">Store</span>
+              </Button>
+            )}
+
+            {/* Bundle - Hidden for operations (agents) and logistics-admin */}
+            {userRole !== 'operations' && userRole !== 'logistics-admin' && (
+              <Button
+                onClick={() => setCreateBundleOpen(true)}
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg sm:rounded-md shadow-sm"
+              >
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                Bundle
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1437,7 +1445,7 @@ export default function InventoryPage() {
           ) : (
             /* Table View */
             <>
-              {/* Mobile Scroll Hint - Enhanced */}
+              {/* Mobile Scroll Hint */}
               <div className="md:hidden px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-blue-100 dark:border-blue-800">
                 <p className="text-xs text-blue-700 dark:text-blue-300 flex items-center justify-center gap-2 font-medium">
                   <span className="text-blue-500">←</span>
@@ -1454,10 +1462,10 @@ export default function InventoryPage() {
                       {statusFilter === "bad" ? (
                         /* Bad Stock Table Headers - Complete Reasons */
                         <>
-                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky left-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[80px]">
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 md:sticky md:left-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[80px]">
                             Image
                           </th>
-                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky left-[80px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[180px]">
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 md:sticky md:left-[80px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[180px]">
                             Item Name
                           </th>
                           <th className="py-2.5 px-3 text-center text-[10px] font-bold text-red-300 uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
@@ -1514,25 +1522,26 @@ export default function InventoryPage() {
                           <th className="py-2.5 px-3 text-center text-[10px] font-bold text-slate-300 uppercase tracking-wider border-r border-slate-700/50 w-[80px]">
                             Other
                           </th>
-                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky right-[180px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                          <th className="py-2.5 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 md:sticky md:right-[180px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[90px]">
                             Total Bad
                           </th>
-                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 sticky right-[90px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 md:sticky md:right-[90px] bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[90px]">
                             Cost
                           </th>
-                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider sticky right-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black z-20 w-[90px]">
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider md:sticky md:right-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[90px]">
                             COGS Lost
                           </th>
                         </>
                       ) : (
-                        /* Normal Table Headers */
+                        /* Normal Table Headers - No Sticky on Mobile and Desktop */
                         <>
-                          {/* Image Column */}
-                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 w-[90px]">
+                          {/* Image Column - Regular (No Sticky) */}
+                          <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black w-[90px]">
                             Image
                           </th>
+                          {/* Product Name - Regular (No Sticky) */}
                           <th className={cn(
-                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50",
+                            "py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black",
                             !isReadOnly ? "w-[20%]" : "w-[25%]"
                           )}>
                             Product
@@ -1574,7 +1583,7 @@ export default function InventoryPage() {
                             Margin
                           </th>
                           {!isReadOnly && (
-                            <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider w-[11%]">
+                            <th className="py-2.5 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider md:sticky md:right-0 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black md:z-20 w-[140px]">
                               Actions
                             </th>
                           )}
@@ -1628,8 +1637,8 @@ export default function InventoryPage() {
                                 : "transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30"
                             }
                           >
-                            {/* Image - Sticky Left */}
-                            <td className="py-2 px-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
+                            {/* Image - No Sticky on Mobile, Sticky on Desktop (Bad Stocks) */}
+                            <td className="py-2 px-3 md:sticky md:left-0 bg-white dark:bg-slate-900 md:z-10">
                               <div className="flex items-center justify-center">
                                 {item.imageUrl ? (
                                   <div className="w-10 h-10 rounded overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 border-2 border-red-300 dark:border-red-700">
@@ -1654,8 +1663,8 @@ export default function InventoryPage() {
                               </div>
                             </td>
                             
-                            {/* Item Name - Sticky Left */}
-                            <td className="py-2 px-3 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r border-slate-200 dark:border-slate-700">
+                            {/* Item Name - No Sticky on Mobile, Sticky on Desktop (Bad Stocks) */}
+                            <td className="py-2 px-3 md:sticky md:left-[80px] bg-white dark:bg-slate-900 md:z-10 border-r border-slate-200 dark:border-slate-700">
                               <div className="font-medium text-slate-900 dark:text-white">{item.name}</div>
                             </td>
                             
@@ -1839,22 +1848,22 @@ export default function InventoryPage() {
                               </span>
                             </td>
                             
-                            {/* Total Bad */}
-                            <td className="py-2 px-3 text-center sticky right-[180px] bg-white dark:bg-slate-900">
+                            {/* Total Bad - No Sticky on Mobile, Sticky on Desktop (Bad Stocks) */}
+                            <td className="py-2 px-3 text-center md:sticky md:right-[180px] bg-white dark:bg-slate-900 md:z-10">
                               <span className="inline-flex items-center justify-center min-w-[50px] px-2.5 py-1 rounded-lg font-bold text-sm bg-red-600 text-white">
                                 {totalBadQty}
                               </span>
                             </td>
                             
-                            {/* Cost */}
-                            <td className="py-2 px-3 sticky right-[90px] bg-white dark:bg-slate-900">
+                            {/* Cost - No Sticky on Mobile, Sticky on Desktop (Bad Stocks) */}
+                            <td className="py-2 px-3 md:sticky md:right-[90px] bg-white dark:bg-slate-900 md:z-10">
                               <div className="text-slate-700 dark:text-slate-300 font-medium">
                                 ₱{item.costPrice.toFixed(2)}
                               </div>
                             </td>
                             
-                            {/* COGS Lost */}
-                            <td className="py-2 px-3 sticky right-0 bg-white dark:bg-slate-900">
+                            {/* COGS Lost - No Sticky on Mobile, Sticky on Desktop (Bad Stocks) */}
+                            <td className="py-2 px-3 md:sticky md:right-0 bg-white dark:bg-slate-900 md:z-10">
                               <div className="text-red-700 dark:text-red-300 font-bold">
                                 ₱{totalCost.toFixed(2)}
                               </div>
@@ -1874,8 +1883,8 @@ export default function InventoryPage() {
                               : "transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30"
                           }
                         >
-                          {/* Image Column */}
-                          <td className="py-2 px-3">
+                          {/* Image Column - Regular (No Sticky) */}
+                          <td className="py-2 px-3 bg-white dark:bg-slate-900">
                             <div className="flex items-center justify-center">
                               {item.imageUrl ? (
                                 <div className="w-10 h-10 rounded overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
@@ -1902,8 +1911,8 @@ export default function InventoryPage() {
                             </div>
                           </td>
                           
-                          {/* Product Name */}
-                          <td className="py-2 px-3">
+                          {/* Product Name - Regular (No Sticky) */}
+                          <td className="py-2 px-3 bg-white dark:bg-slate-900">
                             <div className="flex items-center gap-2">
                               <div className="min-w-0 flex-1">
                                 <p 
@@ -2202,7 +2211,7 @@ export default function InventoryPage() {
 
                           {/* Actions Column - Hidden for agents (operations) and dept-manager */}
                           {!isReadOnly && (
-                            <td className="py-2 px-3">
+                            <td className="py-2 px-3 md:sticky md:right-0 bg-white dark:bg-slate-900 md:z-10">
                               <TooltipProvider>
                                 <div className="flex justify-start gap-0">
 
@@ -2510,7 +2519,7 @@ export default function InventoryPage() {
                     className="h-10 px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold flex-shrink-0 shadow-sm"
                   >
                     {submitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CustomLoader size="sm" />
                     ) : (
                       <>
                         <Plus className="h-4 w-4 mr-1.5" />
@@ -2566,7 +2575,7 @@ export default function InventoryPage() {
                         disabled={submitting || !editCategoryValue.trim()}
                         className="h-9 px-4 bg-green-600 hover:bg-green-700 text-white text-sm whitespace-nowrap"
                       >
-                        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                        {submitting ? <CustomLoader size="sm" /> : "Save"}
                       </Button>
                       <Button
                         size="sm"
@@ -2698,7 +2707,7 @@ export default function InventoryPage() {
                       className="h-10 px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold flex-shrink-0 shadow-sm"
                     >
                       {submitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <CustomLoader size="sm" />
                       ) : (
                         <>
                           <Plus className="h-4 w-4 mr-1.5" />
@@ -2781,7 +2790,7 @@ export default function InventoryPage() {
                                   size="sm"
                                   className="h-8 w-8 p-0"
                                 >
-                                  {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                                  {submitting ? <CustomLoader size="sm" /> : <Check className="h-3 w-3" />}
                                 </Button>
                                 <Button
                                   onClick={() => {
@@ -2887,7 +2896,7 @@ export default function InventoryPage() {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <CustomLoader size="sm" className="mr-2" />
                   Deleting...
                 </>
               ) : (

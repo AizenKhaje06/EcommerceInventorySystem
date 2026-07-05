@@ -605,31 +605,32 @@ export default function SalesChannelDetailPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header */}
+      {/* Page Header - Mobile Responsive */}
       <div className="mb-6 animate-in fade-in-0 slide-in-from-top-4 duration-700">
         <Button 
           variant="ghost" 
           onClick={() => router.back()}
-          className="mb-4 -ml-2"
+          className="mb-4 -ml-2 text-sm sm:text-base"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Sales Channels
         </Button>
         
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-4">
+          {/* Title Section */}
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
               {data.name}
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-base">
+            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
               Detailed performance analytics and cash flow
             </p>
           </div>
           
-          {/* Date Filter and Export Button - Admin only */}
+          {/* Date Filter and Export Button - Admin only - Responsive Stack */}
           {!isTeamLeader && (
-            <div className="flex items-center gap-3">
-              {/* Date Range Picker */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Date Range Picker - Full Width on Mobile */}
               <EnterpriseDateRangePicker
                 startDate={startDate}
                 endDate={endDate}
@@ -637,16 +638,16 @@ export default function SalesChannelDetailPage() {
                   setStartDate(start)
                   setEndDate(end)
                 }}
-                className="h-11 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-semibold transition-all shadow-sm"
+                className="w-full sm:w-auto h-11 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-semibold transition-all shadow-sm"
               />
               
-              {/* Export Dropdown */}
+              {/* Export Dropdown - Full Width on Mobile */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="group relative inline-flex items-center justify-center p-0.5 text-sm font-medium text-gray-900 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200">
-                    <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 flex items-center gap-2">
+                  <button className="w-full sm:w-auto group relative inline-flex items-center justify-center p-0.5 text-sm font-medium text-gray-900 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200">
+                    <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 flex items-center justify-center gap-2 w-full">
                       <FileDown className="h-4 w-4" />
-                      Export Report
+                      <span className="whitespace-nowrap">Export Report</span>
                       <ChevronDown className="h-4 w-4" />
                     </span>
                   </button>
@@ -1396,13 +1397,6 @@ export default function SalesChannelDetailPage() {
                           }}
                           cursor={{ fill: 'rgba(59,130,246,0.06)' }}
                         />
-                          contentStyle={{
-                            backgroundColor: 'rgba(255,255,255,0.97)',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            fontSize: '12px'
-                          }}
-                        />
                         <Bar dataKey="revenue" fill="#3B82F6" radius={[0, 6, 6, 0]} name="revenue" />
                         <Bar dataKey="estimatedProfit" fill="#10B981" radius={[0, 6, 6, 0]} name="estimatedProfit" />
                       </BarChart>
@@ -1604,13 +1598,6 @@ export default function SalesChannelDetailPage() {
                             return null
                           }}
                           cursor={{ fill: 'rgba(59,130,246,0.06)' }}
-                        />
-                          contentStyle={{
-                            backgroundColor: 'rgba(255,255,255,0.97)',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            fontSize: '12px'
-                          }}
                         />
                         <Bar dataKey="revenue" fill="#3B82F6" radius={[0, 6, 6, 0]} name="revenue" />
                         <Bar dataKey="profit" fill="#10B981" radius={[0, 6, 6, 0]} name="profit" />

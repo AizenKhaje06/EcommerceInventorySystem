@@ -861,7 +861,92 @@ export default function PackerDashboard() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3 px-2">
+                {paginatedOrders.map((order) => (
+                  <Card 
+                    key={order.id} 
+                    className={`overflow-hidden ${
+                      order.is_cancelled 
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+                        : 'hover:shadow-lg transition-shadow'
+                    }`}
+                  >
+                    <div className="p-4 space-y-3">
+                      {/* Header Row */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <Badge className="mb-2 text-xs font-semibold">
+                            {order.channel}
+                          </Badge>
+                          <div className="font-mono text-sm font-bold text-blue-600 dark:text-blue-400 break-all">
+                            {order.waybill}
+                          </div>
+                        </div>
+                        {order.is_cancelled && (
+                          <Badge className="bg-red-600 text-white text-xs font-bold">
+                            CANCELLED
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Item Info */}
+                      <div className="space-y-1">
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2">
+                          {order.itemName}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                          <Package className="h-3.5 w-3.5" />
+                          <span>{order.quantity} units</span>
+                          <span>•</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">
+                            ₱{order.totalAmount.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-2 text-xs">
+                          <User className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="text-slate-900 dark:text-white font-medium truncate">
+                            {order.customerName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Phone className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="text-slate-600 dark:text-slate-400">
+                            {order.customerPhone}
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-2 text-xs">
+                          <MapPin className="h-3.5 w-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-slate-600 dark:text-slate-400 line-clamp-2">
+                            {order.customerAddress}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        onClick={() => handleViewOrder(order)}
+                        disabled={order.is_cancelled || packing}
+                        className={`w-full h-12 text-sm font-semibold ${
+                          order.is_cancelled
+                            ? 'bg-slate-300 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        {order.is_cancelled ? 'Order Cancelled' : 'View Details'}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   {/* Desktop Header - Hidden on Mobile */}
                   <thead className="sticky top-0 z-10 hidden md:table-header-group">

@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { CustomLoader } from './custom-loader'
 
 interface LoadingOverlayProps {
   message?: string
@@ -17,7 +17,9 @@ export function LoadingOverlay({ message = 'Please wait...', show }: LoadingOver
             <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 animate-spin">
               <div className="absolute inset-2 bg-white dark:bg-slate-900 rounded-full"></div>
             </div>
-            <Loader2 className="absolute inset-0 m-auto h-8 w-8 text-blue-600 dark:text-blue-400 animate-spin" />
+            <div className="absolute inset-0 m-auto flex items-center justify-center">
+              <CustomLoader size="md" />
+            </div>
           </div>
           
           {/* Message */}

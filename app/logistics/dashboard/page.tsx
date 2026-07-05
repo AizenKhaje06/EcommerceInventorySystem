@@ -129,14 +129,33 @@ export default function LogisticsAdminDashboard() {
     })
   }, [packedHistory, startDate, endDate])
 
-  // Channel-filtered tracked orders and queue
-  const filteredQueue = useMemo(() =>
-    selectedChannel === 'all' ? packingQueue : packingQueue.filter(o => o.channel === selectedChannel)
-  , [packingQueue, selectedChannel])
+  // Date-filtered packing queue
+  const dateFilteredQueue = useMemo(() => {
+    if (!startDate || !endDate) return packingQueue
+    return packingQueue.filter(o => {
+      const d = new Date(o.orderDate)
+      return d >= startDate && d <= endDate
+    })
+  }, [packingQueue, startDate, endDate])
 
+  // Date-filtered tracked orders
+  const dateFilteredTracked = useMemo(() => {
+    if (!startDate || !endDate) return trackedOrders
+    return trackedOrders.filter(o => {
+      const d = new Date(o.orderDate)
+      return d >= startDate && d <= endDate
+    })
+  }, [trackedOrders, startDate, endDate])
+
+  // Channel + Date filtered queue
+  const filteredQueue = useMemo(() =>
+    selectedChannel === 'all' ? dateFilteredQueue : dateFilteredQueue.filter(o => o.channel === selectedChannel)
+  , [dateFilteredQueue, selectedChannel])
+
+  // Channel + Date filtered tracked orders
   const filteredTracked = useMemo(() =>
-    selectedChannel === 'all' ? trackedOrders : trackedOrders.filter(o => o.department === selectedChannel)
-  , [trackedOrders, selectedChannel])
+    selectedChannel === 'all' ? dateFilteredTracked : dateFilteredTracked.filter(o => o.department === selectedChannel)
+  , [dateFilteredTracked, selectedChannel])
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {}

@@ -204,19 +204,22 @@ export default function OperationsDashboardPage() {
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between animate-in fade-in-0 slide-in-from-top-4 duration-700">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">Operations Dashboard</h2>
-          <p className="text-slate-600 dark:text-slate-400 text-base">Quick overview of inventory and operations</p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 animate-in fade-in-0 slide-in-from-top-4 duration-700">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text mb-1 sm:mb-2">Operations Dashboard</h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">Quick overview of inventory and operations</p>
         </div>
-        <EnterpriseDateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onDateChange={(start, end) => {
-            setStartDate(start)
-            setEndDate(end)
-          }}
-        />
+        <div className="flex-shrink-0">
+          <EnterpriseDateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onDateChange={(start, end) => {
+              setStartDate(start)
+              setEndDate(end)
+            }}
+            className="w-full sm:w-auto"
+          />
+        </div>
       </div>
 
       {/* Key Metrics - 5 Primary KPIs - Professional Corporate Design */}

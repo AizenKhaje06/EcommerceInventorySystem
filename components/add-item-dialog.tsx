@@ -8,10 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Package, Loader2 } from "lucide-react"
+import { Package } from "lucide-react"
 import { apiGet, apiPost, apiPut } from "@/lib/api-client"
 import { toast } from "sonner"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 interface AddItemDialogProps {
   open: boolean
@@ -241,7 +242,7 @@ export function AddItemDialog({ open, onOpenChange, onSuccess }: AddItemDialogPr
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <CustomLoader size="sm" className="mr-2" />
                   Adding Product...
                 </>
               ) : (

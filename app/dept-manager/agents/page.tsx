@@ -92,8 +92,8 @@ export default function AgentsPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">Agent Performance</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -104,6 +104,7 @@ export default function AgentsPage() {
           startDate={startDate}
           endDate={endDate}
           onDateChange={(s, e) => { setStartDate(s); setEndDate(e) }}
+          className="w-full sm:w-auto"
         />
       </div>
 

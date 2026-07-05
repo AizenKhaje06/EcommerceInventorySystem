@@ -375,20 +375,20 @@ export default function LogPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header with Date Filter - Professional Style */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Page Header with Date Filter - Mobile Responsive */}
+      <div className="flex flex-col gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Activity Logs Overview</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">View all system operations and changes</p>
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">Activity Logs Overview</h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">View all system operations and changes</p>
         </div>
         
-        {/* Date Range + Export */}
-        <div className="flex items-center gap-3">
+        {/* Date Range + Export - Mobile Stack */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button
             onClick={exportLogsToExcel}
             disabled={filteredLogs.length === 0}
             size="sm"
-            className="h-9 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold gap-2 shadow-sm disabled:opacity-50"
+            className="w-full sm:w-auto h-9 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold gap-2 shadow-sm disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
             Export Excel
@@ -488,13 +488,13 @@ export default function LogPage() {
       {/* Filters Section - SaaS Professional Design */}
       <div className="mb-4">
         {/* Title Row */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-600 dark:text-slate-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm tracking-tight">Search & Filter Logs</h3>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
             {/* Clear All Button - Aligned with title */}
             {hasActiveFilters && (
               <Button
@@ -509,7 +509,7 @@ export default function LogPage() {
             )}
             
             {/* Results Summary - Above filters on right */}
-            <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
               Showing <span className="font-bold text-slate-900 dark:text-white">{paginatedLogs.length}</span> of <span className="font-bold text-slate-900 dark:text-white">{filteredLogs.length}</span> logs
               {hasActiveFilters && ` (filtered from ${logs.length} total)`}
             </div>
@@ -517,9 +517,9 @@ export default function LogPage() {
         </div>
 
         {/* Search and Filters Row */}
-        <div className="flex gap-3">
-          {/* Search - Fixed width */}
-          <div className="relative" style={{ width: '450px' }}>
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search - Responsive width */}
+          <div className="relative flex-1 sm:max-w-[450px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search logs..."
@@ -529,15 +529,14 @@ export default function LogPage() {
             />
           </div>
 
-          {/* Spacer to push filters to the right */}
-          <div className="flex-1" />
-
-          {/* Operation Filter */}
-          <Select value={operationFilter} onValueChange={setOperationFilter}>
-            <SelectTrigger className="h-10 w-[200px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-              <SelectValue placeholder="All Operations" />
-            </SelectTrigger>
-            <SelectContent>
+          {/* Filters Container - Responsive */}
+          <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+            {/* Operation Filter */}
+            <Select value={operationFilter} onValueChange={setOperationFilter}>
+              <SelectTrigger className="h-10 flex-1 sm:w-[160px] md:w-[200px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                <SelectValue placeholder="All Operations" />
+              </SelectTrigger>
+              <SelectContent>
               <SelectItem value="all">All Operations</SelectItem>
               <SelectItem value="create">Create</SelectItem>
               <SelectItem value="update">Update</SelectItem>
@@ -557,7 +556,7 @@ export default function LogPage() {
           {/* Sales Channel Filter - Admin Only */}
           {!isDepartment && (
             <Select value={salesChannelFilter} onValueChange={setSalesChannelFilter}>
-              <SelectTrigger className="h-10 w-[180px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+              <SelectTrigger className="h-10 flex-1 sm:w-[150px] md:w-[180px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
                 <SelectValue placeholder="All Channels" />
               </SelectTrigger>
               <SelectContent>
@@ -571,6 +570,7 @@ export default function LogPage() {
               </SelectContent>
             </Select>
           )}
+          </div>
         </div>
       </div>
 

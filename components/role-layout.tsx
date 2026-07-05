@@ -161,6 +161,7 @@ export function RoleLayout({
               <div className="flex items-center gap-2 sm:gap-3 pr-3 sm:pr-8 border-r border-slate-200 dark:border-slate-800">
                 <img src="/Vertex-icon.png" alt="" aria-hidden="true" className="h-6 w-auto object-contain dark:hidden" />
                 <img src="/Vertex-icon-2.png" alt="" aria-hidden="true" className="h-6 w-auto object-contain hidden dark:block" />
+                {/* Hide name on mobile - show only on sm and up */}
                 <div className="hidden sm:flex flex-col">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-none">
                     {brandSubtitle || 'Welcome back'}
@@ -169,7 +170,6 @@ export function RoleLayout({
                     {displayName}
                   </span>
                 </div>
-                <div className="sm:hidden text-xs font-semibold text-slate-900 dark:text-white">{displayName}</div>
               </div>
 
               {/* Desktop Navigation - Hidden on mobile */}

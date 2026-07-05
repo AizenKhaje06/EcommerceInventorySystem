@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [lowStockItems, setLowStockItems] = useState<InventoryItem[]>([])
   const [outOfStockItems, setOutOfStockItems] = useState<InventoryItem[]>([])
+  const [allItems, setAllItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("ID")
@@ -86,11 +87,13 @@ export default function DashboardPage() {
       })
 
       setStats(stats)
+      setAllItems(items)
       setLowStockItems(items.filter((item: InventoryItem) => item.quantity > 0 && item.quantity <= item.reorderLevel))
       setOutOfStockItems(items.filter((item: InventoryItem) => item.quantity === 0))
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
       setStats(null)
+      setAllItems([])
       setLowStockItems([])
       setOutOfStockItems([])
     } finally {
@@ -137,7 +140,7 @@ export default function DashboardPage() {
   const outOfStockCount = outOfStockItems.length
 
   // Calculate Bad Stock metrics
-  const badStockItems = items?.filter((item: InventoryItem) => item.item_status === 'bad') || []
+  const badStockItems = allItems?.filter((item: InventoryItem) => item.item_status === 'bad') || []
   const totalBadQty = badStockItems.reduce((sum, item) => sum + (item.bad_item_quantity || 0), 0)
   const totalBadCOGS = badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.costPrice), 0)
   const totalBadRevenueLost = badStockItems.reduce((sum, item) => sum + ((item.bad_item_quantity || 0) * item.sellingPrice), 0)
@@ -183,17 +186,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header - Professional Shopify Style */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+    <div className="max-w-[1400px] mx-auto py-4 px-4 sm:px-6 space-y-5 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Dashboard Overview</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Welcome back! Here's what's happening with your inventory.</p>
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">Dashboard Overview</h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Welcome back! Here's what's happening with your inventory.</p>
         </div>
         
-        {/* Actions - Date Picker Only */}
-        <div className="flex items-center gap-3">
-          {/* Date Range Picker - No wrapper, direct component */}
+        {/* Actions - Date Picker - Full Width on Mobile */}
+        <div className="flex items-center">
           <EnterpriseDateRangePicker
             startDate={startDate}
             endDate={endDate}
@@ -201,10 +203,10 @@ export default function DashboardPage() {
               setStartDate(start)
               setEndDate(end)
             }}
+            className="w-full sm:w-auto"
           />
         </div>
       </div>
-
       {/* Redesigned KPI Cards - 2 Rows Only */}
       
       {/* Row 1: Financial Metrics (4 cards) */}

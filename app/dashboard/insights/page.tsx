@@ -316,8 +316,8 @@ export default function InsightsPage() {
       {/* Page Header - Professional */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">Business Insights Overview</h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1 leading-tight">Business Insights Overview</h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             AI-powered analytics and strategic recommendations for data-driven decisions
           </p>
         </div>
@@ -415,7 +415,27 @@ export default function InsightsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="relative enterprise-tab-container">
+        {/* Mobile: Dropdown Select */}
+        <div className="md:hidden w-full px-2 mb-4">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+              <SelectValue placeholder="Select Analysis Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="abc">ABC Analysis</SelectItem>
+              <SelectItem value="turnover">Turnover</SelectItem>
+              <SelectItem value="forecast">Forecast</SelectItem>
+              <SelectItem value="profit">Profit</SelectItem>
+              <SelectItem value="fast-moving">Fast Moving</SelectItem>
+              <SelectItem value="slow-moving">Slow Moving</SelectItem>
+              <SelectItem value="deadstock">Dead Stock</SelectItem>
+              <SelectItem value="returns">Returns</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: Tabs with scroll indicators */}
+        <div className="hidden md:block relative enterprise-tab-container">
           {/* Left Gradient Fade Indicator */}
           <div 
             className={`absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-slate-900 to-transparent pointer-events-none z-10 transition-opacity duration-300 ${
@@ -431,12 +451,13 @@ export default function InsightsPage() {
             }`}
             aria-hidden="true"
           />
-          
+
+          {/* Desktop: Horizontal Tabs */}
           <TabsList 
             ref={tabsRef}
             role="tablist"
             aria-label="Business insights navigation"
-            className="enterprise-tabs-list bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-0 h-auto rounded-none w-full justify-start overflow-x-auto scrollbar-hide scroll-smooth"
+            className="enterprise-tabs-list flex flex-row gap-2 p-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 h-auto rounded-none w-full justify-start overflow-x-auto scrollbar-hide scroll-smooth"
             style={{
               scrollSnapType: 'x mandatory',
               WebkitOverflowScrolling: 'touch',
@@ -448,7 +469,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'abc'}
               aria-controls="abc-panel"
-              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               ABC Analysis
@@ -458,7 +479,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'turnover'}
               aria-controls="turnover-panel"
-              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Turnover
@@ -468,7 +489,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'forecast'}
               aria-controls="forecast-panel"
-              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Forecast
@@ -478,7 +499,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'profit'}
               aria-controls="profit-panel"
-              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(37,99,235,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Profit
@@ -488,7 +509,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'fast-moving'}
               aria-controls="fast-moving-panel"
-              className="enterprise-tab relative data-[state=active]:bg-green-100 dark:data-[state=active]:bg-green-900/30 data-[state=active]:text-green-700 dark:data-[state=active]:text-green-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(34,197,94,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-green-100 dark:data-[state=active]:bg-green-900/30 data-[state=active]:text-green-700 dark:data-[state=active]:text-green-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(34,197,94,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Fast Moving
@@ -498,7 +519,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'slow-moving'}
               aria-controls="slow-moving-panel"
-              className="enterprise-tab relative data-[state=active]:bg-amber-100 dark:data-[state=active]:bg-amber-900/30 data-[state=active]:text-amber-700 dark:data-[state=active]:text-amber-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(245,158,11,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-amber-100 dark:data-[state=active]:bg-amber-900/30 data-[state=active]:text-amber-700 dark:data-[state=active]:text-amber-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(245,158,11,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Slow Moving
@@ -508,7 +529,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'deadstock'}
               aria-controls="deadstock-panel"
-              className="enterprise-tab relative data-[state=active]:bg-red-100 dark:data-[state=active]:bg-red-900/30 data-[state=active]:text-red-700 dark:data-[state=active]:text-red-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(239,68,68,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-red-100 dark:data-[state=active]:bg-red-900/30 data-[state=active]:text-red-700 dark:data-[state=active]:text-red-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(239,68,68,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Dead Stock
@@ -518,7 +539,7 @@ export default function InsightsPage() {
               role="tab"
               aria-selected={activeTab === 'returns'}
               aria-controls="returns-panel"
-              className="enterprise-tab relative data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(168,85,247,0.3)] rounded-lg px-6 md:px-8 py-3 font-medium text-base whitespace-nowrap transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="enterprise-tab relative data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_20px_rgba(168,85,247,0.3)] rounded-lg px-6 lg:px-8 py-3 font-medium text-base transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex-shrink-0 whitespace-nowrap"
               style={{ scrollSnapAlign: 'start' }}
             >
               Returns
@@ -709,16 +730,22 @@ export default function InsightsPage() {
               <CardTitle className="text-slate-900 dark:text-white">Detailed ABC Analysis</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Mobile scroll hint banner */}
+              <div className="md:hidden mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-center">
+                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">← Swipe to see all columns →</p>
+              </div>
+              
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                <table className="w-full text-sm">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">
-                        <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Product</th>
-                        <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Category</th>
-                        <th className="py-3 px-3 text-right text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Revenue %</th>
-                        <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider">Recommendation</th>
-                      </tr>
-                    </thead>
+                <div className="min-w-[700px]">
+                  <table className="w-full text-sm">
+                      <thead className="sticky top-0 z-10">
+                        <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">
+                          <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Product</th>
+                          <th className="py-3 px-3 text-center text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Category</th>
+                          <th className="py-3 px-3 text-right text-[10px] font-bold text-white uppercase tracking-wider border-r border-slate-700/50">Revenue %</th>
+                          <th className="py-3 px-3 text-left text-[10px] font-bold text-white uppercase tracking-wider">Recommendation</th>
+                        </tr>
+                      </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                       {filteredAbcAnalysis.slice(0, 20).map((item) => (
                         <tr key={item.itemId} className="transition-all duration-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30">
@@ -739,6 +766,7 @@ export default function InsightsPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -1513,8 +1541,13 @@ export default function InsightsPage() {
               </p>
             </CardHeader>
             <CardContent>
+              {/* Mobile Scroll Hint */}
+              <div className="md:hidden mb-3 text-center text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 py-2 rounded">
+                ← Swipe to see all columns →
+              </div>
+              
               <div className="overflow-x-auto -mx-6 px-6">
-                <div className="min-w-full inline-block align-middle">
+                <div className="min-w-[800px] inline-block align-middle w-full">
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black">

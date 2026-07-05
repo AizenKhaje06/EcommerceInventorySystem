@@ -197,7 +197,7 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
           </button>
 
           {/* User Info with Welcome Back */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0">
             {/* Department Logo - For Operations AND Dept. Head */}
             {((currentUser?.role === 'operations' || currentUser?.role === 'dept-manager') && currentUser?.assignedChannel) && (
               <div className="flex-shrink-0 hidden lg:block">
@@ -219,13 +219,13 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
               </div>
             )}
             
-            {/* Welcome Back + User Name + Role Badge */}
-            <div className="flex flex-col">
+            {/* Welcome Back + User Name + Role Badge - Hidden on mobile */}
+            <div className="hidden sm:flex flex-col min-w-0">
               <span className="text-[10px] text-slate-500 dark:text-amber-400/60 font-medium leading-none">Welcome back</span>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">{username}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white leading-tight truncate">{username}</span>
                 <span className={cn(
-                  "text-[10px] font-medium px-2 py-0.5 rounded-full",
+                  "text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0",
                   userRole === "Administrator" 
                     ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400" 
                     : userRole.includes("Dept") || userRole === "Dept. Head"

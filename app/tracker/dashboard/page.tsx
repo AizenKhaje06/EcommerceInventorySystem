@@ -707,7 +707,7 @@ export default function TrackerDashboardPage() {
               <div className="md:hidden px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                 <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 font-medium">
                   <span className="text-slate-500">Ã¢â€ Â</span>
-                  <span>Swipe to see all columns Ã¢â‚¬Â¢ Tap row to highlight</span>
+                  <span>Swipe to see all columns • Tap row to highlight</span>
                   <span className="text-blue-500">Ã¢â€ â€™</span>
                 </p>
               </div>

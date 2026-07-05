@@ -259,23 +259,23 @@ export function EnterpriseDateRangePicker({
         <Button
           variant="outline"
           className={cn(
-            "justify-start text-left font-normal h-10 px-3 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm rounded-md",
+            "justify-start text-left font-normal h-9 sm:h-10 px-2 sm:px-3 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-[11px] sm:text-sm rounded-md",
             !tempStart && !tempEnd && "text-slate-500",
             className
           )}
         >
-          <Calendar className="mr-2 h-4 w-4 text-slate-500" />
-          <span className="text-sm font-normal">{formatDateRange()}</span>
+          <Calendar className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 flex-shrink-0" />
+          <span className="text-[11px] sm:text-sm font-normal truncate">{formatDateRange()}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-auto p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-xl overflow-hidden" 
+        className="w-auto max-w-[calc(100vw-1rem)] p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-xl overflow-hidden" 
         align="start"
         sideOffset={4}
       >
         <div className="flex items-stretch">
-          {/* Left Sidebar - Presets - same height as right panel, scrolls internally */}
-          <div className="w-40 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex-shrink-0 flex flex-col max-h-[430px]">
+          {/* Left Sidebar - Presets - Hidden on mobile, visible on md+ */}
+          <div className="hidden md:flex w-40 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex-shrink-0 flex-col max-h-[430px]">
             <div className="px-3 pt-4 pb-2 flex-shrink-0">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Quick Select</p>
             </div>
@@ -303,27 +303,33 @@ export function EnterpriseDateRangePicker({
           </div>
 
           {/* Right Section - Calendars */}
-          <div className="p-5">
-            {/* Dual Calendar */}
-            <div className="flex gap-8 mb-4">
+          <div className="p-3 sm:p-5">
+            {/* Dual Calendar - Single calendar on mobile, dual on md+ */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-4">
               {/* Calendar 1 */}
-              <div>
+              <div className="w-full sm:w-auto">
                 <div className="flex items-center justify-between mb-3">
                   <button
                     onClick={() => handlePrevMonth(1)}
-                    className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-target"
                   >
                     <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                   </button>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white w-32 text-center">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex-1 text-center">
                     {monthNames[currentMonth1.getMonth()]} {currentMonth1.getFullYear()}
                   </h3>
-                  <div className="w-6" />
+                  <div className="w-6 sm:block hidden" />
+                  <button
+                    onClick={() => handleNextMonth(2)}
+                    className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-target sm:hidden"
+                  >
+                    <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-7 mb-1">
                   {dayNames.map((day) => (
-                    <div key={day} className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 w-9 py-1">
+                    <div key={day} className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 w-8 sm:w-9 py-1">
                       {day}
                     </div>
                   ))}
@@ -331,7 +337,7 @@ export function EnterpriseDateRangePicker({
 
                 <div className="grid grid-cols-7">
                   {days1.map((day, index) => {
-                    if (day === null) return <div key={`empty-${index}`} className="w-9 h-9" />
+                    if (day === null) return <div key={`empty-${index}`} className="w-8 h-8 sm:w-9 sm:h-9" />
                     const inRange = isDateInRange(day, currentMonth1)
                     const isStart = isStartDate(day, currentMonth1)
                     const isEnd = isEndDate(day, currentMonth1)
@@ -341,7 +347,7 @@ export function EnterpriseDateRangePicker({
                         key={day}
                         onClick={() => handleDateClick(day, currentMonth1)}
                         className={cn(
-                          "w-9 h-9 text-xs font-medium rounded-md transition-all duration-150 flex items-center justify-center",
+                          "w-8 h-8 sm:w-9 sm:h-9 text-xs font-medium rounded-md transition-all duration-150 flex items-center justify-center touch-target",
                           "hover:bg-slate-100 dark:hover:bg-slate-800",
                           inRange && !isSelected && "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-none",
                           isStart && "bg-blue-600 text-white font-bold rounded-l-md rounded-r-none",
@@ -357,11 +363,11 @@ export function EnterpriseDateRangePicker({
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="w-px bg-slate-200 dark:bg-slate-700 self-stretch" />
+              {/* Divider - Hidden on mobile */}
+              <div className="hidden sm:block w-px bg-slate-200 dark:bg-slate-700 self-stretch" />
 
-              {/* Calendar 2 */}
-              <div>
+              {/* Calendar 2 - Hidden on mobile */}
+              <div className="hidden sm:block">
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-6" />
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white w-32 text-center">
@@ -413,33 +419,33 @@ export function EnterpriseDateRangePicker({
             </div>
 
             {/* Bottom Controls */}
-            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-              <div className="flex items-center justify-between">
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-3 sm:pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 {/* Selected range display */}
-                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-2 sm:px-3 py-2 border border-slate-200 dark:border-slate-700 overflow-hidden">
                   <Calendar className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                  <span className="text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
                     {tempStart ? format(tempStart, 'MMM d, yyyy') : '—'}
                   </span>
-                  <span className="text-slate-300 dark:text-slate-600 text-xs">→</span>
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                  <span className="text-slate-300 dark:text-slate-600 text-xs flex-shrink-0">→</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
                     {tempEnd ? format(tempEnd, 'MMM d, yyyy') : '—'}
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 sm:ml-4">
                   <Button
                     variant="outline"
                     onClick={handleCancel}
-                    className="px-4 h-9 border-slate-300 dark:border-slate-600 font-semibold text-xs"
+                    className="flex-1 sm:flex-none px-3 sm:px-4 h-10 sm:h-9 border-slate-300 dark:border-slate-600 font-semibold text-xs touch-target"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleUpdate}
                     disabled={!tempStart || !tempEnd}
-                    className="px-4 h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md disabled:opacity-50"
+                    className="flex-1 sm:flex-none px-3 sm:px-4 h-10 sm:h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md disabled:opacity-50 touch-target"
                   >
                     Apply
                   </Button>

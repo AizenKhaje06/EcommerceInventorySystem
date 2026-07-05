@@ -560,44 +560,41 @@ export default function BusinessContactsPage() {
           {/* Professional Header with Dark Gradient */}
           <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-6 py-5 relative overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-            <div className="relative">
-              <DialogHeader>
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
-                    <Users className="h-6 w-6 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-bold text-white tracking-tight !text-white">Add New Business Contact</DialogTitle>
-                    <DialogDescription className="text-slate-200 text-sm mt-0.5 font-medium !text-slate-200">
-                      Create a new supplier, distributor, or reseller contact
-                    </DialogDescription>
-                  </div>
+            <div className="relative flex flex-col items-center justify-center text-center">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
+                  <Users className="h-6 w-6 text-white" strokeWidth={2.5} />
                 </div>
-              </DialogHeader>
+              </div>
+              <DialogTitle className="text-2xl font-bold text-white tracking-tight !text-white">Add New Business Contact</DialogTitle>
+              <DialogDescription className="text-slate-200 text-sm mt-1 font-medium !text-slate-200">
+                Create a new supplier, distributor, or reseller contact
+              </DialogDescription>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Name/Company Name *</Label>
+                <Label htmlFor="name" className="block h-5 mb-2">Name/Company Name *</Label>
                 <Input
                   id="name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="ABC Corporation"
+                  className="h-10"
                 />
               </div>
               <div>
-                <Label htmlFor="contactType">Contact Type *</Label>
+                <Label htmlFor="contactType" className="block h-5 mb-2">Contact Type *</Label>
                 <Select 
                   value={formData.contactType} 
                   onValueChange={(value: 'supplier' | 'distributor' | 'reseller') => 
                     setFormData({ ...formData, contactType: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -668,12 +665,12 @@ export default function BusinessContactsPage() {
                 rows={3}
               />
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)}>
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1">Add Contact</Button>
+              <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)} className="flex-1">
                 Cancel
               </Button>
-              <Button type="submit">Add Contact</Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
@@ -684,43 +681,40 @@ export default function BusinessContactsPage() {
           {/* Professional Header with Dark Gradient */}
           <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-6 py-5 relative overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-            <div className="relative">
-              <DialogHeader>
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
-                    <Edit className="h-6 w-6 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-bold text-white tracking-tight !text-white">Edit Business Contact</DialogTitle>
-                    <DialogDescription className="text-slate-200 text-sm mt-0.5 font-medium !text-slate-200">
-                      Update contact information
-                    </DialogDescription>
-                  </div>
+            <div className="relative flex flex-col items-center justify-center text-center">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
+                  <Edit className="h-6 w-6 text-white" strokeWidth={2.5} />
                 </div>
-              </DialogHeader>
+              </div>
+              <DialogTitle className="text-2xl font-bold text-white tracking-tight !text-white">Edit Business Contact</DialogTitle>
+              <DialogDescription className="text-slate-200 text-sm mt-1 font-medium !text-slate-200">
+                Update contact information
+              </DialogDescription>
             </div>
           </div>
 
           <form onSubmit={handleEdit} className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit-name">Name/Company Name *</Label>
+                <Label htmlFor="edit-name" className="block h-5 mb-2">Name/Company Name *</Label>
                 <Input
                   id="edit-name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="h-10"
                 />
               </div>
               <div>
-                <Label htmlFor="edit-contactType">Contact Type *</Label>
+                <Label htmlFor="edit-contactType" className="block h-5 mb-2">Contact Type *</Label>
                 <Select 
                   value={formData.contactType} 
                   onValueChange={(value: 'supplier' | 'distributor' | 'reseller') => 
                     setFormData({ ...formData, contactType: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -785,12 +779,12 @@ export default function BusinessContactsPage() {
                 rows={3}
               />
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1">Save Changes</Button>
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

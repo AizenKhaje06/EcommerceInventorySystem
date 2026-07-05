@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, Lock, User, Loader2, ArrowRight, AlertCircle, Info, Package, Truck } from "lucide-react"
+import { Eye, EyeOff, Lock, User, ArrowRight, AlertCircle, Info, Package, Truck } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { CustomLoader } from "@/components/ui/custom-loader"
 import type { UserRole, LogisticsSubRole } from "./role-selector"
 
 interface Channel {
@@ -380,7 +381,7 @@ export function LoginForm({
       >
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <CustomLoader size="sm" className="mr-2" />
             Signing in...
           </>
         ) : (

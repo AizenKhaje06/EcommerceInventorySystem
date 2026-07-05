@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
-  Loader2, Mail, CheckCircle2, AlertCircle, Package, TrendingUp, Users, 
+  Mail, CheckCircle2, AlertCircle, Package, TrendingUp, Users, 
   ShoppingCart, BarChart3, Shield, Zap, Clock, ChevronRight, Sparkles,
   Database, Truck, FileText, Settings, Eye, Lock, AlertTriangle, User
 } from "lucide-react"
@@ -1192,7 +1192,7 @@ export default function LandingLoginPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <span className="loader mr-2"></span>
                     Authenticating...
                   </>
                 ) : (
@@ -1307,6 +1307,65 @@ export default function LandingLoginPage() {
 
       {/* Premium CSS Animations - Black & Gold Theme */}
       <style jsx>{`
+        /* Custom Loader Animation */
+        .loader {
+          --color-1: #fff;
+          --color-2: #ff3d00;
+          --size: 1px;
+          transform: rotateZ(45deg);
+          perspective: calc(1000 * var(--size));
+          border-radius: 50%;
+          width: calc(48 * var(--size));
+          height: calc(48 * var(--size));
+          color: var(--color-1);
+          display: inline-block;
+          position: relative;
+        }
+        .loader:before,
+        .loader:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: inherit;
+          height: inherit;
+          border-radius: 50%;
+          transform: rotateX(70deg);
+          animation: 1s spin linear infinite;
+        }
+        .loader:after {
+          color: var(--color-2);
+          transform: rotateY(70deg);
+          animation-delay: 0.4s;
+        }
+        @keyframes spin {
+          0%, 100% {
+            box-shadow: 0.2em 0 0 0 currentcolor;
+          }
+          12% {
+            box-shadow: 0.2em 0.2em 0 0 currentcolor;
+          }
+          25% {
+            box-shadow: 0 0.2em 0 0 currentcolor;
+          }
+          37% {
+            box-shadow: -0.2em 0.2em 0 0 currentcolor;
+          }
+          50% {
+            box-shadow: -0.2em 0 0 0 currentcolor;
+          }
+          62% {
+            box-shadow: -0.2em -0.2em 0 0 currentcolor;
+          }
+          75% {
+            box-shadow: 0 -0.2em 0 0 currentcolor;
+          }
+          87% {
+            box-shadow: 0.2em -0.2em 0 0 currentcolor;
+          }
+        }
+
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }

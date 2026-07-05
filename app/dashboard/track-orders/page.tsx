@@ -1253,19 +1253,19 @@ export default function TrackOrdersPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header - Professional Style */}
+      {/* Page Header - Mobile Responsive */}
       <div className="mb-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold gradient-text">Track Orders Overview</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">Track Orders Overview</h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
               Manage customer orders and delivery tracking
             </p>
           </div>
-          {/* Date Filter and Export button - Admin only */}
+          {/* Date Filter and Export button - Admin only - Mobile Stack */}
           {!isTeamLeader && (
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {/* Date Range Picker */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Date Range Picker - Full Width on Mobile */}
               <EnterpriseDateRangePicker
                 startDate={startDate}
                 endDate={endDate}
@@ -1273,12 +1273,13 @@ export default function TrackOrdersPage() {
                   setStartDate(start)
                   setEndDate(end)
                 }}
+                className="w-full sm:w-auto"
               />
               
-              {/* Export Dropdown */}
+              {/* Export Dropdown - Full Width on Mobile */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="h-10 gap-2 border-slate-200 dark:border-slate-700">
+                  <Button variant="outline" className="w-full sm:w-auto h-10 gap-2 border-slate-200 dark:border-slate-700">
                     <FileDown className="h-4 w-4" />
                     Export
                     <ChevronDown className="h-4 w-4" />
@@ -1301,7 +1302,7 @@ export default function TrackOrdersPage() {
       </div>
 
       {/* Statistics Cards - 2 Rows x 5 Columns Professional Corporate Design */}
-      <div className="grid gap-3 grid-cols-5">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {/* Row 1 */}
         {/* Total Orders */}
         <div className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-xl bg-white dark:bg-slate-900">
@@ -1315,7 +1316,8 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold text-slate-700 dark:text-slate-200 tabular-nums mb-2">
               {totalOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+            {/* Desktop: Complete Details */}
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{totalFinancials.qty}</div>
@@ -1348,7 +1350,8 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-yellow-600 to-yellow-700 bg-clip-text text-transparent tabular-nums mb-2">
               {pendingOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
+            {/* Desktop: Complete Details */}
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{pendingFinancials.qty}</div>
@@ -1381,7 +1384,8 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-indigo-700 bg-clip-text text-transparent tabular-nums mb-2">
               {inTransitOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-200 dark:border-indigo-800">
+            {/* Desktop: Complete Details */}
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-indigo-200 dark:border-indigo-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{inTransitFinancials.qty}</div>
@@ -1414,7 +1418,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent tabular-nums mb-2">
               {onDeliveryOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-blue-200 dark:border-blue-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-blue-200 dark:border-blue-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{onDeliveryFinancials.qty}</div>
@@ -1447,7 +1451,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-purple-600 to-purple-700 bg-clip-text text-transparent tabular-nums mb-2">
               {pickupOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-purple-200 dark:border-purple-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-purple-200 dark:border-purple-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{pickupFinancials.qty}</div>
@@ -1481,7 +1485,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-green-600 to-green-700 bg-clip-text text-transparent tabular-nums mb-2">
               {deliveredOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-green-200 dark:border-green-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-green-200 dark:border-green-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{deliveredFinancials.qty}</div>
@@ -1514,7 +1518,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-red-600 to-red-700 bg-clip-text text-transparent tabular-nums mb-2">
               {cancelledOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-red-200 dark:border-red-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-red-200 dark:border-red-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{cancelledFinancials.qty}</div>
@@ -1547,7 +1551,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-orange-600 to-orange-700 bg-clip-text text-transparent tabular-nums mb-2">
               {detainedOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-orange-200 dark:border-orange-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-orange-200 dark:border-orange-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{detainedFinancials.qty}</div>
@@ -1580,7 +1584,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold bg-gradient-to-br from-pink-600 to-pink-700 bg-clip-text text-transparent tabular-nums mb-2">
               {problematicOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-pink-200 dark:border-pink-800">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-pink-200 dark:border-pink-800">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{problematicFinancials.qty}</div>
@@ -1613,7 +1617,7 @@ export default function TrackOrdersPage() {
             <p className="text-2xl font-bold text-slate-700 dark:text-slate-200 tabular-nums mb-2">
               {returnedOrders}
             </p>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div className="hidden md:grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
               <div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Qty</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">{returnedFinancials.qty}</div>
@@ -1635,29 +1639,30 @@ export default function TrackOrdersPage() {
         </div>
       </div>
 
-      {/* Filters - Professional SaaS Design */}
+      {/* Filters - Professional SaaS Design - Mobile Responsive */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-xl overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            {/* Search Input - Half Width */}
-            <div className="w-1/2">
+        <CardContent className="p-4 md:p-6">
+          {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+            {/* Search Input - Full width on mobile, half on desktop */}
+            <div className="w-full md:w-1/2">
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <Search className="absolute left-3 md:left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 <Input
                   placeholder="Search by order no., waybill, customer name, phone or courier..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-11 h-12 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-medium placeholder:text-slate-400 transition-all"
+                  className="pl-10 md:pl-11 h-11 md:h-12 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-medium placeholder:text-slate-400 text-sm md:text-base transition-all"
                 />
               </div>
             </div>
             
-            {/* Right Side - Filters and Clear */}
-            <div className="flex items-center gap-3 ml-auto">
-              {/* Status Filter */}
-              <div className="w-[200px]">
+            {/* Right Side - Filters and Clear - Stacked on mobile, horizontal on desktop */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3 md:ml-auto w-full md:w-auto">
+              {/* Status Filter - Full width on mobile */}
+              <div className="w-full sm:w-[180px] md:w-[200px]">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-0">
+                  <SelectTrigger className="h-11 md:h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-0 w-full">
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
@@ -1720,11 +1725,11 @@ export default function TrackOrdersPage() {
                 </Select>
               </div>
 
-              {/* Sales Channel Filter - Admin Only */}
+              {/* Sales Channel Filter - Admin Only - Full width on mobile */}
               {userRole === 'admin' && (
-                <div className="w-[200px]">
+                <div className="w-full sm:w-[180px] md:w-[200px]">
                   <Select value={salesChannelFilter} onValueChange={setChannelFilter}>
-                    <SelectTrigger className="h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-0">
+                    <SelectTrigger className="h-11 md:h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-0 w-full">
                       <SelectValue placeholder="All Channels" />
                     </SelectTrigger>
                     <SelectContent className="rounded-lg">
@@ -1739,13 +1744,13 @@ export default function TrackOrdersPage() {
                 </div>
               )}
 
-              {/* Clear Filters - Text Only */}
+              {/* Clear Filters - Full width button on mobile, text link on desktop */}
               <button
                 onClick={clearFilters}
-                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold text-sm transition-colors flex items-center gap-1.5 group"
+                className="h-11 md:h-auto px-4 md:px-0 bg-red-50 dark:bg-red-900/20 md:bg-transparent rounded-lg md:rounded-none text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 md:hover:bg-transparent dark:hover:text-red-300 font-semibold text-sm transition-colors flex items-center justify-center md:justify-start gap-1.5 group"
               >
                 <X className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
-                Clear
+                <span>Clear Filters</span>
               </button>
             </div>
           </div>

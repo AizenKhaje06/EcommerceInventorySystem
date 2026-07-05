@@ -784,10 +784,10 @@ export default function SettingsPage() {
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
       {/* Page Header - Professional */}
       <div className="space-y-1">
-        <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1">
+        <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1 leading-tight">
           Settings Overview
         </h2>
-        <p className="text-xs text-slate-600 dark:text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Configure system preferences, manage users, and customize your workspace
         </p>
       </div>

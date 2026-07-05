@@ -173,8 +173,8 @@ export default function TrackOrdersPage() {
 
   return (
     <div className="space-y-6 pt-2">
-      {/* Page Header */}
-      <div className="flex items-start justify-between mb-6">
+      {/* Page Header - Mobile Responsive */}
+      <div className="flex flex-col gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold gradient-text mb-2">Track Orders</h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -182,7 +182,7 @@ export default function TrackOrdersPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={fetchOrders}>
+          <Button variant="outline" size="sm" onClick={fetchOrders} className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>

@@ -1207,6 +1207,23 @@ a.icon-only {
   padding: 0.5rem;
 }
 
+/* Mobile touch target utility class */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* For smaller touch targets on desktop only */
+@media (min-width: 640px) {
+  .touch-target {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
 /* Ensure text remains visible during webfont load */
 @font-face {
   font-display: swap;

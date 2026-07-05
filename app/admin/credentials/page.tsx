@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
-import { Users, Lock, Eye, EyeOff, Loader2, CheckCircle2, User, Shield } from "lucide-react"
+import { Users, Lock, Eye, EyeOff, CheckCircle2, User, Shield } from "lucide-react"
 import { showSuccess, showError } from "@/lib/toast-utils"
 import { Badge } from "@/components/ui/badge"
 import { apiGet, apiPut } from "@/lib/api-client"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 interface Account {
   id: string
@@ -151,7 +152,7 @@ export default function CredentialsManagementPage() {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+              <CustomLoader size="lg" />
             </div>
           ) : accounts.length === 0 ? (
             <div className="text-center py-12">
@@ -340,7 +341,7 @@ export default function CredentialsManagementPage() {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  <CustomLoader size="sm" className="mr-2" />
                   Updating...
                 </>
               ) : (

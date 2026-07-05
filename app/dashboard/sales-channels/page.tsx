@@ -359,20 +359,20 @@ export default function SalesChannelsPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
-      {/* Page Header - Professional Shopify Style */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      {/* Page Header - Mobile Responsive */}
+      <div className="flex flex-col gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">
             Sales Channels Overview
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
             Performance analytics and insights per sales channel
           </p>
         </div>
         
-        {/* Actions - Shopify Style with Date Picker and Export */}
-        <div className="flex items-center gap-3">
-          {/* Date Range Picker - No wrapper, direct component */}
+        {/* Actions - Responsive Stack Layout */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Date Range Picker - Full Width on Mobile */}
           <EnterpriseDateRangePicker
             startDate={startDate}
             endDate={endDate}
@@ -380,16 +380,17 @@ export default function SalesChannelsPage() {
               setStartDate(start)
               setEndDate(end)
             }}
+            className="w-full sm:w-auto"
           />
 
-          {/* Export Button - Square corners, same height as date picker - Admin only */}
+          {/* Export Button - Full Width on Mobile - Admin only */}
           {!isTeamLeader && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   disabled={loading || !data}
                   variant="outline"
-                  className="h-10 px-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 rounded-md font-normal"
+                  className="w-full sm:w-auto h-10 px-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 rounded-md font-normal"
                 >
                   <FileDown className="h-4 w-4 mr-2" />
                   Export Data
