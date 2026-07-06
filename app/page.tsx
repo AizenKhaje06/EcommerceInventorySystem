@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { apiPost } from "@/lib/api-client"
 import { SecurityIndicator } from "@/components/auth/security-indicator"
+import { toast } from "sonner"
 
 // Animated counter hook
 function useCountUp(target: number | string, duration = 2000, isActive = false) {
@@ -324,8 +325,16 @@ export default function LandingLoginPage() {
         // Store complete user object
         localStorage.setItem("currentUser", JSON.stringify(user))
 
-        // Redirect to appropriate dashboard
-        router.push(redirectPath)
+        // Show success toast
+        toast.success(`Welcome back, ${user.displayName || user.username}! 🎉`, {
+          description: 'Redirecting to your dashboard...',
+          duration: 2000,
+        })
+
+        // Small delay to show toast before redirect
+        setTimeout(() => {
+          router.push(redirectPath)
+        }, 500)
       }
     } catch (error) {
       console.error("Login error:", error)
