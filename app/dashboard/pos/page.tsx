@@ -81,6 +81,12 @@ export default function POSPage() {
 
   const total = useMemo(() => cart.reduce((sum, cartItem) => sum + cartItem.item.sellingPrice * cartItem.quantity, 0), [cart])
 
+  // Helper function to calculate sellable quantity (total - bad stock)
+  const getSellableQuantity = (item: InventoryItem): number => {
+    const badQuantity = item.bad_item_quantity || 0
+    return Math.max(0, item.quantity - badQuantity)
+  }
+
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -157,16 +163,22 @@ export default function POSPage() {
 
   async function fetchItems() {
     try {
-      // Fetch ONLY good (sellable) items for POS - exclude defective items
-      const data = await apiGet<InventoryItem[]>("/api/products?status=good")
+      // Fetch all products
+      const data = await apiGet<InventoryItem[]>("/api/products")
       const itemsArray = Array.isArray(data) ? data : []
       
-      // Extra safety filter: ensure no bad items slip through
-      const sellableItems = itemsArray.filter(item => item.item_status !== 'bad' && item.quantity > 0)
+      // Filter to only products with sellable stock
+      // Sellable quantity = quantity - bad_item_quantity
+      // Only show products where sellable quantity > 0
+      const sellableItems = itemsArray.filter(item => {
+        const badQuantity = item.bad_item_quantity || 0
+        const sellableQuantity = item.quantity - badQuantity
+        return sellableQuantity > 0
+      })
       
       console.log('[POS] Fetched items count:', itemsArray.length)
       console.log('[POS] Sellable items count:', sellableItems.length)
-      console.log('[POS] Filtered out bad items:', itemsArray.length - sellableItems.length)
+      console.log('[POS] Filtered out items with no sellable stock:', itemsArray.length - sellableItems.length)
       console.log('[POS] First 5 items:', sellableItems.slice(0, 5))
       
       setItems(sellableItems)
@@ -409,9 +421,10 @@ export default function POSPage() {
 
   function addToCart(item: InventoryItem) {
     const existingItem = cart.find((cartItem) => cartItem.item.id === item.id)
+    const sellableQty = getSellableQuantity(item)
 
     if (existingItem) {
-      if (existingItem.quantity < item.quantity) {
+      if (existingItem.quantity < sellableQty) {
         setCart(
           cart.map((cartItem) =>
             cartItem.item.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
@@ -448,8 +461,9 @@ export default function POSPage() {
       return
     }
 
-    // Allow any quantity to be entered, but cap at available stock
-    const finalQuantity = Math.min(quantity, cartItem.item.quantity)
+    // Allow any quantity to be entered, but cap at sellable stock
+    const sellableQty = getSellableQuantity(cartItem.item)
+    const finalQuantity = Math.min(quantity, sellableQty)
     setCart(cart.map((ci) => (ci.item.id === itemId ? { ...ci, quantity: finalQuantity } : ci)))
   }
 
@@ -522,8 +536,9 @@ export default function POSPage() {
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {filteredItems.map((item) => {
-                  const isLowStock = item.quantity <= item.reorderLevel && item.quantity > 0
-                  const isOutOfStock = item.quantity === 0
+                  const sellableQty = getSellableQuantity(item)
+                  const isLowStock = sellableQty <= item.reorderLevel && sellableQty > 0
+                  const isOutOfStock = sellableQty === 0
                   
                   return (
                     <button
@@ -561,7 +576,7 @@ export default function POSPage() {
                               ? "bg-amber-500 text-white"
                               : "bg-slate-900/70 text-white"
                           )}>
-                            {isOutOfStock ? "OUT" : item.quantity}
+                            {isOutOfStock ? "OUT" : sellableQty}
                           </span>
                         </div>
 
@@ -662,53 +677,56 @@ export default function POSPage() {
                 </div>
               ) : (
                 <div className="space-y-2 overflow-y-auto flex-1">
-                  {cart.map((cartItem) => (
-                    <div
-                      key={cartItem.item.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{toDisplayName(cartItem.item.name)}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          ₱{cartItem.item.sellingPrice.toFixed(2)} × {cartItem.quantity}
+                  {cart.map((cartItem) => {
+                    const sellableQty = getSellableQuantity(cartItem.item)
+                    return (
+                      <div
+                        key={cartItem.item.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{toDisplayName(cartItem.item.name)}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            ₱{cartItem.item.sellingPrice.toFixed(2)} × {cartItem.quantity}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            max={sellableQty}
+                            value={cartItem.quantity}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              if (value === '') return
+                              const numValue = parseInt(value, 10)
+                              if (!isNaN(numValue) && numValue >= 1) {
+                                updateQuantity(cartItem.item.id, numValue)
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value = e.target.value
+                              if (value === '' || parseInt(value, 10) < 1) {
+                                updateQuantity(cartItem.item.id, 1)
+                              }
+                            }}
+                            className="min-w-[60px] max-w-[100px] h-8 text-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => removeFromCart(cartItem.item.id)} 
+                            className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <p className="font-semibold text-sm text-emerald-600 dark:text-emerald-400 min-w-[70px] text-right">
+                          ₱{(cartItem.item.sellingPrice * cartItem.quantity).toFixed(2)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          max={cartItem.item.quantity}
-                          value={cartItem.quantity}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            if (value === '') return
-                            const numValue = parseInt(value, 10)
-                            if (!isNaN(numValue) && numValue >= 1) {
-                              updateQuantity(cartItem.item.id, numValue)
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const value = e.target.value
-                            if (value === '' || parseInt(value, 10) < 1) {
-                              updateQuantity(cartItem.item.id, 1)
-                            }
-                          }}
-                          className="min-w-[60px] max-w-[100px] h-8 text-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => removeFromCart(cartItem.item.id)} 
-                          className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                      <p className="font-semibold text-sm text-emerald-600 dark:text-emerald-400 min-w-[70px] text-right">
-                        ₱{(cartItem.item.sellingPrice * cartItem.quantity).toFixed(2)}
-                      </p>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
