@@ -64,21 +64,24 @@ export function TablePagination({
   }
 
   return (
-    <div className="flex items-center justify-between px-6 py-3 bg-slate-800 dark:bg-slate-900 border-t border-slate-700 dark:border-slate-800">
-      {/* Left: Showing text */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-slate-300 dark:text-slate-400">
-          Showing {startItem} to {endItem} of {totalItems} results
+    <div className="flex items-center justify-between px-2 sm:px-6 py-2 sm:py-3 bg-slate-800 dark:bg-slate-900 border-t border-slate-700 dark:border-slate-800">
+      {/* Left: Showing text and rows selector */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        <span className="text-[10px] sm:text-sm font-medium text-slate-300 dark:text-slate-400 hidden sm:inline">
+          Showing {startItem}-{endItem} of {totalItems}
+        </span>
+        <span className="text-[10px] font-medium text-slate-300 dark:text-slate-400 sm:hidden">
+          {startItem}-{endItem} of {totalItems}
         </span>
         
         {/* Rows per page selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-400">Rows:</span>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="text-[10px] sm:text-sm font-medium text-slate-400 hidden sm:inline">Rows:</span>
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
-            <SelectTrigger className="h-9 w-[75px] bg-slate-700 border-slate-600 text-white font-medium">
+            <SelectTrigger className="h-7 sm:h-9 w-[60px] sm:w-[75px] bg-slate-700 border-slate-600 text-white font-medium text-[10px] sm:text-sm rounded-md">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -93,22 +96,22 @@ export function TablePagination({
       </div>
 
       {/* Right: Page numbers */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         {/* Previous button */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="h-9 w-9 p-0 text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 font-medium"
+          className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 font-medium"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         {/* Page numbers */}
         {getPageNumbers().map((page, index) => (
           page === '...' ? (
-            <span key={`ellipsis-${index}`} className="px-2 text-slate-400 font-medium">
+            <span key={`ellipsis-${index}`} className="px-1 sm:px-2 text-slate-400 font-medium text-[10px] sm:text-sm">
               ...
             </span>
           ) : (
@@ -117,7 +120,7 @@ export function TablePagination({
               variant="ghost"
               size="sm"
               onClick={() => onPageChange(page as number)}
-              className={`h-9 w-9 p-0 font-semibold ${
+              className={`h-7 w-7 sm:h-9 sm:w-9 p-0 font-semibold text-[10px] sm:text-sm ${
                 currentPage === page
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "text-slate-300 hover:text-white hover:bg-slate-700"
@@ -134,9 +137,9 @@ export function TablePagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="h-9 w-9 p-0 text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 font-medium"
+          className="h-7 w-7 sm:h-9 sm:w-9 p-0 text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 font-medium"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
     </div>

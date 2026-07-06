@@ -972,7 +972,7 @@ export default function InternalUsagePage() {
 
       {/* Dispatch Modal */}
       <Dialog open={dispatchModalOpen} onOpenChange={setDispatchModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+        <DialogContent className="max-w-[95vw] sm:max-w-6xl mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold gradient-text">Dispatch Items</DialogTitle>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -1265,73 +1265,156 @@ export default function InternalUsagePage() {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 overflow-hidden p-0">
-                  <div className="h-full overflow-y-auto px-4">
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-slate-900 dark:bg-slate-950 z-10">
-                        <TableRow className="hover:bg-slate-900 dark:hover:bg-slate-950 border-b border-slate-700">
-                          <TableHead className="text-white font-bold w-[80px]">Image</TableHead>
-                          <TableHead className="text-white font-bold">Item Name</TableHead>
-                          <TableHead className="text-white font-bold text-right w-[120px]">Price</TableHead>
-                          <TableHead className="text-white font-bold text-center w-[100px]">Quantity</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredProducts.length === 0 ? (
-                          <TableRow className="hover:bg-transparent">
-                            <TableCell colSpan={4} className="text-center py-16">
-                              <div className="flex flex-col items-center justify-center">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                                  <Package className="h-8 w-8 text-slate-400 dark:text-slate-500" />
-                                </div>
-                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No products found</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Try adjusting your search</p>
-                              </div>
-                            </TableCell>
+                  <div className="h-full overflow-y-auto px-4 pb-4">
+                    {/* Desktop: Table View */}
+                    <div className="hidden sm:block">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-900 dark:bg-slate-950 z-10">
+                          <TableRow className="hover:bg-slate-900 dark:hover:bg-slate-950 border-b border-slate-700">
+                            <TableHead className="text-white font-bold text-xs w-[80px]">Image</TableHead>
+                            <TableHead className="text-white font-bold text-xs">Item Name</TableHead>
+                            <TableHead className="text-white font-bold text-xs text-right w-[100px]">Price</TableHead>
+                            <TableHead className="text-white font-bold text-xs text-center w-[90px]">Qty</TableHead>
                           </TableRow>
-                        ) : (
-                          filteredProducts.map((item) => {
-                            const isOutOfStock = item.quantity === 0
-                            const isLowStock = item.quantity > 0 && item.quantity < 10
-                            
-                            return (
-                              <TableRow 
-                                key={item.id}
-                                onClick={() => !isOutOfStock && addToCart(item)}
-                                className={cn(
-                                  "border-b border-slate-200 dark:border-slate-800 transition-colors",
-                                  !isOutOfStock && "hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer",
-                                  isOutOfStock && "opacity-50 bg-slate-50 dark:bg-slate-900"
-                                )}
-                              >
-                                <TableCell className="py-3">
-                                  <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center">
-                                    {item.imageUrl ? (
-                                      <img 
-                                        src={item.imageUrl} 
-                                        alt={item.name}
-                                        className="w-full h-full object-contain p-1"
-                                        onLoad={() => console.log('[Internal Usage] Image loaded:', item.name, item.imageUrl)}
-                                        onError={(e) => {
-                                          console.error('[Internal Usage] Image failed:', item.name, item.imageUrl)
-                                          e.currentTarget.style.display = 'none'
-                                        }}
-                                      />
-                                    ) : (
-                                      <Package className="h-6 w-6 text-slate-300 dark:text-slate-600" />
-                                    )}
+                        </TableHeader>
+                        <TableBody>
+                          {filteredProducts.length === 0 ? (
+                            <TableRow className="hover:bg-transparent">
+                              <TableCell colSpan={4} className="text-center py-16">
+                                <div className="flex flex-col items-center justify-center">
+                                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                                    <Package className="h-8 w-8 text-slate-400 dark:text-slate-500" />
                                   </div>
-                                </TableCell>
-                                <TableCell className="font-medium text-slate-900 dark:text-white">
-                                  {item.name}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <span className="font-bold text-slate-900 dark:text-white">
+                                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No products found</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Try adjusting your search</p>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            filteredProducts.map((item) => {
+                              const isOutOfStock = item.quantity === 0
+                              const isLowStock = item.quantity > 0 && item.quantity < 10
+                              
+                              return (
+                                <TableRow 
+                                  key={item.id}
+                                  onClick={() => !isOutOfStock && addToCart(item)}
+                                  className={cn(
+                                    "border-b border-slate-200 dark:border-slate-800 transition-colors",
+                                    !isOutOfStock && "hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer",
+                                    isOutOfStock && "opacity-50 bg-slate-50 dark:bg-slate-900"
+                                  )}
+                                >
+                                  <TableCell className="py-3 px-4">
+                                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                                      {item.imageUrl ? (
+                                        <img 
+                                          src={item.imageUrl} 
+                                          alt={item.name}
+                                          className="w-full h-full object-contain p-1"
+                                          onLoad={() => console.log('[Internal Usage] Image loaded:', item.name, item.imageUrl)}
+                                          onError={(e) => {
+                                            console.error('[Internal Usage] Image failed:', item.name, item.imageUrl)
+                                            e.currentTarget.style.display = 'none'
+                                          }}
+                                        />
+                                      ) : (
+                                        <Package className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="font-medium text-slate-900 dark:text-white text-sm px-4">
+                                    {item.name}
+                                  </TableCell>
+                                  <TableCell className="text-right px-4">
+                                    <div className="font-bold text-slate-900 dark:text-white text-sm whitespace-nowrap">
+                                      ₱{item.costPrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-center px-4">
+                                    <span className={cn(
+                                      "inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap",
+                                      isOutOfStock
+                                        ? "bg-red-500 text-white"
+                                        : isLowStock
+                                        ? "bg-amber-500 text-white"
+                                        : "bg-emerald-500 text-white"
+                                    )}>
+                                      {isOutOfStock ? "OUT" : item.quantity}
+                                    </span>
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile: Card View */}
+                    <div className="sm:hidden space-y-3 pt-3">
+                      {filteredProducts.length === 0 ? (
+                        <div className="text-center py-16">
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                              <Package className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+                            </div>
+                            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No products found</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Try adjusting your search</p>
+                          </div>
+                        </div>
+                      ) : (
+                        filteredProducts.map((item) => {
+                          const isOutOfStock = item.quantity === 0
+                          const isLowStock = item.quantity > 0 && item.quantity < 10
+                          
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => !isOutOfStock && addToCart(item)}
+                              className={cn(
+                                "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                                !isOutOfStock && "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer active:scale-[0.98]",
+                                isOutOfStock && "opacity-50 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                              )}
+                            >
+                              {/* Image */}
+                              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                                {item.imageUrl ? (
+                                  <img 
+                                    src={item.imageUrl} 
+                                    alt={item.name}
+                                    className="w-full h-full object-contain p-1"
+                                    onLoad={() => console.log('[Internal Usage] Image loaded:', item.name, item.imageUrl)}
+                                    onError={(e) => {
+                                      console.error('[Internal Usage] Image failed:', item.name, item.imageUrl)
+                                      e.currentTarget.style.display = 'none'
+                                    }}
+                                  />
+                                ) : (
+                                  <Package className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                                )}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0 flex items-start gap-3">
+                                {/* Left side: Name and Price */}
+                                <div className="flex-1 min-w-0 pr-2">
+                                  {/* Product Name */}
+                                  <h4 className="font-semibold text-slate-900 dark:text-white text-sm leading-tight mb-1.5 break-words">
+                                    {item.name}
+                                  </h4>
+                                  
+                                  {/* Price */}
+                                  <div className="font-bold text-slate-900 dark:text-white text-sm">
                                     ₱{item.costPrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center">
+                                  </div>
+                                </div>
+
+                                {/* Right side: Quantity Badge */}
+                                <div className="flex-shrink-0">
                                   <span className={cn(
-                                    "inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold",
+                                    "inline-flex items-center justify-center px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap",
                                     isOutOfStock
                                       ? "bg-red-500 text-white"
                                       : isLowStock
@@ -1340,13 +1423,13 @@ export default function InternalUsagePage() {
                                   )}>
                                     {isOutOfStock ? "OUT" : item.quantity}
                                   </span>
-                                </TableCell>
-                              </TableRow>
-                            )
-                          })
-                        )}
-                      </TableBody>
-                    </Table>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -1357,7 +1440,7 @@ export default function InternalUsagePage() {
 
       {/* Success Modal */}
       <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
-        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 max-w-md">
+        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 max-w-[95vw] sm:max-w-md mx-4 sm:mx-auto rounded-xl sm:rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-slate-900 dark:text-white text-xl font-semibold flex items-center gap-2">
               <CheckCircle className="h-6 w-6 text-green-500" />

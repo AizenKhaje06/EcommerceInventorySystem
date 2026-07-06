@@ -2335,7 +2335,7 @@ export default function InventoryPage() {
       {/* Adjust Stock Dialog */}
       {selectedAdjustItem && (
         <Dialog open={adjustStockDialogOpen} onOpenChange={setAdjustStockDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl mx-4 sm:mx-auto max-h-[90vh] flex flex-col p-0 gap-0 rounded-xl sm:rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-8 py-6 border-b border-slate-600 flex-shrink-0">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
@@ -2472,32 +2472,32 @@ export default function InventoryPage() {
 
       {/* Category Management Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
-          {/* Professional Header with Dark Gradient */}
-          <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-8 py-6 border-b border-slate-600 flex-shrink-0">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] mx-4 sm:mx-auto flex flex-col p-0 gap-0 rounded-xl sm:rounded-2xl overflow-hidden">
+          {/* Professional Header with Dark Gradient - Mobile optimized */}
+          <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-600 flex-shrink-0">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                  <Tag className="h-6 w-6 text-white" />
+              <DialogTitle className="text-lg sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                  <Tag className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <span className="text-white">Category Management</span>
               </DialogTitle>
-              <DialogDescription className="text-slate-200 text-sm mt-2 font-medium">
+              <DialogDescription className="text-slate-200 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                 Add and manage product categories
               </DialogDescription>
             </DialogHeader>
           </div>
           
-          <div className="flex-1 overflow-y-auto space-y-4 px-8 py-6 min-h-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-500 [&::-webkit-scrollbar]:opacity-0 hover:[&::-webkit-scrollbar]:opacity-100 transition-opacity">
-            {/* Add New Category Section - More Prominent */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-2 border-dashed border-orange-300 dark:border-orange-700 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Plus className="h-4 w-4 text-orange-600" />
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Add New Category</h3>
+          <div className="flex-1 overflow-y-auto space-y-3 sm:space-y-4 px-4 sm:px-8 py-4 sm:py-6 min-h-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-500 [&::-webkit-scrollbar]:opacity-0 hover:[&::-webkit-scrollbar]:opacity-100 transition-opacity">
+            {/* Add New Category Section - Mobile optimized */}
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-2 border-dashed border-orange-300 dark:border-orange-700 rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Add New Category</h3>
               </div>
               
               <div>
-                <Label className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <Label className="text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 sm:mb-1.5 block">
                   Category Name *
                 </Label>
                 <div className="flex items-center gap-2">
@@ -2510,20 +2510,20 @@ export default function InventoryPage() {
                         handleAddCategory()
                       }
                     }}
-                    className="h-10 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                    className="h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                     disabled={submitting}
                   />
                   <Button
                     onClick={handleAddCategory}
                     disabled={!newCategory.trim() || submitting}
-                    className="h-10 px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold flex-shrink-0 shadow-sm"
+                    className="h-9 sm:h-10 px-4 sm:px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs sm:text-sm font-semibold flex-shrink-0 shadow-sm"
                   >
                     {submitting ? (
                       <CustomLoader size="sm" />
                     ) : (
                       <>
-                        <Plus className="h-4 w-4 mr-1.5" />
-                        Add
+                        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1.5" />
+                        <span className="hidden sm:inline">Add</span>
                       </>
                     )}
                   </Button>
@@ -2533,16 +2533,16 @@ export default function InventoryPage() {
 
             {/* Existing Categories List */}
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 px-1">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white mb-2 sm:mb-3 px-1">
                 Existing Categories ({categories.length})
               </h3>
 
             {/* Category List */}
             {categories.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                <Tag className="h-12 w-12 mx-auto text-slate-400 mb-3" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No categories yet</p>
-                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Add your first category using the form above</p>
+              <div className="text-center py-8 sm:py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                <Tag className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-slate-400 mb-2 sm:mb-3" />
+                <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">No categories yet</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 mt-1">Add your first category using the form above</p>
               </div>
             ) : (
             <div className="space-y-2">
@@ -2565,7 +2565,7 @@ export default function InventoryPage() {
                             setEditCategoryValue("")
                           }
                         }}
-                        className="h-9 text-sm flex-1"
+                        className="h-8 sm:h-9 text-xs sm:text-sm flex-1"
                         disabled={submitting}
                         autoFocus
                       />
@@ -2573,7 +2573,7 @@ export default function InventoryPage() {
                         size="sm"
                         onClick={handleEditCategory}
                         disabled={submitting || !editCategoryValue.trim()}
-                        className="h-9 px-4 bg-green-600 hover:bg-green-700 text-white text-sm whitespace-nowrap"
+                        className="h-8 sm:h-9 px-3 sm:px-4 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm whitespace-nowrap"
                       >
                         {submitting ? <CustomLoader size="sm" /> : "Save"}
                       </Button>
@@ -2585,7 +2585,7 @@ export default function InventoryPage() {
                           setEditCategoryValue("")
                         }}
                         disabled={submitting}
-                        className="h-9 px-4 text-sm whitespace-nowrap"
+                        className="h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap"
                       >
                         Cancel
                       </Button>
@@ -2593,8 +2593,8 @@ export default function InventoryPage() {
                   ) : (
                     <>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Tag className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                        <span className="text-sm font-medium text-slate-900 dark:text-white truncate">{category.name}</span>
+                        <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                        <span className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white truncate">{category.name}</span>
                       </div>
                       <div className="flex items-center gap-0.5 flex-shrink-0">
                         <Button
@@ -2607,7 +2607,7 @@ export default function InventoryPage() {
                           disabled={submitting}
                           className="h-7 w-7 p-0 text-slate-600 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400"
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -2616,7 +2616,7 @@ export default function InventoryPage() {
                           disabled={submitting}
                           className="h-7 w-7 p-0 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         </Button>
                       </div>
                     </>
@@ -2632,33 +2632,33 @@ export default function InventoryPage() {
 
       {/* Store Management Dialog */}
       <Dialog open={storeDialogOpen} onOpenChange={setStoreDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
-          {/* Professional Header with Dark Gradient */}
-          <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-8 py-6 border-b border-slate-600 flex-shrink-0">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] mx-4 sm:mx-auto flex flex-col p-0 gap-0 rounded-xl sm:rounded-2xl overflow-hidden">
+          {/* Professional Header with Dark Gradient - Mobile optimized */}
+          <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-600 flex-shrink-0">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                  <Warehouse className="h-6 w-6 text-white" />
+              <DialogTitle className="text-lg sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                  <Warehouse className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <span className="text-white">Store Management</span>
               </DialogTitle>
-              <DialogDescription className="text-slate-200 text-sm mt-2 font-medium">
+              <DialogDescription className="text-slate-200 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                 Add and manage stores organized by sales channel
               </DialogDescription>
             </DialogHeader>
           </div>
           
-          <div className="flex-1 overflow-y-auto space-y-4 px-8 py-6 min-h-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-500 [&::-webkit-scrollbar]:opacity-0 hover:[&::-webkit-scrollbar]:opacity-100 transition-opacity">
-            {/* Add New Store Section - More Prominent */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-2 border-dashed border-orange-300 dark:border-orange-700 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Plus className="h-4 w-4 text-orange-600" />
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Add New Store</h3>
+          <div className="flex-1 overflow-y-auto space-y-3 sm:space-y-4 px-4 sm:px-8 py-4 sm:py-6 min-h-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-500 [&::-webkit-scrollbar]:opacity-0 hover:[&::-webkit-scrollbar]:opacity-100 transition-opacity">
+            {/* Add New Store Section - Mobile optimized */}
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-2 border-dashed border-orange-300 dark:border-orange-700 rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Add New Store</h3>
               </div>
               
               <div className="space-y-2">
                 <div>
-                  <Label className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <Label className="text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 sm:mb-1.5 block">
                     Sales Channel *
                   </Label>
                   <Select 
@@ -2666,7 +2666,7 @@ export default function InventoryPage() {
                     onValueChange={(value) => setNewStore({ ...newStore, salesChannel: value })}
                     disabled={submitting || isDepartment}
                   >
-                    <SelectTrigger className="h-10 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                    <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
                       <SelectValue placeholder={isDepartment ? userDepartment : "Choose a sales channel"} />
                     </SelectTrigger>
                     <SelectContent>
@@ -2682,14 +2682,14 @@ export default function InventoryPage() {
                     </SelectContent>
                   </Select>
                   {isDepartment && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
                       You can only add stores for your department ({userDepartment})
                     </p>
                   )}
                 </div>
                 
                 <div>
-                  <Label className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <Label className="text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 sm:mb-1.5 block">
                     Store Name *
                   </Label>
                   <div className="flex items-center gap-2">
@@ -2699,19 +2699,19 @@ export default function InventoryPage() {
                       onChange={(e) => setNewStore({ ...newStore, name: e.target.value })}
                       onKeyDown={(e) => e.key === "Enter" && handleAddStore()}
                       disabled={submitting}
-                      className="h-10 text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                      className="h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                     />
                     <Button
                       onClick={handleAddStore}
                       disabled={!newStore.name.trim() || !newStore.salesChannel || submitting}
-                      className="h-10 px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold flex-shrink-0 shadow-sm"
+                      className="h-9 sm:h-10 px-4 sm:px-6 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs sm:text-sm font-semibold flex-shrink-0 shadow-sm"
                     >
                       {submitting ? (
                         <CustomLoader size="sm" />
                       ) : (
                         <>
-                          <Plus className="h-4 w-4 mr-1.5" />
-                          Add
+                          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1.5" />
+                          <span className="hidden sm:inline">Add</span>
                         </>
                       )}
                     </Button>
@@ -2722,19 +2722,19 @@ export default function InventoryPage() {
 
             {/* Existing Stores List */}
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 px-1">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white mb-2 sm:mb-3 px-1">
                 Existing Stores ({isDepartment ? stores.filter(s => s.sales_channel === userDepartment).length : stores.length})
               </h3>
 
             {/* Store List */}
             {(isDepartment ? stores.filter(s => s.sales_channel === userDepartment) : stores).length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                <Warehouse className="h-12 w-12 mx-auto text-slate-400 mb-3" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No stores yet</p>
-                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Add your first store using the form above</p>
+              <div className="text-center py-8 sm:py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                <Warehouse className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-slate-400 mb-2 sm:mb-3" />
+                <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">No stores yet</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 mt-1">Add your first store using the form above</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {(isDepartment ? [userDepartment] : SALES_CHANNELS).map((channel) => {
                   const channelStores = stores.filter(s => s.sales_channel === channel)
                   if (channelStores.length === 0) return null
@@ -2743,7 +2743,7 @@ export default function InventoryPage() {
                     <div key={channel} className="space-y-2">
                       <div className="flex items-center gap-2 px-2">
                         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent" />
-                        <div className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                        <div className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                           {channel} ({channelStores.length})
                         </div>
                         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent" />
@@ -2751,7 +2751,7 @@ export default function InventoryPage() {
                       {channelStores.map((store) => (
                         <div
                           key={store.id}
-                          className="flex items-center justify-between p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-orange-300 dark:hover:border-orange-700 transition-colors"
+                          className="flex items-center justify-between p-2 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-orange-300 dark:hover:border-orange-700 transition-colors"
                         >
                           {editingStore?.id === store.id ? (
                             <div className="flex-1 space-y-2">
@@ -2760,7 +2760,7 @@ export default function InventoryPage() {
                                 onValueChange={(value) => setEditStoreValue({ ...editStoreValue, salesChannel: value })}
                                 disabled={submitting}
                               >
-                                <SelectTrigger className="h-8 text-xs">
+                                <SelectTrigger className="h-8 sm:h-9 text-[10px] sm:text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -2769,7 +2769,7 @@ export default function InventoryPage() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <div className="flex gap-2">
+                              <div className="flex gap-1.5 sm:gap-2">
                                 <Input
                                   value={editStoreValue.name}
                                   onChange={(e) => setEditStoreValue({ ...editStoreValue, name: e.target.value })}
@@ -2781,16 +2781,16 @@ export default function InventoryPage() {
                                     }
                                   }}
                                   disabled={submitting}
-                                  className="h-8 text-xs flex-1"
+                                  className="h-8 sm:h-9 text-[10px] sm:text-xs flex-1"
                                   autoFocus
                                 />
                                 <Button
                                   onClick={handleEditStore}
                                   disabled={!editStoreValue.name.trim() || !editStoreValue.salesChannel || submitting}
                                   size="sm"
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 sm:h-9 w-8 sm:w-9 p-0"
                                 >
-                                  {submitting ? <CustomLoader size="sm" /> : <Check className="h-3 w-3" />}
+                                  {submitting ? <CustomLoader size="sm" /> : <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
                                 </Button>
                                 <Button
                                   onClick={() => {
@@ -2800,15 +2800,15 @@ export default function InventoryPage() {
                                   disabled={submitting}
                                   size="sm"
                                   variant="ghost"
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 sm:h-9 w-8 sm:w-9 p-0"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 </Button>
                               </div>
                             </div>
                           ) : (
                             <>
-                              <span className="text-sm font-medium text-slate-900 dark:text-white flex-1">
+                              <span className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white flex-1">
                                 {store.store_name}
                               </span>
                               <div className="flex gap-1">
@@ -2820,18 +2820,18 @@ export default function InventoryPage() {
                                     setEditStoreValue({ name: store.store_name, salesChannel: store.sales_channel })
                                   }}
                                   disabled={submitting}
-                                  className="h-7 w-7 p-0 text-slate-600 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400"
+                                  className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-slate-600 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400"
                                 >
-                                  <Pencil className="h-3.5 w-3.5" />
+                                  <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => setDeleteWarehouseId(store.id)}
                                   disabled={submitting}
-                                  className="h-7 w-7 p-0 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+                                  className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 </Button>
                               </div>
                             </>
@@ -2850,21 +2850,25 @@ export default function InventoryPage() {
 
       {/* Delete Store Confirmation */}
       <Dialog open={!!deleteWarehouseId} onOpenChange={() => setDeleteWarehouseId(null)}>
-        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
-          <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white">Delete Store</DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">
+        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 max-w-[95vw] sm:max-w-md mx-4 sm:mx-auto rounded-xl sm:rounded-2xl">
+          <DialogHeader className="px-1">
+            <DialogTitle className="text-slate-900 dark:text-white text-base sm:text-lg">Delete Store</DialogTitle>
+            <DialogDescription className="text-slate-600 dark:text-slate-400 text-sm">
               Are you sure you want to delete this store? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteWarehouseId(null)}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteWarehouseId(null)}
+              className="h-9 sm:h-10 px-4 sm:px-6 text-sm"
+            >
               Cancel
             </Button>
             <Button
               onClick={() => deleteWarehouseId && handleDeleteStore(deleteWarehouseId)}
               disabled={submitting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white h-9 sm:h-10 px-4 sm:px-6 text-sm"
             >
               {submitting ? "Deleting..." : "Delete"}
             </Button>
@@ -2874,25 +2878,26 @@ export default function InventoryPage() {
 
       {/* Delete Category Confirmation */}
       <Dialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>
-        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white text-xl font-semibold">Delete Category</DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">
+        <DialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 max-w-[95vw] sm:max-w-md mx-4 sm:mx-auto rounded-xl sm:rounded-2xl">
+          <DialogHeader className="px-1">
+            <DialogTitle className="text-slate-900 dark:text-white text-base sm:text-lg font-semibold">Delete Category</DialogTitle>
+            <DialogDescription className="text-slate-600 dark:text-slate-400 text-sm">
               Are you sure you want to delete this category? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 pt-4">
             <Button
               variant="outline"
               onClick={() => setDeleteCategoryId(null)}
               disabled={submitting}
+              className="flex-1 sm:flex-initial h-9 sm:h-10 px-4 sm:px-6 text-sm"
             >
               Cancel
             </Button>
             <Button
               onClick={() => deleteCategoryId && handleDeleteCategory(deleteCategoryId)}
               disabled={submitting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white flex-1 sm:flex-initial h-9 sm:h-10 px-4 sm:px-6 text-sm"
             >
               {submitting ? (
                 <>
@@ -2909,32 +2914,32 @@ export default function InventoryPage() {
 
       {/* Professional SaaS Delete Confirmation Modal */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden border-0">
-          {/* Header with gradient background - Reduced height */}
-          <div className="relative bg-gradient-to-br from-red-500 via-red-600 to-red-700 px-6 py-5 text-center">
+        <DialogContent className="max-w-[95vw] sm:max-w-[480px] mx-4 sm:mx-auto p-0 gap-0 overflow-hidden border-0 rounded-xl sm:rounded-2xl">
+          {/* Header with gradient background - Compact on mobile */}
+          <div className="relative bg-gradient-to-br from-red-500 via-red-600 to-red-700 px-4 sm:px-6 py-4 sm:py-5 text-center">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
             <div className="relative">
-              <div className="inline-flex items-center justify-center w-14 h-14 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm ring-4 ring-white/30">
-                <AlertCircle className="h-7 w-7 text-white" strokeWidth={2.5} />
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 sm:mb-3 rounded-full bg-white/20 backdrop-blur-sm ring-2 sm:ring-4 ring-white/30">
+                <AlertCircle className="h-6 w-6 sm:h-7 sm:w-7 text-white" strokeWidth={2.5} />
               </div>
-              <DialogTitle className="text-xl font-bold !text-white tracking-tight">
+              <DialogTitle className="text-lg sm:text-xl font-bold !text-white tracking-tight">
                 Delete Product
               </DialogTitle>
-              <p className="text-white text-xs mt-1.5 font-medium">
+              <p className="text-white text-xs mt-1 sm:mt-1.5 font-medium">
                 This action is permanent and cannot be undone
               </p>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="px-6 py-6 space-y-4">
-            <div className="text-center space-y-3">
-              <p className="text-slate-700 dark:text-slate-300 font-medium">
+          {/* Content - Compact padding on mobile */}
+          <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-3 sm:space-y-4">
+            <div className="text-center space-y-2 sm:space-y-3">
+              <p className="text-slate-700 dark:text-slate-300 font-medium text-sm sm:text-base">
                 Are you sure you want to delete this product?
               </p>
               {itemToDelete && (
-                <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-lg">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-1">
+                <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg">
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold mb-1">
                     Product Name
                   </p>
                   <p className="text-sm font-bold text-slate-900 dark:text-white">
@@ -2944,15 +2949,15 @@ export default function InventoryPage() {
               )}
             </div>
 
-            {/* Warning box */}
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            {/* Warning box - Compact on mobile */}
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-900 dark:text-red-100 mb-1">
+                  <p className="text-xs sm:text-sm font-semibold text-red-900 dark:text-red-100 mb-1">
                     Warning: Permanent Action
                   </p>
-                  <p className="text-xs text-red-700 dark:text-red-300">
+                  <p className="text-[11px] sm:text-xs text-red-700 dark:text-red-300 leading-relaxed">
                     All product data, including inventory history and associated records, will be permanently removed from the system.
                   </p>
                 </div>
@@ -2960,9 +2965,9 @@ export default function InventoryPage() {
             </div>
           </div>
 
-          {/* Footer with buttons */}
-          <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 border-t border-slate-200 dark:border-slate-800">
-            <div className="flex items-center justify-end gap-3">
+          {/* Footer with buttons - Mobile optimized */}
+          <div className="bg-slate-50 dark:bg-slate-900/50 px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2 sm:gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -2971,7 +2976,7 @@ export default function InventoryPage() {
                   setItemToDelete(null)
                 }}
                 disabled={isDeleting}
-                className="h-11 px-6 font-semibold border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="h-9 sm:h-11 px-4 sm:px-6 text-sm font-semibold border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 Cancel
               </Button>
@@ -2979,7 +2984,7 @@ export default function InventoryPage() {
                 type="button"
                 onClick={() => itemToDelete && handleDelete(itemToDelete.id)}
                 disabled={isDeleting}
-                className="h-11 px-6 font-semibold bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                className="h-9 sm:h-11 px-4 sm:px-6 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isDeleting ? (
                   <>
@@ -2987,12 +2992,14 @@ export default function InventoryPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Please wait...
+                    <span className="hidden sm:inline">Please wait...</span>
+                    <span className="sm:hidden">Wait...</span>
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Product
+                    <span className="hidden sm:inline">Delete Product</span>
+                    <span className="sm:hidden">Delete</span>
                   </>
                 )}
               </Button>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -191,73 +190,65 @@ export default function TrackOrdersPage() {
 
       {/* Statistics Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-[5px] bg-blue-100 dark:bg-blue-900/30">
-                <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0">
-                Total
-              </Badge>
+        <div className="border-0 shadow-md bg-white dark:bg-slate-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-[5px] bg-blue-100 dark:bg-blue-900/30">
+              <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-              {totalOrders}
-            </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400">Total Orders</div>
-          </CardContent>
-        </Card>
+            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0">
+              Total
+            </Badge>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {totalOrders}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">Total Orders</div>
+        </div>
 
-        <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-[5px] bg-yellow-100 dark:bg-yellow-900/30">
-                <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-              </div>
-              <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-0">
-                Pending
-              </Badge>
+        <div className="border-0 shadow-md bg-white dark:bg-slate-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-[5px] bg-yellow-100 dark:bg-yellow-900/30">
+              <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-              {pendingOrders}
-            </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400">Awaiting Processing</div>
-          </CardContent>
-        </Card>
+            <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-0">
+              Pending
+            </Badge>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {pendingOrders}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">Awaiting Processing</div>
+        </div>
 
-        <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-[5px] bg-purple-100 dark:bg-purple-900/30">
-                <Truck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0">
-                Shipped
-              </Badge>
+        <div className="border-0 shadow-md bg-white dark:bg-slate-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-[5px] bg-purple-100 dark:bg-purple-900/30">
+              <Truck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-              {shippedToday}
-            </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400">In Transit</div>
-          </CardContent>
-        </Card>
+            <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0">
+              Shipped
+            </Badge>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {shippedToday}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">In Transit</div>
+        </div>
 
-        <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-[5px] bg-green-100 dark:bg-green-900/30">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">
-                Delivered
-              </Badge>
+        <div className="border-0 shadow-md bg-white dark:bg-slate-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 rounded-[5px] bg-green-100 dark:bg-green-900/30">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-              {deliveredToday}
-            </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400">Successfully Delivered</div>
-          </CardContent>
-        </Card>
+            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">
+              Delivered
+            </Badge>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {deliveredToday}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">Successfully Delivered</div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -307,35 +298,37 @@ export default function TrackOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <Card className="border-0 shadow-lg bg-white dark:bg-slate-900">
-        <CardContent className="p-0">
-          {filteredOrders.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12">
-              <Package className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <p className="text-slate-500 dark:text-slate-400">No orders found</p>
-              <p className="text-sm text-slate-400 dark:text-slate-500">
-                Orders will appear here when customers place orders
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+      <div>
+        {filteredOrders.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-12 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 shadow-lg">
+            <Package className="h-12 w-12 text-slate-300 dark:text-slate-600" />
+            <p className="text-slate-500 dark:text-slate-400">No orders found</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">
+              Orders will appear here when customers place orders
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Scrollable Table Area */}
+            <div className="table-scroll-container">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/50">
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Order #</th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Customer</th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Item</th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Qty</th>
-                    <th className="py-3 px-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Amount</th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Payment</th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Order #</th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Customer</th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Contact No.</th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Product</th>
+                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Qty</th>
+                    <th className="py-3 px-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status</th>
+                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Payment</th>
+                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {paginatedOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 whitespace-nowrap">
                         <div className="font-mono text-xs font-semibold text-slate-900 dark:text-white">
                           {order.orderNumber}
                         </div>
@@ -343,21 +336,23 @@ export default function TrackOrdersPage() {
                           {new Date(order.orderDate).toLocaleDateString()}
                         </div>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 whitespace-nowrap">
                         <div className="font-medium text-slate-900 dark:text-white">{order.customerName}</div>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
                         <div className="text-xs text-slate-500 dark:text-slate-400">{order.customerPhone}</div>
                       </td>
-                      <td className="py-3 px-4 text-slate-800 dark:text-slate-200">{order.itemName}</td>
-                      <td className="py-3 px-4 text-center font-semibold text-slate-900 dark:text-white">{order.quantity}</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900 dark:text-white">
+                      <td className="py-3 px-4 text-slate-800 dark:text-slate-200 whitespace-nowrap">{order.itemName}</td>
+                      <td className="py-3 px-4 text-center font-semibold text-slate-900 dark:text-white whitespace-nowrap">{order.quantity}</td>
+                      <td className="py-3 px-4 text-right font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                         {formatCurrency(order.totalAmount)}
                       </td>
-                      <td className="py-3 px-4 text-center">{getStatusBadge(order.orderStatus)}</td>
-                      <td className="py-3 px-4 text-center">{getPaymentBadge(order.paymentStatus)}</td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">{getStatusBadge(order.orderStatus)}</td>
+                      <td className="py-3 px-4 text-center whitespace-nowrap">{getPaymentBadge(order.paymentStatus)}</td>
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <button
                           onClick={() => openDetailsModal(order)}
-                          className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 whitespace-nowrap cursor-pointer"
+                          className="text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-150 cursor-pointer"
                         >
                           View Details
                         </button>
@@ -367,8 +362,7 @@ export default function TrackOrdersPage() {
                 </tbody>
               </table>
             </div>
-          )}
-          {filteredOrders.length > 0 && (
+            {/* Pagination - Directly after table, no wrapper */}
             <TablePagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -377,13 +371,13 @@ export default function TrackOrdersPage() {
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
             />
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
+      </div>
 
       {/* Order Details Modal */}
       <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto rounded-xl sm:rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Order Details</DialogTitle>
           </DialogHeader>
