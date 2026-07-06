@@ -373,7 +373,7 @@ export default function TrackerDashboardPage() {
       setBulkStatus('')
     } catch (err) {
       console.error('Bulk update error:', err)
-      toast.error('Bulk update failed Ã¢â‚¬â€ please try again')
+      toast.error('Bulk update failed — please try again')
       await fetchOrders()
     } finally {
       setBulkUpdating(false)
@@ -508,20 +508,20 @@ export default function TrackerDashboardPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6 pt-4 sm:pt-6 px-2 sm:px-3 lg:px-4 pb-6 sm:pb-8">
+    <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6 pt-4 sm:pt-6 px-3 sm:px-4 lg:px-6 pb-6 sm:pb-8">
       {/* Page Header - Mobile Responsive */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+      <div className="flex flex-col gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-light gradient-text mb-1 sm:mb-2">Track Orders</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold gradient-text mb-1">Track Orders</h1>
+          <p className="text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs md:text-sm">
             Update parcel status and manage order tracking
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <Button
             onClick={exportToExcel}
             disabled={paginatedOrders.length === 0}
-            className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="h-9 sm:h-10 px-3 sm:px-4 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export to Excel</span>
@@ -534,7 +534,7 @@ export default function TrackerDashboardPage() {
               setStartDate(start)
               setEndDate(end)
             }}
-            className="h-10 sm:h-11 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-semibold transition-all shadow-sm"
+            className="h-9 sm:h-10 md:h-11 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg font-semibold transition-all shadow-sm"
           />
         </div>
       </div>
@@ -698,22 +698,13 @@ export default function TrackerDashboardPage() {
                 {searchTerm ? 'No matching orders' : 'No orders found'}
               </p>
               <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
-                {searchTerm ? 'Try different search' : 'All orders tracked! Ã°Å¸Å½â€°'}
+                {searchTerm ? 'Try different search' : 'All orders tracked! 🎉'}
               </p>
             </div>
           ) : (
             <>
-              {/* Mobile Scroll Hint */}
-              <div className="md:hidden px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 font-medium">
-                  <span className="text-slate-500">Ã¢â€ Â</span>
-                  <span>Swipe to see all columns • Tap row to highlight</span>
-                  <span className="text-blue-500">Ã¢â€ â€™</span>
-                </p>
-              </div>
-
               <div className="overflow-x-auto">
-                {/* Bulk Action Bar Ã¢â‚¬â€ shows when items are selected */}
+                {/* Bulk Action Bar — shows when items are selected */}
                 {selectedIds.size > 0 && (
                   <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50">
                     <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
@@ -886,7 +877,7 @@ export default function TrackerDashboardPage() {
                             </SelectContent>
                           </Select>
                         </td>
-                        {/* Reason column Ã¢â‚¬â€ only active for CANCELLED or RETURNED */}
+                        {/* Reason column — only active for CANCELLED or RETURNED */}
                         <td className="py-1.5 px-2 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                           {(order.parcelStatus === 'CANCELLED' || order.parcelStatus === 'RETURNED') ? (
                             <Select

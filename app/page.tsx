@@ -76,46 +76,52 @@ export default function LandingLoginPage() {
 
   // Intersection Observer for scroll animations + stats counter trigger
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !mounted) return
 
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -80px 0px'
-    }
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const observerOptions = {
+        threshold: 0.05,
+        rootMargin: '0px 0px -50px 0px'
+      }
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (!prefersReducedMotion) {
-            entry.target.classList.add('animate-in')
-          } else {
-            // Instantly visible for reduced motion users
-            ;(entry.target as HTMLElement).style.opacity = '1'
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!prefersReducedMotion) {
+              entry.target.classList.add('animate-in')
+            } else {
+              // Instantly visible for reduced motion users
+              ;(entry.target as HTMLElement).style.opacity = '1'
+            }
+            observer.unobserve(entry.target)
           }
-          observer.unobserve(entry.target)
-        }
-      })
-    }, observerOptions)
+        })
+      }, observerOptions)
 
-    const animatedElements = document.querySelectorAll('[data-animate]')
-    animatedElements.forEach((el) => observer.observe(el))
+      const animatedElements = document.querySelectorAll('[data-animate]')
+      console.log('[Scroll Animations] Found elements:', animatedElements.length)
+      animatedElements.forEach((el) => observer.observe(el))
 
-    // Stats counter observer
-    const statsObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setStatsVisible(true)
-          statsObserver.unobserve(entry.target)
-        }
-      })
-    }, { threshold: 0.5 })
+      // Stats counter observer
+      const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setStatsVisible(true)
+            statsObserver.unobserve(entry.target)
+          }
+        })
+      }, { threshold: 0.5 })
 
-    if (statsRef.current) statsObserver.observe(statsRef.current)
+      if (statsRef.current) statsObserver.observe(statsRef.current)
 
-    return () => {
-      observer.disconnect()
-      statsObserver.disconnect()
-    }
+      return () => {
+        observer.disconnect()
+        statsObserver.disconnect()
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [mounted, prefersReducedMotion])
 
   useEffect(() => {
@@ -398,68 +404,68 @@ export default function LandingLoginPage() {
       </nav>
 
       {/* Hero Section - Premium Black & Gold */}
-      <section className="relative z-10 pt-24 pb-32 px-6">
+      <section className="relative z-10 pt-16 sm:pt-20 md:pt-24 pb-20 sm:pb-28 md:pb-32 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
             {/* Left: Hero Content */}
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {/* Premium Badge */}
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/30 text-amber-300 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg shadow-amber-900/20 animate-landing-fade-in" style={{ animationDelay: '200ms' }}>
-                <Sparkles className="h-4 w-4 text-amber-400" />
+              <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/30 text-amber-300 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-sm shadow-lg shadow-amber-900/20 animate-landing-fade-in" style={{ animationDelay: '200ms' }}>
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-amber-400" />
                 <span className="bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">Enterprise-Grade Multi-Channel Solution</span>
               </div>
 
               {/* Hero Heading - Luxurious Typography */}
-              <div className="space-y-6 animate-landing-fade-in" style={{ animationDelay: '300ms' }}>
-                <h1 className="text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
-                  <span className="text-white">Transform Your</span>
+              <div className="space-y-4 sm:space-y-6 animate-landing-fade-in" style={{ animationDelay: '300ms' }}>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+                  <span className="text-white">Manage Your</span>
                   <br />
                   <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                    Inventory Empire
+                    Inventory Smarter
                   </span>
                 </h1>
-                <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
-                  Elite order fulfillment platform for multi-channel e-commerce operations with military-grade precision.
+                <p className="text-base sm:text-lg md:text-xl text-slate-300 leading-relaxed max-w-xl">
+                  Run your multi-channel orders smoothly from one powerful system.
                 </p>
               </div>
 
               {/* Premium Stats - Gold Accented with Counter Animation */}
-              <div className="grid grid-cols-3 gap-6 pt-4 animate-landing-fade-in" ref={statsRef} style={{ animationDelay: '400ms' }}>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 pt-2 sm:pt-4 animate-landing-fade-in" ref={statsRef} style={{ animationDelay: '400ms' }}>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-yellow-600/10 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
-                  <div className="relative bg-black/40 border border-amber-500/20 rounded-xl p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
-                    <div className="text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
+                  <div className="relative bg-black/40 border border-amber-500/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
                       {statsVisible ? `${ordersCount > 999 ? `₱${Math.floor(ordersCount/1000)}K` : ordersCount}` : '₱0'}
                     </div>
-                    <div className="text-sm text-amber-200/70 font-medium mt-1">Sales Today</div>
+                    <div className="text-[10px] sm:text-xs md:text-sm text-amber-200/70 font-medium mt-1">Sales Today</div>
                   </div>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-yellow-600/10 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
-                  <div className="relative bg-black/40 border border-amber-500/20 rounded-xl p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
-                    <div className="text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
+                  <div className="relative bg-black/40 border border-amber-500/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
                       {statsVisible ? packedCount : 0}
                     </div>
-                    <div className="text-sm text-amber-200/70 font-medium mt-1">Orders Packed</div>
+                    <div className="text-[10px] sm:text-xs md:text-sm text-amber-200/70 font-medium mt-1">Orders Packed</div>
                   </div>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-yellow-600/10 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
-                  <div className="relative bg-black/40 border border-amber-500/20 rounded-xl p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
-                    <div className="text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
+                  <div className="relative bg-black/40 border border-amber-500/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm hover:border-amber-500/40 transition-all">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tabular-nums">
                       {statsVisible ? channelsCount : 0}+
                     </div>
-                    <div className="text-sm text-amber-200/70 font-medium mt-1">Sales Channels</div>
+                    <div className="text-[10px] sm:text-xs md:text-sm text-amber-200/70 font-medium mt-1">Sales Channels</div>
                   </div>
                 </div>
               </div>
 
               {/* CTA Buttons - Premium Gold */}
-              <div className="flex flex-wrap gap-4 pt-4 animate-landing-fade-in" style={{ animationDelay: '500ms' }}>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4 animate-landing-fade-in" style={{ animationDelay: '500ms' }}>
                 <Button
                   onClick={() => setShowLoginModal(true)}
                   size="lg"
-                  className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 text-black font-bold text-lg px-10 py-7 shadow-2xl shadow-amber-600/50 hover:shadow-amber-500/70 transition-all duration-300 border border-amber-400/30 hover:scale-105 btn-ripple"
+                  className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 text-black font-bold text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-2xl shadow-amber-600/50 hover:shadow-amber-500/70 transition-all duration-300 border border-amber-400/30 hover:scale-105 btn-ripple"
                 >
                   Access Dashboard
                   <ChevronRight className="h-5 w-5 ml-2" />
@@ -467,7 +473,7 @@ export default function LandingLoginPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="text-lg px-10 py-7 border-2 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 hover:border-amber-400/50 backdrop-blur-sm transition-all duration-300 animate-border-glow"
+                  className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 border-2 border-amber-500/30 text-amber-300 hover:bg-amber-500/10 hover:border-amber-400/50 backdrop-blur-sm transition-all duration-300 animate-border-glow"
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <Eye className="h-5 w-5 mr-2" />
@@ -528,7 +534,7 @@ export default function LandingLoginPage() {
       </section>
 
       {/* Features Section - Premium Black & Gold */}
-      <section id="features" className="relative z-10 py-24 px-6 bg-gradient-to-b from-slate-950 to-black border-y border-amber-900/20">
+      <section id="features" className="relative z-10 py-16 sm:py-20 md:py-24 px-4 sm:px-6 bg-gradient-to-b from-slate-950 to-black border-y border-amber-900/20">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-20 space-y-6" data-animate="fade-up">
@@ -676,7 +682,7 @@ export default function LandingLoginPage() {
       </section>
 
       {/* Additional Features Section - Premium Black & Gold */}
-      <section className="relative z-10 py-24 px-6 bg-black border-y border-amber-900/20">
+      <section className="relative z-10 py-16 sm:py-20 md:py-24 px-4 sm:px-6 bg-black border-y border-amber-900/20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16" data-animate="fade-up">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/30 text-amber-300 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg shadow-amber-900/20 mb-6">
@@ -792,75 +798,75 @@ export default function LandingLoginPage() {
       </section>
 
       {/* Capabilities Section - Premium Black & Gold */}
-      <section className="relative z-10 py-24 px-6 bg-black">
+      <section className="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-black">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-center">
             {/* Left: Content */}
-            <div className="space-y-8" data-animate="fade-right">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/30 text-amber-300 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg shadow-amber-900/20">
-                <Database className="h-4 w-4 text-amber-400" />
+            <div className="space-y-6 sm:space-y-8" data-animate="fade-right">
+              <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/30 text-amber-300 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-sm shadow-lg shadow-amber-900/20">
+                <Database className="h-3 w-3 sm:h-4 sm:w-4 text-amber-400" />
                 <span className="bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">Complete Workflow System</span>
               </div>
-              <h2 className="text-5xl font-black text-white leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
                 Order to Delivery
                 <br />
                 <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">
                   Complete Pipeline
                 </span>
               </h2>
-              <p className="text-lg text-slate-400 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-400 leading-relaxed">
                 Seamless order fulfillment workflow from creation to customer delivery with full visibility and control.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="group relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
-                  <div className="relative flex items-start gap-5 p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black">
+                  <div className="relative flex items-start gap-3 sm:gap-4 md:gap-5 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
+                    <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black text-sm sm:text-base">
                       1
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg text-white mb-2">Order Creation (POS)</h4>
-                      <p className="text-sm text-slate-400">Agent creates order in POS system, assigns sales channel, selects products/bundles, enters customer details, and dispatches with waybill. Order enters Packing Queue automatically.</p>
+                      <h4 className="font-bold text-base sm:text-lg text-white mb-1 sm:mb-2">Order Creation (POS)</h4>
+                      <p className="text-xs sm:text-sm text-slate-400">Agent creates order in POS system, assigns sales channel, selects products/bundles, enters customer details, and dispatches with waybill. Order enters Packing Queue automatically.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="group relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
-                  <div className="relative flex items-start gap-5 p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black">
+                  <div className="relative flex items-start gap-3 sm:gap-4 md:gap-5 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
+                    <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black text-sm sm:text-base">
                       2
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg text-white mb-2">Packing Queue</h4>
-                      <p className="text-sm text-slate-400">Packer views pending orders, verifies items and customer details, marks as "Packed". System automatically deducts inventory stock upon packing confirmation.</p>
+                      <h4 className="font-bold text-base sm:text-lg text-white mb-1 sm:mb-2">Packing Queue</h4>
+                      <p className="text-xs sm:text-sm text-slate-400">Packer views pending orders, verifies items and customer details, marks as "Packed". System automatically deducts inventory stock upon packing confirmation.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="group relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
-                  <div className="relative flex items-start gap-5 p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black">
+                  <div className="relative flex items-start gap-3 sm:gap-4 md:gap-5 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
+                    <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black text-sm sm:text-base">
                       3
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg text-white mb-2">Manual Tracking Updates</h4>
-                      <p className="text-sm text-slate-400">Tracker manually updates parcel status (In Transit, Out for Delivery, Delivered, etc.) based on courier information. All updates are internal - not synced with courier APIs.</p>
+                      <h4 className="font-bold text-base sm:text-lg text-white mb-1 sm:mb-2">Manual Tracking Updates</h4>
+                      <p className="text-xs sm:text-sm text-slate-400">Tracker manually updates parcel status (In Transit, Out for Delivery, Delivered, etc.) based on courier information. All updates are internal - not synced with courier APIs.</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="group relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
-                  <div className="relative flex items-start gap-5 p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black">
+                  <div className="relative flex items-start gap-3 sm:gap-4 md:gap-5 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-slate-900 to-black border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all">
+                    <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-600/50 flex-shrink-0 text-black font-black text-sm sm:text-base">
                       4
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg text-white mb-2">Analytics & Reporting</h4>
-                      <p className="text-sm text-slate-400">Admin views comprehensive reports: sales by channel, agent performance, fulfillment rates, return rates, and profit margins across all departments.</p>
+                      <h4 className="font-bold text-base sm:text-lg text-white mb-1 sm:mb-2">Analytics & Reporting</h4>
+                      <p className="text-xs sm:text-sm text-slate-400">Admin views comprehensive reports: sales by channel, agent performance, fulfillment rates, return rates, and profit margins across all departments.</p>
                     </div>
                   </div>
                 </div>
@@ -868,37 +874,37 @@ export default function LandingLoginPage() {
             </div>
 
             {/* Right: Premium Stats Grid */}
-            <div className="grid grid-cols-2 gap-6" data-animate="fade-left">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6" data-animate="fade-left">
               <div className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-all"></div>
-                <div className="relative p-8 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-2xl shadow-2xl shadow-amber-900/50 h-full">
-                  <Clock className="h-10 w-10 mb-4 text-black/70" strokeWidth={2.5} />
-                  <div className="text-4xl font-black mb-2 text-black">Real-Time</div>
-                  <div className="text-black/70 font-semibold">Stock Updates</div>
+                <div className="relative p-5 sm:p-6 md:p-8 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-xl sm:rounded-2xl shadow-2xl shadow-amber-900/50 h-full">
+                  <Clock className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 mb-3 sm:mb-4 text-black/70" strokeWidth={2.5} />
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-black">Real-Time</div>
+                  <div className="text-xs sm:text-sm md:text-base text-black/70 font-semibold">Stock Updates</div>
                 </div>
               </div>
               <div className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-all"></div>
-                <div className="relative p-8 bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-2xl shadow-2xl h-full">
-                  <Users className="h-10 w-10 mb-4 text-amber-400" strokeWidth={2.5} />
-                  <div className="text-4xl font-black mb-2 text-white">Multi-User</div>
-                  <div className="text-amber-300/70 font-semibold">Collaboration</div>
+                <div className="relative p-5 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-xl sm:rounded-2xl shadow-2xl h-full">
+                  <Users className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 mb-3 sm:mb-4 text-amber-400" strokeWidth={2.5} />
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-white">Multi-User</div>
+                  <div className="text-xs sm:text-sm md:text-base text-amber-300/70 font-semibold">Collaboration</div>
                 </div>
               </div>
               <div className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-all"></div>
-                <div className="relative p-8 bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-2xl shadow-2xl h-full">
-                  <TrendingUp className="h-10 w-10 mb-4 text-amber-400" strokeWidth={2.5} />
-                  <div className="text-4xl font-black mb-2 text-white">Analytics</div>
-                  <div className="text-amber-300/70 font-semibold">Dashboard</div>
+                <div className="relative p-5 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-xl sm:rounded-2xl shadow-2xl h-full">
+                  <TrendingUp className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 mb-3 sm:mb-4 text-amber-400" strokeWidth={2.5} />
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-white">Analytics</div>
+                  <div className="text-xs sm:text-sm md:text-base text-amber-300/70 font-semibold">Dashboard</div>
                 </div>
               </div>
               <div className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-all"></div>
-                <div className="relative p-8 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-2xl shadow-2xl shadow-amber-900/50 h-full">
-                  <Shield className="h-10 w-10 mb-4 text-black/70" strokeWidth={2.5} />
-                  <div className="text-4xl font-black mb-2 text-black">Secure</div>
-                  <div className="text-black/70 font-semibold">& Auditable</div>
+                <div className="relative p-5 sm:p-6 md:p-8 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-xl sm:rounded-2xl shadow-2xl shadow-amber-900/50 h-full">
+                  <Shield className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 mb-3 sm:mb-4 text-black/70" strokeWidth={2.5} />
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-black">Secure</div>
+                  <div className="text-xs sm:text-sm md:text-base text-black/70 font-semibold">& Auditable</div>
                 </div>
               </div>
             </div>
@@ -907,22 +913,22 @@ export default function LandingLoginPage() {
       </section>
 
       {/* CTA Section - Premium Black & Gold */}
-      <section className="relative z-10 py-32 px-6 bg-gradient-to-b from-black to-slate-950">
+      <section className="relative z-10 py-16 sm:py-20 md:py-24 px-4 sm:px-6 bg-gradient-to-b from-black to-slate-950">
         <div className="max-w-6xl mx-auto">
           <div className="relative group" data-animate="scale">
             {/* Premium Glow */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-all duration-500"></div>
+            <div className="absolute -inset-2 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-all duration-500"></div>
             
             {/* Premium Card */}
-            <div className="relative p-16 bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 rounded-3xl shadow-2xl">
+            <div className="relative p-8 sm:p-12 md:p-14 lg:p-16 bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 rounded-2xl sm:rounded-3xl shadow-2xl">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="px-6 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-full shadow-lg shadow-amber-600/50">
-                  <span className="text-sm font-bold text-black tracking-wide">EXCLUSIVE ACCESS</span>
+                <div className="px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 bg-gradient-to-r from-amber-600 to-yellow-600 rounded-full shadow-lg shadow-amber-600/50">
+                  <span className="text-xs sm:text-sm font-bold text-black tracking-wide">EXCLUSIVE ACCESS</span>
                 </div>
               </div>
               
-              <div className="text-center space-y-8">
-                <h2 className="text-5xl lg:text-6xl font-black text-white leading-tight">
+              <div className="text-center space-y-6 sm:space-y-8">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight">
                   Ready to Elevate Your
                   <br />
                   <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">
@@ -930,37 +936,37 @@ export default function LandingLoginPage() {
                   </span>
                 </h2>
                 
-                <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
                   Transform your e-commerce operations with our enterprise-grade inventory management system. Streamline order fulfillment, maximize efficiency, and scale your business across multiple channels.
                 </p>
 
                 {/* Key Benefits Grid */}
-                <div className="grid md:grid-cols-3 gap-6 pt-6 pb-4">
-                  <div className="p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
-                    <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 md:gap-6 pt-4 sm:pt-6 pb-2 sm:pb-4">
+                  <div className="p-5 sm:p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
                       100%
                     </div>
-                    <div className="text-sm text-slate-400">
+                    <div className="text-xs sm:text-sm text-slate-400">
                       Order Visibility
                       <br />
                       From Creation to Delivery
                     </div>
                   </div>
-                  <div className="p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
-                    <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
+                  <div className="p-5 sm:p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
                       5
                     </div>
-                    <div className="text-sm text-slate-400">
+                    <div className="text-xs sm:text-sm text-slate-400">
                       Sales Channels
                       <br />
                       Unified in One Platform
                     </div>
                   </div>
-                  <div className="p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
-                    <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
+                  <div className="p-5 sm:p-6 bg-slate-800/50 border border-amber-500/20 rounded-xl">
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
                       Real-Time
                     </div>
-                    <div className="text-sm text-slate-400">
+                    <div className="text-xs sm:text-sm text-slate-400">
                       Inventory Updates
                       <br />
                       Across All Departments
@@ -969,73 +975,73 @@ export default function LandingLoginPage() {
                 </div>
 
                 {/* What You Get */}
-                <div className="pt-4 pb-6 space-y-4">
-                  <h3 className="text-xl font-bold text-white">What You Get:</h3>
-                  <div className="grid md:grid-cols-2 gap-4 text-left max-w-3xl mx-auto">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <div className="pt-3 sm:pt-4 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">What You Get:</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-left max-w-3xl mx-auto">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Multi-Channel Integration</div>
-                        <div className="text-sm text-slate-400">Manage Shopee, Lazada, Facebook, TikTok & Physical Store</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Multi-Channel Integration</div>
+                        <div className="text-xs sm:text-sm text-slate-400">Manage Shopee, Lazada, Facebook, TikTok & Physical Store</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Complete Order Workflow</div>
-                        <div className="text-sm text-slate-400">POS → Packing → Tracking → Analytics</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Complete Order Workflow</div>
+                        <div className="text-xs sm:text-sm text-slate-400">POS → Packing → Tracking → Analytics</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Role-Based Access Control</div>
-                        <div className="text-sm text-slate-400">6 user roles with granular permissions</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Role-Based Access Control</div>
+                        <div className="text-xs sm:text-sm text-slate-400">6 user roles with granular permissions</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Advanced Analytics Dashboard</div>
-                        <div className="text-sm text-slate-400">Sales reports, profit tracking & performance metrics</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Advanced Analytics Dashboard</div>
+                        <div className="text-xs sm:text-sm text-slate-400">Sales reports, profit tracking & performance metrics</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Smart Inventory Management</div>
-                        <div className="text-sm text-slate-400">Auto-deduction, bundles & low-stock alerts</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Smart Inventory Management</div>
+                        <div className="text-xs sm:text-sm text-slate-400">Auto-deduction, bundles & low-stock alerts</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold">Complete Audit Trail</div>
-                        <div className="text-sm text-slate-400">Activity logs & security compliance</div>
+                        <div className="text-white font-semibold text-sm sm:text-base">Complete Audit Trail</div>
+                        <div className="text-xs sm:text-sm text-slate-400">Activity logs & security compliance</div>
                       </div>
                     </div>
                   </div>
@@ -1044,14 +1050,14 @@ export default function LandingLoginPage() {
                 <Button
                   onClick={() => setShowLoginModal(true)}
                   size="lg"
-                  className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 text-black font-bold text-xl px-12 py-8 h-auto shadow-2xl shadow-amber-600/50 hover:shadow-amber-500/70 transition-all duration-300 border-2 border-amber-400/30 hover:scale-105 btn-ripple"
+                  className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 text-black font-bold text-base sm:text-lg md:text-xl px-8 sm:px-10 md:px-12 py-6 sm:py-7 md:py-8 h-auto shadow-2xl shadow-amber-600/50 hover:shadow-amber-500/70 transition-all duration-300 border-2 border-amber-400/30 hover:scale-105 btn-ripple"
                 >
-                  <Lock className="h-6 w-6 mr-3" strokeWidth={2.5} />
+                  <Lock className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" strokeWidth={2.5} />
                   Access Elite Dashboard
-                  <ChevronRight className="h-6 w-6 ml-3" strokeWidth={2.5} />
+                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2 sm:ml-3" strokeWidth={2.5} />
                 </Button>
 
-                <p className="text-sm text-slate-500 pt-4">
+                <p className="text-xs sm:text-sm text-slate-500 pt-3 sm:pt-4">
                   Secure login • Enterprise-grade security • Role-based access control
                 </p>
               </div>
@@ -1061,22 +1067,22 @@ export default function LandingLoginPage() {
       </section>
 
       {/* Footer - Premium Black & Gold */}
-      <footer className="relative z-10 py-10 px-6 border-t border-amber-900/20 bg-black">
+      <footer className="relative z-10 py-8 sm:py-10 px-4 sm:px-6 border-t border-amber-900/20 bg-black">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
             <div className="flex items-center gap-3">
               <img 
                 src="/Vertex-icon.png" 
                 alt="Vertex" 
-                className="h-8 w-auto object-contain opacity-80"
+                className="h-7 sm:h-8 w-auto object-contain opacity-80"
                 loading="eager"
               />
-              <div className="text-slate-500 text-sm">
+              <div className="text-slate-500 text-xs sm:text-sm">
                 <div className="font-semibold text-slate-400">Vertex IMS</div>
                 <div>© 2026 All Rights Reserved</div>
               </div>
             </div>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 text-xs sm:text-sm text-center md:text-right">
               Powered by <span className="text-amber-500 font-semibold">Enterprise Technology</span>
             </p>
           </div>
@@ -1085,23 +1091,23 @@ export default function LandingLoginPage() {
 
       {/* Login Modal - Premium Black & Gold */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 shadow-2xl shadow-amber-900/50">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:w-full bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 shadow-2xl shadow-amber-900/50 !p-6 sm:!p-8 rounded-2xl sm:rounded-3xl">
+          <DialogHeader className="space-y-3">
             <div className="flex justify-center mb-4 animate-modal-fade-in" style={{ animationDelay: '0ms' }}>
               <div className="relative">
                 <div className="absolute inset-0 bg-amber-500/30 blur-2xl rounded-full"></div>
                 <img 
                   src="/Vertex-icon.png" 
                   alt="Vertex" 
-                  className="h-16 w-auto object-contain relative z-10"
+                  className="h-14 sm:h-16 w-auto object-contain relative z-10"
                   loading="eager"
                 />
               </div>
             </div>
-            <DialogTitle className="text-3xl font-black text-center bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent animate-modal-fade-in" style={{ animationDelay: '100ms' }}>
+            <DialogTitle className="text-2xl sm:text-3xl font-black text-center bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent animate-modal-fade-in" style={{ animationDelay: '100ms' }}>
               Welcome Back
             </DialogTitle>
-            <DialogDescription className="text-center text-slate-400 text-base animate-modal-fade-in" style={{ animationDelay: '200ms' }}>
+            <DialogDescription className="text-center text-slate-400 text-sm sm:text-base animate-modal-fade-in" style={{ animationDelay: '200ms' }}>
               Sign in to access your elite dashboard
             </DialogDescription>
           </DialogHeader>
@@ -1161,7 +1167,8 @@ export default function LandingLoginPage() {
                   id="remember"
                   checked={rememberDevice}
                   onChange={(e) => setRememberDevice(e.target.checked)}
-                  className="rounded border-amber-500/30 bg-black/40 text-amber-500 focus:ring-amber-500/20"
+                  className="!w-3.5 !h-3.5 !min-w-0 !min-h-0 rounded border-amber-500/30 bg-black/40 text-amber-500 focus:ring-amber-500/20 focus:ring-1 focus:ring-offset-0"
+                  style={{ width: '14px', height: '14px' }}
                 />
                 <Label htmlFor="remember" className="text-sm font-normal cursor-pointer text-slate-400">
                   Remember me
@@ -1209,7 +1216,7 @@ export default function LandingLoginPage() {
 
       {/* Forgot Password Dialog - Premium Black & Gold */}
       <Dialog open={showForgotPasswordDialog} onOpenChange={resetForgotPasswordDialog}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 shadow-2xl shadow-amber-900/50">
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:w-full bg-gradient-to-br from-slate-900 via-black to-slate-900 border-2 border-amber-500/30 shadow-2xl shadow-amber-900/50 !p-6 sm:!p-8 rounded-2xl sm:rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-white animate-modal-fade-in" style={{ animationDelay: '0ms' }}>Reset Password</DialogTitle>
             <DialogDescription className="text-slate-400 animate-modal-fade-in" style={{ animationDelay: '100ms' }}>

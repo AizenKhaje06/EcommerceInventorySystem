@@ -190,7 +190,7 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 mb-6">
         <div>
-          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">Dashboard Overview</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold gradient-text leading-tight">Dashboard Overview</h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Welcome back! Here's what's happening with your inventory.</p>
         </div>
         
