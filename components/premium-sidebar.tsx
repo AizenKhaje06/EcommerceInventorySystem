@@ -138,6 +138,7 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [showContactModal, setShowContactModal] = useState(false)
+  const [showPreferenceModal, setShowPreferenceModal] = useState(false)
 
   // Get current user
   useEffect(() => {
@@ -697,6 +698,17 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
                           <span>About</span>
                         </DropdownMenuItem>
 
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setShowPreferenceModal(true)
+                            setProfileMenuOpen(false)
+                          }}
+                          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                        >
+                          <Settings className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          <span>Preferences</span>
+                        </DropdownMenuItem>
+
                         <DropdownMenuSeparator className="my-1 bg-slate-200 dark:bg-slate-800" />
 
                         <DropdownMenuItem 
@@ -836,6 +848,17 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
                   >
                     <AlertTriangle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                     <span>About</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setShowPreferenceModal(true)
+                      setProfileMenuOpen(false)
+                    }}
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                  >
+                    <Settings className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                    <span>Preferences</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator className="my-1 bg-slate-200 dark:bg-slate-800" />
@@ -1226,6 +1249,152 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
                 >
                   Close
                 </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Preferences Modal */}
+      {showPreferenceModal && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowPreferenceModal(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="border-b border-slate-200 dark:border-slate-800 p-6 sticky top-0 bg-white dark:bg-slate-900">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Preferences
+                  </h2>
+                  <button
+                    onClick={() => setShowPreferenceModal(false)}
+                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Display Preferences */}
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Display</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Theme</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Choose your preferred color scheme</p>
+                      </label>
+                      <select defaultValue="auto" className="px-3 py-2 text-sm rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                        <option value="auto">Auto</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Sidebar Collapse</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Auto-collapse sidebar on small screens</p>
+                      </label>
+                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded border-slate-300 text-amber-500" />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Notification Preferences */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Notifications</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Email Notifications</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Receive updates via email</p>
+                      </label>
+                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded border-slate-300 text-amber-500" />
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">In-App Notifications</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Show notifications within the app</p>
+                      </label>
+                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded border-slate-300 text-amber-500" />
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Low Stock Alerts</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Notify when items run low</p>
+                      </label>
+                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded border-slate-300 text-amber-500" />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Language & Region */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Language & Region</h3>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Language</span>
+                        <select defaultValue="en" className="w-full mt-2 px-3 py-2 text-sm rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                          <option value="en">English</option>
+                          <option value="tl">Filipino (Tagalog)</option>
+                          <option value="es">Spanish</option>
+                          <option value="zh">Chinese</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Timezone</span>
+                        <select defaultValue="pht" className="w-full mt-2 px-3 py-2 text-sm rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                          <option value="pht">Philippine Time (PHT)</option>
+                          <option value="utc">Coordinated Universal Time (UTC)</option>
+                          <option value="est">Eastern Standard Time (EST)</option>
+                          <option value="pst">Pacific Standard Time (PST)</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Privacy & Data */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Privacy & Data</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Analytics</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Help us improve by sharing usage data</p>
+                      </label>
+                      <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-amber-500" />
+                    </div>
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>🗑️</span> Clear Cache
+                    </button>
+                  </div>
+                </section>
+
+                {/* Save Button */}
+                <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowPreferenceModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => setShowPreferenceModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    Save Preferences
+                  </button>
+                </div>
               </div>
             </div>
           </div>
