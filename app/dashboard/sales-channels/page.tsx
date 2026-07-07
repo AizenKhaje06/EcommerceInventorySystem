@@ -360,8 +360,8 @@ export default function SalesChannelsPage() {
   return (
     <div className="max-w-[1400px] mx-auto py-5 space-y-6">
       {/* Page Header - Mobile Responsive */}
-      <div className="flex flex-col gap-4 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text leading-tight">
             Sales Channels Overview
           </h2>
@@ -371,7 +371,7 @@ export default function SalesChannelsPage() {
         </div>
         
         {/* Actions - Responsive Stack Layout */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:flex-shrink-0">
           {/* Date Range Picker - Full Width on Mobile */}
           <EnterpriseDateRangePicker
             startDate={startDate}

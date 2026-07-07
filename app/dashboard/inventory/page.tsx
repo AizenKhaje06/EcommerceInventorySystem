@@ -1159,7 +1159,7 @@ export default function InventoryPage() {
   return (
     <div className="max-w-[1400px] mx-auto py-4 px-4 sm:px-6 space-y-5 sm:space-y-6">
       {/* Page Header - Professional & Mobile-Optimized */}
-      <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1.5 leading-tight">
             Inventory Overview
@@ -1169,13 +1169,13 @@ export default function InventoryPage() {
           </p>
         </div>
         
-        {/* Action Buttons - Mobile-Optimized Layout */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-          {/* Add Product - Primary Action - Full width on mobile */}
+        {/* Action Buttons - Mobile stacked, Desktop inline */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:flex-shrink-0">
+          {/* Add Product - Primary Action */}
           {!isReadOnly && (
             <Button
               onClick={() => setAddDialogOpen(true)}
-              className="w-full sm:w-auto h-11 sm:h-9 px-4 sm:px-3 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-md shadow-sm"
+              className="w-full sm:w-auto h-11 sm:h-9 px-4 sm:px-3 text-sm font-medium bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white rounded-lg sm:rounded-md shadow-sm transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Product
@@ -1188,8 +1188,7 @@ export default function InventoryPage() {
             {!isReadOnly && userRole !== 'logistics-admin' && (
               <Button
                 onClick={() => setCategoryDialogOpen(true)}
-                variant="outline"
-                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm border-slate-200 dark:border-slate-700 rounded-lg sm:rounded-md"
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg sm:rounded-md transition-colors"
               >
                 <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 <span className="hidden sm:inline">Categories</span>
@@ -1201,7 +1200,7 @@ export default function InventoryPage() {
             {userRole !== 'operations' && userRole !== 'logistics-admin' && (
               <Button
                 onClick={() => setStoreDialogOpen(true)}
-                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-lg sm:rounded-md shadow-sm"
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-800 text-white rounded-lg sm:rounded-md shadow-sm transition-colors"
               >
                 <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 <span className="hidden sm:inline">Stores</span>
@@ -1213,7 +1212,7 @@ export default function InventoryPage() {
             {userRole !== 'operations' && userRole !== 'logistics-admin' && (
               <Button
                 onClick={() => setCreateBundleOpen(true)}
-                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg sm:rounded-md shadow-sm"
+                className="h-11 sm:h-9 px-3 sm:px-3 text-xs sm:text-sm bg-slate-500 hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-700 text-white rounded-lg sm:rounded-md shadow-sm transition-colors"
               >
                 <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 Bundle

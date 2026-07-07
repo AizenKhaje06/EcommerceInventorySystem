@@ -616,9 +616,9 @@ export default function SalesChannelDetailPage() {
           Back to Sales Channels
         </Button>
         
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           {/* Title Section */}
-          <div>
+          <div className="flex-1 min-w-0">
             <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
               {data.name}
             </h2>
@@ -629,7 +629,7 @@ export default function SalesChannelDetailPage() {
           
           {/* Date Filter and Export Button - Admin only - Responsive Stack */}
           {!isTeamLeader && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:flex-shrink-0">
               {/* Date Range Picker - Full Width on Mobile */}
               <EnterpriseDateRangePicker
                 startDate={startDate}

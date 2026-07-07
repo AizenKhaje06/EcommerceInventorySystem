@@ -188,14 +188,14 @@ export default function DashboardPage() {
   return (
     <div className="max-w-[1400px] mx-auto py-4 px-4 sm:px-6 space-y-5 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold gradient-text leading-tight">Dashboard Overview</h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Welcome back! Here's what's happening with your inventory.</p>
         </div>
         
-        {/* Actions - Date Picker - Full Width on Mobile */}
-        <div className="flex items-center">
+        {/* Actions - Date Picker */}
+        <div className="flex items-center sm:flex-shrink-0">
           <EnterpriseDateRangePicker
             startDate={startDate}
             endDate={endDate}
@@ -579,8 +579,8 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <div className="grid gap-5 grid-cols-1 lg:grid-cols-2">
         {/* Recent Sales */}
-        <Card className="overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-amber-500/10">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-emerald-500 rounded-full flex-shrink-0"></div>
               <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Recent Sales</h3>
@@ -620,8 +620,8 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent Restocks */}
-        <Card className="overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-amber-500/10">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-blue-500 rounded-full flex-shrink-0"></div>
               <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Recent Restocks</h3>
@@ -661,8 +661,8 @@ export default function DashboardPage() {
       {/* Insights & Health */}
       <div className="grid gap-5 grid-cols-1 lg:grid-cols-3">
         {/* Business Insights */}
-        <Card className="lg:col-span-2 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-amber-500/10">
+        <Card className="lg:col-span-2 overflow-hidden border-0 shadow-lg">
+          <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-violet-500 rounded-full flex-shrink-0"></div>
               <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Business Insights</h3>
@@ -715,8 +715,8 @@ export default function DashboardPage() {
         </Card>
 
         {/* Inventory Health Score */}
-        <Card className="overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-amber-500/10">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-emerald-500 rounded-full flex-shrink-0"></div>
               <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Inventory Health</h3>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -28,6 +28,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,6 +125,7 @@ interface PremiumSidebarProps {
 
 export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, onCollapsedChange }: PremiumSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false) // Default: false = expanded/open
   const reducedMotion = useReducedMotion()
   const [isMobile, setIsMobile] = useState(false)
@@ -125,11 +133,47 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
   const [outOfStockCount, setOutOfStockCount] = useState(0)
   const [currentUser, setCurrentUser] = useState<ReturnType<typeof getCurrentUser>>(null)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showAboutModal, setShowAboutModal] = useState(false)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [showContactModal, setShowContactModal] = useState(false)
 
   // Get current user
   useEffect(() => {
     setCurrentUser(getCurrentUser())
   }, [])
+
+  // Fetch profile image
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const user = getCurrentUser()
+        if (!user?.username) return
+
+        // Fetch user profile including image from API
+        const response = await fetch('/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            'x-user-username': user.username
+          }
+        })
+
+        if (!response.ok) return
+
+        const data = await response.json()
+        if (data?.profile_image) {
+          setProfileImage(data.profile_image)
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error)
+      }
+    }
+
+    if (currentUser) {
+      fetchProfileImage()
+    }
+  }, [currentUser])
 
   // Notify parent when collapsed state changes
   useEffect(() => {
@@ -557,35 +601,117 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
           ))}
         </nav>
 
-        {/* Logout Button Container */}
+        {/* User Profile Dropdown */}
         <div className="p-2.5 xl:p-3 border-t flex-shrink-0 border-white/10 dark:border-slate-800/60">
           {collapsed ? (
             <TooltipProvider>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setShowLogoutConfirm(true)}
-                    className={cn(
-                      "flex items-center justify-center rounded-lg w-full group relative overflow-hidden",
-                      "py-2.5 xl:py-3",
-                      reducedMotion ? "" : "transition-all duration-200",
-                      "text-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-600",
-                      "dark:text-white dark:hover:bg-gradient-to-r dark:hover:from-red-900/20 dark:hover:to-red-900/30 dark:hover:text-white",
-                      !reducedMotion && "hover:scale-105"
-                    )}
-                    aria-label="Logout from application"
-                  >
-                    <div className="flex items-center justify-center w-5 h-5 xl:w-6 xl:h-6">
-                      <LogOut
+                  <DropdownMenu open={profileMenuOpen} onOpenChange={setProfileMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <button
                         className={cn(
-                          "h-[12px] w-[12px] xl:h-[18px] xl:w-[18px] flex-shrink-0",
-                          !reducedMotion && "group-hover:scale-110 transition-transform duration-200"
+                          "flex items-center justify-center rounded-lg w-full group relative overflow-hidden",
+                          "py-2.5 xl:py-3",
+                          reducedMotion ? "" : "transition-all duration-200",
+                          "hover:bg-white/10 dark:hover:bg-slate-800/60",
+                          !reducedMotion && "hover:scale-105"
                         )}
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                    </div>
-                  </button>
+                        aria-label="User profile menu"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 xl:w-10 xl:h-10 rounded-full bg-slate-700 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+                          {profileImage ? (
+                            <img 
+                              src={profileImage} 
+                              alt={currentUser?.displayName || currentUser?.username}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm xl:text-base font-bold text-white">
+                              {currentUser?.displayName?.[0]?.toUpperCase() || currentUser?.username?.[0]?.toUpperCase() || 'U'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      align="end" 
+                      className="w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+                      sideOffset={8}
+                    >
+                      {/* Profile Header Section */}
+                      <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+                            {profileImage ? (
+                              <img 
+                                src={profileImage} 
+                                alt={currentUser?.displayName || currentUser?.username}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-sm font-bold text-white">
+                                {currentUser?.displayName?.[0]?.toUpperCase() || currentUser?.username?.[0]?.toUpperCase() || 'U'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                              {currentUser?.displayName || currentUser?.username}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                {currentUser?.role === 'admin' ? 'Main Admin' : 
+                                 currentUser?.role === 'logistics-admin' ? 'Logistics Admin' : 
+                                 currentUser?.role === 'operations' ? 'Department User' : 
+                                 currentUser?.role === 'dept-manager' ? 'Department Manager' :
+                                 currentUser?.role?.charAt(0).toUpperCase() + currentUser?.role?.slice(1)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setShowSettingsModal(true)
+                            setProfileMenuOpen(false)
+                          }}
+                          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                        >
+                          <Settings className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          <span>Settings</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setShowAboutModal(true)
+                            setProfileMenuOpen(false)
+                          }}
+                          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                        >
+                          <AlertTriangle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          <span>About</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator className="my-1 bg-slate-200 dark:bg-slate-800" />
+
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setShowLogoutConfirm(true)
+                            setProfileMenuOpen(false)
+                          }}
+                          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span>Sign Out</span>
+                        </DropdownMenuItem>
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TooltipTrigger>
                 <TooltipContent 
                   side="right" 
@@ -595,33 +721,516 @@ export function PremiumSidebar({ onNavClick, mobileOpen = false, onMobileClose, 
                   )}
                   sideOffset={12}
                 >
-                  <p className="font-semibold text-red-600 dark:text-red-400">Logout</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Sign out of your account</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">
+                    {currentUser?.displayName || currentUser?.username}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {currentUser?.role === 'admin' ? 'Main Admin' : 
+                     currentUser?.role === 'logistics-admin' ? 'Logistics Admin' : 
+                     currentUser?.role === 'operations' ? 'Department User' : 
+                     currentUser?.role === 'dept-manager' ? 'Department Manager' :
+                     currentUser?.role?.charAt(0).toUpperCase() + currentUser?.role?.slice(1)}
+                  </p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Click to open menu</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           ) : (
-            <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className={cn(
-                "flex items-center gap-1.5 xl:gap-2 px-1.5 xl:px-2 py-1.5 xl:py-2 rounded-lg w-full",
-                reducedMotion ? "" : "transition-colors duration-200",
-                "text-white hover:bg-red-500/20 hover:text-white dark:text-white dark:hover:bg-red-900/20 dark:hover:text-white"
-              )}
-              aria-label="Logout from application"
-            >
-              <LogOut
-                className="h-[13px] w-[13px] xl:h-[14px] xl:w-[14px] flex-shrink-0"
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-              <span className="text-xs xl:text-sm font-medium">
-                Logout
-              </span>
-            </button>
+            <DropdownMenu open={profileMenuOpen} onOpenChange={setProfileMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "flex items-center gap-2 xl:gap-3 px-2 xl:px-3 py-2 xl:py-2.5 rounded-lg w-full",
+                    reducedMotion ? "" : "transition-all duration-200",
+                    "hover:bg-white/10 dark:hover:bg-slate-800/60",
+                    "group"
+                  )}
+                  aria-label="User profile menu"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 xl:w-10 xl:h-10 rounded-full bg-slate-700 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+                    {profileImage ? (
+                      <img 
+                        src={profileImage} 
+                        alt={currentUser?.displayName || currentUser?.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm xl:text-base font-bold text-white">
+                        {currentUser?.displayName?.[0]?.toUpperCase() || currentUser?.username?.[0]?.toUpperCase() || 'U'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[8px] xl:text-[9px] font-semibold text-white truncate">
+                      Welcome back,
+                    </p>
+                    <p className="text-xs xl:text-sm font-bold text-white/90 truncate">
+                      {currentUser?.displayName || currentUser?.username}
+                    </p>
+                  </div>
+                  <LogOut
+                    className="h-3.5 w-3.5 xl:h-4 xl:w-4 flex-shrink-0 text-white/60 group-hover:text-white transition-colors"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+                sideOffset={8}
+              >
+                {/* Profile Header Section */}
+                <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+                      {profileImage ? (
+                        <img 
+                          src={profileImage} 
+                          alt={currentUser?.displayName || currentUser?.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-bold text-white">
+                          {currentUser?.displayName?.[0]?.toUpperCase() || currentUser?.username?.[0]?.toUpperCase() || 'U'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                        {currentUser?.displayName || currentUser?.username}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {currentUser?.role === 'admin' ? 'Main Admin' : 
+                           currentUser?.role === 'logistics-admin' ? 'Logistics Admin' : 
+                           currentUser?.role === 'operations' ? 'Department User' : 
+                           currentUser?.role === 'dept-manager' ? 'Department Manager' :
+                           currentUser?.role?.charAt(0).toUpperCase() + currentUser?.role?.slice(1)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-1">
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setShowSettingsModal(true)
+                      setProfileMenuOpen(false)
+                    }}
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                  >
+                    <Settings className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setShowAboutModal(true)
+                      setProfileMenuOpen(false)
+                    }}
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                  >
+                    <AlertTriangle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                    <span>About</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="my-1 bg-slate-200 dark:bg-slate-800" />
+
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setShowLogoutConfirm(true)
+                      setProfileMenuOpen(false)
+                    }}
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </aside>
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowSettingsModal(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="border-b border-slate-200 dark:border-slate-800 p-6 sticky top-0 bg-white dark:bg-slate-900">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Settings
+                  </h2>
+                  <button
+                    onClick={() => setShowSettingsModal(false)}
+                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Account Settings */}
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Account Settings</h3>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Display Name</span>
+                        <input type="text" defaultValue={currentUser?.displayName} className="w-full mt-1 px-3 py-2 text-sm rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                      </label>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Email</span>
+                        <input type="email" placeholder="user@example.com" className="w-full mt-1 px-3 py-2 text-sm rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                      </label>
+                    </div>
+                    <button className="w-full px-4 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                      Change Password
+                    </button>
+                  </div>
+                </section>
+
+                {/* Security & Access */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Security & Access</h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-start gap-3">
+                      <span className="text-lg">🔐</span>
+                      <div>
+                        <p className="font-medium text-blue-900 dark:text-blue-400">Two-Factor Authentication</p>
+                        <p className="text-xs text-blue-800 dark:text-blue-300 mt-1">Enhance your account security</p>
+                        <button className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">Enable 2FA</button>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-900 dark:text-white">Active Sessions</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">View and manage all active login sessions</p>
+                      </label>
+                      <button className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">View Sessions</button>
+                    </div>
+                  </div>
+                </section>
+
+                {/* API & Integrations */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">API & Integrations</h3>
+                  <div className="space-y-3">
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>🔑</span> Generate API Key
+                    </button>
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>🔗</span> Manage Integrations
+                    </button>
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>📚</span> API Documentation
+                    </button>
+                  </div>
+                </section>
+
+                {/* Audit Log */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Audit & Compliance</h3>
+                  <div className="space-y-3">
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>📋</span> View Activity Log
+                    </button>
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>📊</span> Export Audit Trail
+                    </button>
+                    <button className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                      <span>📅</span> Compliance Reports
+                    </button>
+                  </div>
+                </section>
+
+                {/* Danger Zone */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-6">
+                  <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Danger Zone</h3>
+                  <div className="space-y-2">
+                    <button className="w-full px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                      Delete Account
+                    </button>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Permanently delete your account and all associated data. This action cannot be undone.
+                    </p>
+                  </div>
+                </section>
+
+                {/* Save Button */}
+                <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowSettingsModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => setShowSettingsModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* About Modal */}
+      {showAboutModal && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowAboutModal(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="border-b border-slate-200 dark:border-slate-800 p-6 sticky top-0 bg-white dark:bg-slate-900">
+                <div className="flex items-center justify-between gap-6">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700">
+                      <img 
+                        src="/Vertex-icon.png" 
+                        alt="VERTEX" 
+                        className="h-8 w-auto object-contain dark:hidden"
+                      />
+                      <img 
+                        src="/Vertex-icon-2.png" 
+                        alt="VERTEX" 
+                        className="h-8 w-auto object-contain hidden dark:block"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                        About VERTEX
+                      </h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Inventory Management System
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowAboutModal(false)}
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
+                    aria-label="Close modal"
+                  >
+                    <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* System Information */}
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">System Information</h3>
+                  <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Application</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">VERTEX Inventory Management System</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Version</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">1.0.0</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Build Date</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">July 2026</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Organization</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">WIHI Asia</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* System Overview */}
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">System Overview</h3>
+                  <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Real-time inventory tracking across multiple sales channels</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Integrated sales channel management (Shopee, Lazada, etc.)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Multi-role access control (Admin, Operations, Department Managers)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Comprehensive order tracking and fulfillment management</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Advanced analytics and business insights dashboard</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 font-bold mt-0.5">•</span>
+                      <span>Activity logging and audit trail for compliance</span>
+                    </li>
+                  </ul>
+                </section>
+
+                {/* Technology Stack */}
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Technology Stack</h3>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                      <p className="font-medium text-blue-900 dark:text-blue-400">Frontend</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">Next.js 14, React, Tailwind CSS</p>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                      <p className="font-medium text-green-900 dark:text-green-400">Backend</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">Supabase, PostgreSQL</p>
+                    </div>
+                    <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                      <p className="font-medium text-purple-900 dark:text-purple-400">Infrastructure</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">Cloud-based, Real-time Sync</p>
+                    </div>
+                    <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                      <p className="font-medium text-orange-900 dark:text-orange-400">Security</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">End-to-end Encryption, HTTPS</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Copyright */}
+                <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    © 2026 WIHI Asia. All rights reserved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Contact Support Modal */}
+      {showContactModal && (
+        <>
+          <div 
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowContactModal(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-w-md w-full">
+              <div className="border-b border-slate-200 dark:border-slate-800 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Contact Support
+                  </h2>
+                  <button
+                    onClick={() => setShowContactModal(false)}
+                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Support Team */}
+                <section>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 text-center">Support Team</h3>
+                  
+                  {/* Primary Contact */}
+                  <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex-shrink-0">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500">
+                          <span className="text-sm font-bold text-white">K</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900 dark:text-white">Marjake Rivera</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Support Manager</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <a href="tel:+639057474686" className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                        <span>📱</span> +63 905 747 4686
+                      </a>
+                      <a href="mailto:aizenjhakerivera06@gmail.com" className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                        <span>📧</span> aizenjhakerivera06@gmail.com
+                      </a>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Support Channels */}
+                <section>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Quick Contact</h3>
+                  <div className="space-y-2">
+                    <a href="tel:+639057474686" className="block w-full px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-center font-medium">
+                      📱 Call Now
+                    </a>
+                    <a href="mailto:aizenjhakerivera06@gmail.com" className="block w-full px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-center font-medium">
+                      📧 Send Email
+                    </a>
+                  </div>
+                </section>
+
+                {/* Support Hours */}
+                <section className="border-t border-slate-200 dark:border-slate-800 pt-4">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Support Hours</h3>
+                  <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="flex justify-between">
+                      <span>Monday - Friday</span>
+                      <span className="font-medium text-slate-900 dark:text-white">9:00 AM - 6:00 PM</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Saturday</span>
+                      <span className="font-medium text-slate-900 dark:text-white">10:00 AM - 2:00 PM</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sunday</span>
+                      <span className="font-medium text-red-600">Closed</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Response Time */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3">
+                  <p className="text-xs text-blue-900 dark:text-blue-400">
+                    <span className="font-semibold">⏱️ Average Response Time:</span> Within 2-4 hours during business hours
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowContactModal(false)}
+                  className="w-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Professional Logout Confirmation Modal */}
       <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
