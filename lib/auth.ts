@@ -72,7 +72,8 @@ export const ROLE_PERMISSIONS = {
     '/dashboard/internal-usage',
     '/dashboard/settings',
     '/dashboard/log',
-    '/dashboard/reports'
+    '/dashboard/reports',
+    '/dashboard/chat'
   ],
   operations: [
     '/dashboard/operations',
@@ -83,13 +84,16 @@ export const ROLE_PERMISSIONS = {
     '/dashboard/track-orders',
     '/dashboard/inventory/**',
     '/dashboard/customers',
-    '/dashboard/log'
+    '/dashboard/log',
+    '/dashboard/chat'
   ],
   packer: [
-    '/packer/dashboard'
+    '/packer/dashboard',
+    '/dashboard/chat'
   ],
   tracker: [
-    '/tracker/dashboard'
+    '/tracker/dashboard',
+    '/dashboard/chat'
   ],
   'logistics-admin': [
     '/logistics/dashboard',
@@ -100,7 +104,8 @@ export const ROLE_PERMISSIONS = {
     '/logistics/log',
     '/dashboard/inventory/**',
     '/dashboard/log',
-    '/dashboard/track-orders'
+    '/dashboard/track-orders',
+    '/dashboard/chat'
   ],
   'dept-manager': [
     '/dashboard/operations',
@@ -116,7 +121,9 @@ export const ROLE_PERMISSIONS = {
     '/dashboard/internal-usage',
     '/dept-manager/agents',
     '/dept-manager/dashboard',
-    '/dept-manager/log'  ]
+    '/dept-manager/log',
+    '/dashboard/chat'
+  ]
 } as const
 
 // Default passwords removed from source code for security.

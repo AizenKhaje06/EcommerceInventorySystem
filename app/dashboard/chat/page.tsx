@@ -60,130 +60,163 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages])
 
-  // Mock data - replace with API calls
+  // Fetch data on component mount
   useEffect(() => {
     if (currentUser) {
-      // Mock conversations
-      setConversations([
-        {
-          id: '1',
-          type: 'direct',
-          createdBy: 'user1',
-          lastMessageAt: new Date().toISOString(),
-          members: [
-            { id: 'user1', username: 'john_doe', displayName: 'John Doe', role: 'operations', profileImage: undefined },
-            { id: 'user2', username: 'jane_smith', displayName: 'Jane Smith', role: 'admin', profileImage: undefined }
-          ],
-          lastMessage: 'Sounds good! See you tomorrow.',
-          unreadCount: 0
-        },
-        {
-          id: '2',
-          name: 'Operations Team',
-          type: 'group',
-          createdBy: 'user1',
-          lastMessageAt: new Date().toISOString(),
-          members: [
-            { id: 'user1', username: 'john_doe', displayName: 'John Doe', role: 'operations', profileImage: undefined },
-            { id: 'user3', username: 'bob_wilson', displayName: 'Bob Wilson', role: 'operations', profileImage: undefined }
-          ],
-          lastMessage: 'New shipment arrived',
-          unreadCount: 2
-        }
-      ])
-
-      // Mock users for friend list
-      setAllUsers([
-        { id: 'user2', username: 'jane_smith', displayName: 'Jane Smith', role: 'admin', profileImage: undefined },
-        { id: 'user3', username: 'bob_wilson', displayName: 'Bob Wilson', role: 'operations', profileImage: undefined },
-        { id: 'user4', username: 'alice_johnson', displayName: 'Alice Johnson', role: 'packer', profileImage: undefined }
-      ])
-
-      // Mock messages for first conversation
-      setMessages([
-        {
-          id: '1',
-          conversationId: '1',
-          senderId: 'user2',
-          content: 'Hey! Did you get my email?',
-          createdAt: new Date(Date.now() - 3600000).toISOString(),
-          senderName: 'Jane Smith'
-        },
-        {
-          id: '2',
-          conversationId: '1',
-          senderId: currentUser.username,
-          content: 'Yes, I did! Working on it now.',
-          createdAt: new Date(Date.now() - 1800000).toISOString(),
-          senderName: currentUser.displayName
-        },
-        {
-          id: '3',
-          conversationId: '1',
-          senderId: 'user2',
-          content: 'Sounds good! See you tomorrow.',
-          createdAt: new Date(Date.now() - 600000).toISOString(),
-          senderName: 'Jane Smith'
-        }
-      ])
+      fetchConversations()
+      fetchUsers()
     }
   }, [currentUser])
 
-  const handleSendMessage = () => {
-    if (!messageInput.trim() || !selectedConversation) return
-
-    const newMessage: Message = {
-      id: Math.random().toString(),
-      conversationId: selectedConversation.id,
-      senderId: currentUser!.username,
-      content: messageInput,
-      createdAt: new Date().toISOString(),
-      senderName: currentUser!.displayName
+  // Fetch conversations from API
+  const fetchConversations = async () => {
+    try {
+      const response = await fetch('/api/chat/conversations')
+      if (response.ok) {
+        const data = await response.json()
+        setConversations(data)
+        if (data.length > 0) {
+          setSelectedConversation(data[0])
+          fetchMessages(data[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error)
     }
-
-    setMessages([...messages, newMessage])
-    setMessageInput('')
   }
 
-  const handleStartDirectMessage = (user: User) => {
+  // Fetch messages for a conversation
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/chat/messages?conversationId=${conversationId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(data)
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error)
+    }
+  }
+
+  // Fetch all users
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/chat/users')
+      if (response.ok) {
+        const data = await response.json()
+        setAllUsers(data)
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+
+  // Load messages when conversation changes
+  useEffect(() => {
+    if (selectedConversation) {
+      fetchMessages(selectedConversation.id)
+    }
+  }, [selectedConversation?.id])
+
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !selectedConversation) return
+
+    try {
+      const response = await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: selectedConversation.id,
+          content: messageInput
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to send message')
+
+      const newMessage = await response.json()
+      setMessages([...messages, {
+        ...newMessage,
+        senderName: currentUser!.displayName
+      }])
+      setMessageInput('')
+    } catch (error) {
+      console.error('Error sending message:', error)
+    }
+  }
+
+  const handleStartDirectMessage = async (user: User) => {
     // Check if conversation already exists
     const existing = conversations.find(c => c.type === 'direct' && c.members.some(m => m.id === user.id))
     if (existing) {
       setSelectedConversation(existing)
     } else {
-      const newConversation: Conversation = {
-        id: Math.random().toString(),
-        type: 'direct',
-        createdBy: currentUser!.username,
-        lastMessageAt: new Date().toISOString(),
-        members: [currentUser as any, user],
-        unreadCount: 0
+      // Create new direct message conversation
+      try {
+        const response = await fetch('/api/chat/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'direct',
+            members: [user.id]
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to create conversation')
+
+        const newConv = await response.json()
+        const newConversation: Conversation = {
+          id: newConv.id,
+          type: 'direct',
+          createdBy: currentUser!.username,
+          lastMessageAt: new Date().toISOString(),
+          members: [currentUser as any, user],
+          unreadCount: 0
+        }
+        setConversations([...conversations, newConversation])
+        setSelectedConversation(newConversation)
+      } catch (error) {
+        console.error('Error creating conversation:', error)
       }
-      setConversations([...conversations, newConversation])
-      setSelectedConversation(newConversation)
     }
     setShowFriendList(false)
   }
 
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     if (!groupName.trim() || selectedGroupMembers.length === 0) return
 
-    const selectedUsers = allUsers.filter(u => selectedGroupMembers.includes(u.id))
-    const newConversation: Conversation = {
-      id: Math.random().toString(),
-      name: groupName,
-      type: 'group',
-      createdBy: currentUser!.username,
-      lastMessageAt: new Date().toISOString(),
-      members: [currentUser as any, ...selectedUsers],
-      unreadCount: 0
-    }
+    try {
+      const response = await fetch('/api/chat/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'group',
+          name: groupName,
+          members: selectedGroupMembers
+        })
+      })
 
-    setConversations([...conversations, newConversation])
-    setSelectedConversation(newConversation)
-    setGroupName('')
-    setSelectedGroupMembers([])
-    setShowCreateGroup(false)
+      if (!response.ok) throw new Error('Failed to create group')
+
+      const newConv = await response.json()
+      const selectedUsers = allUsers.filter(u => selectedGroupMembers.includes(u.id))
+      const newConversation: Conversation = {
+        id: newConv.id,
+        name: groupName,
+        type: 'group',
+        createdBy: currentUser!.username,
+        lastMessageAt: new Date().toISOString(),
+        members: [currentUser as any, ...selectedUsers],
+        unreadCount: 0
+      }
+
+      setConversations([...conversations, newConversation])
+      setSelectedConversation(newConversation)
+      setGroupName('')
+      setSelectedGroupMembers([])
+      setShowCreateGroup(false)
+    } catch (error) {
+      console.error('Error creating group:', error)
+    }
   }
 
   const getConversationName = (conv: Conversation): string => {
