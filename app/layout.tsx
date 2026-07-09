@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/error-boundary"
 import { Toaster } from "@/components/ui/sonner"
 import { Analytics } from "@vercel/analytics/next"
 import { PWAInstaller } from "@/components/pwa-installer"
+import { ToastProvider } from "@/components/toast-provider"
 
 // Plus Jakarta Sans — Premium corporate sans-serif
 // Clean, modern, elegant — perfect for Black & Gold enterprise UI
@@ -104,8 +105,9 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {/* PWA Service Worker Registration */}
-              <PWAInstaller />
+              <ToastProvider>
+                {/* PWA Service Worker Registration */}
+                <PWAInstaller />
               
               {/* Skip to main content for accessibility */}
               <a href="#main-content" className="skip-to-main sr-only focus:not-sr-only">
@@ -125,6 +127,7 @@ export default function RootLayout({
               
               <Toaster richColors position="top-right" />
               <Analytics />
+              </ToastProvider>
               
               {/* PWA Installation Script */}
               <script

@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { MessageCircle, Plus, Search, Send, X, Users, MoreVertical, Paperclip, Smile, Phone, Video } from 'lucide-react'
+import { MessageCircle, Plus, Search, Send, X, Users, MoreVertical, Paperclip, Smile, Phone, Video, ArrowLeft, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
 import { useReducedMotion } from '@/hooks/use-accessibility'
+import { useChatRealtime } from '@/hooks/use-chat-realtime'
+import { useToast } from '@/components/toast-provider'
+import { validateMessage, sanitizeMessage, checkRateLimit, ChatError } from '@/lib/chat-utils'
 
 interface User {
   id: string
@@ -38,6 +41,7 @@ interface Message {
 export default function ChatPage() {
   const currentUser = getCurrentUser()
   const reducedMotion = useReducedMotion()
+  const { showToast } = useToast()
   
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
@@ -50,6 +54,66 @@ export default function ChatPage() {
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<string[]>([])
   const [groupName, setGroupName] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Enterprise features: Loading states
+  const [loading, setLoading] = useState({
+    conversations: false,
+    messages: false,
+    sending: false,
+    creating: false
+  })
+  
+  // Enterprise features: Real-time indicators
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
+  
+  // Phase 3: Message editing/deleting
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+
+  // Enterprise feature: Real-time subscription
+  const { sendTypingIndicator } = useChatRealtime({
+    conversationId: selectedConversation?.id || null,
+    onNewMessage: (message) => {
+      setMessages(prev => {
+        if (prev.some(m => m.id === message.id)) return prev
+        return [...prev, {
+          id: message.id,
+          conversationId: message.conversation_id,
+          senderId: message.sender_id,
+          content: message.content,
+          createdAt: message.created_at,
+          senderName: message.sender_name || message.sender_id,
+        }]
+      })
+      
+      if (message.sender_id !== currentUser?.username) {
+        showToast('New message received', 'info', 2000)
+      }
+    },
+    onTyping: (userId, isTyping) => {
+      setTypingUsers(prev => {
+        const next = new Set(prev)
+        if (isTyping) {
+          next.add(userId)
+        } else {
+          next.delete(userId)
+        }
+        return next
+      })
+    },
+    onPresenceChange: (userId, isOnline) => {
+      setOnlineUsers(prev => {
+        const next = new Set(prev)
+        if (isOnline) {
+          next.add(userId)
+        } else {
+          next.delete(userId)
+        }
+        return next
+      })
+    }
+  })
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -70,31 +134,37 @@ export default function ChatPage() {
 
   // Fetch conversations from API
   const fetchConversations = async () => {
+    setLoading(prev => ({ ...prev, conversations: true }))
     try {
       const response = await fetch('/api/chat/conversations')
-      if (response.ok) {
-        const data = await response.json()
-        setConversations(data)
-        if (data.length > 0) {
-          setSelectedConversation(data[0])
-          fetchMessages(data[0].id)
-        }
+      if (!response.ok) throw new Error('Failed to fetch conversations')
+      const data = await response.json()
+      setConversations(data)
+      if (data.length > 0) {
+        setSelectedConversation(data[0])
+        fetchMessages(data[0].id)
       }
     } catch (error) {
       console.error('Error fetching conversations:', error)
+      showToast('Failed to load conversations', 'error')
+    } finally {
+      setLoading(prev => ({ ...prev, conversations: false }))
     }
   }
 
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
+    setLoading(prev => ({ ...prev, messages: true }))
     try {
       const response = await fetch(`/api/chat/messages?conversationId=${conversationId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setMessages(data)
-      }
+      if (!response.ok) throw new Error('Failed to fetch messages')
+      const data = await response.json()
+      setMessages(data)
     } catch (error) {
       console.error('Error fetching messages:', error)
+      showToast('Failed to load messages', 'error')
+    } finally {
+      setLoading(prev => ({ ...prev, messages: false }))
     }
   }
 
@@ -117,9 +187,49 @@ export default function ChatPage() {
       fetchMessages(selectedConversation.id)
     }
   }, [selectedConversation?.id])
+  
+  // Phase 3: Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to close modals
+      if (e.key === 'Escape') {
+        setShowFriendList(false)
+        setShowCreateGroup(false)
+        setEditingMessageId(null)
+      }
+      
+      // Ctrl/Cmd + K for search focus
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const searchInput = document.querySelector('input[placeholder="Search conversations..."]') as HTMLInputElement
+        searchInput?.focus()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedConversation) return
+    if (!selectedConversation || !currentUser) return
+
+    // Enterprise: Validate message
+    const validation = validateMessage(messageInput)
+    if (!validation.valid) {
+      showToast(validation.error || 'Invalid message', 'error')
+      return
+    }
+
+    // Enterprise: Check rate limit
+    if (!checkRateLimit(currentUser.username, 20, 60000)) {
+      showToast('Sending too fast. Please slow down.', 'warning')
+      return
+    }
+
+    // Enterprise: Sanitize content
+    const sanitized = sanitizeMessage(messageInput)
+
+    setLoading(prev => ({ ...prev, sending: true }))
 
     try {
       const response = await fetch('/api/chat/messages', {
@@ -127,20 +237,90 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           conversationId: selectedConversation.id,
-          content: messageInput
+          content: sanitized
         })
       })
 
-      if (!response.ok) throw new Error('Failed to send message')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new ChatError(
+          error.message || 'Failed to send message',
+          response.status === 401 ? 'UNAUTHORIZED' : 
+          response.status === 403 ? 'FORBIDDEN' : 
+          response.status === 429 ? 'RATE_LIMIT' : 'UNKNOWN_ERROR'
+        )
+      }
 
-      const newMessage = await response.json()
-      setMessages([...messages, {
-        ...newMessage,
-        senderName: currentUser!.displayName
-      }])
+      // Real-time will handle adding the message
       setMessageInput('')
+      sendTypingIndicator(false)
+      
     } catch (error) {
-      console.error('Error sending message:', error)
+      if (error instanceof ChatError) {
+        if (error.code === 'RATE_LIMIT') {
+          showToast('Too many messages. Please wait.', 'warning')
+        } else if (error.code === 'UNAUTHORIZED') {
+          showToast('Please log in again', 'error')
+        } else {
+          showToast(error.message, 'error')
+        }
+      } else {
+        showToast('Failed to send message', 'error')
+      }
+    } finally {
+      setLoading(prev => ({ ...prev, sending: false }))
+    }
+  }
+  
+  // Phase 3: Edit message
+  const handleEditMessage = async (messageId: string) => {
+    if (!editContent.trim()) {
+      showToast('Message cannot be empty', 'error')
+      return
+    }
+    
+    const validation = validateMessage(editContent)
+    if (!validation.valid) {
+      showToast(validation.error || 'Invalid message', 'error')
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/chat/messages/${messageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: sanitizeMessage(editContent) })
+      })
+      
+      if (!response.ok) throw new Error()
+      
+      setMessages(prev => prev.map(m => 
+        m.id === messageId ? { ...m, content: editContent } : m
+      ))
+      
+      setEditingMessageId(null)
+      setEditContent('')
+      showToast('Message updated', 'success', 1500)
+    } catch (error) {
+      showToast('Failed to update message', 'error')
+    }
+  }
+  
+  // Phase 3: Delete message
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('Delete this message? This cannot be undone.')) return
+    
+    try {
+      const response = await fetch(`/api/chat/messages/${messageId}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) throw new Error()
+      
+      setMessages(prev => prev.filter(m => m.id !== messageId))
+      showToast('Message deleted', 'success', 1500)
+    } catch (error) {
+      showToast('Failed to delete message', 'error')
     }
   }
 
@@ -336,7 +516,10 @@ export default function ChatPage() {
       )}
 
       {/* Conversations Sidebar */}
-      <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
+      <div className={cn(
+        "w-full md:w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col",
+        selectedConversation && "hidden md:flex"
+      )}>
         {/* Header */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
@@ -379,7 +562,19 @@ export default function ChatPage() {
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredConversations.length === 0 ? (
+          {loading.conversations ? (
+            <div className="p-4 space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex gap-3 animate-pulse">
+                  <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredConversations.length === 0 ? (
             <div className="flex items-center justify-center h-full text-center">
               <div>
                 <MessageCircle className="h-12 w-12 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
@@ -397,12 +592,19 @@ export default function ChatPage() {
                 )}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-full bg-slate-700 dark:bg-slate-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-slate-700 dark:bg-slate-600 flex items-center justify-center flex-shrink-0 relative">
                     {conv.type === 'group' ? (
                       <Users className="h-6 w-6 text-white" />
                     ) : (
                       <span className="text-sm font-bold text-white">{getConversationName(conv)[0]}</span>
                     )}
+                    {/* Enterprise: Online indicator for direct messages */}
+                    {conv.type === 'direct' && (() => {
+                      const otherUser = conv.members.find(m => m.id !== currentUser?.username)
+                      return otherUser && onlineUsers.has(otherUser.id) ? (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full" />
+                      ) : null
+                    })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
@@ -432,6 +634,15 @@ export default function ChatPage() {
           {/* Chat Header */}
           <div className="border-b border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
+              {/* Enterprise: Back button for mobile */}
+              <button 
+                onClick={() => setSelectedConversation(null)}
+                className="md:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                aria-label="Back to conversations"
+              >
+                <ArrowLeft className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              </button>
+              
               <div className="w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-600 flex items-center justify-center">
                 {selectedConversation.type === 'group' ? (
                   <Users className="h-5 w-5 text-white" />
@@ -461,29 +672,50 @@ export default function ChatPage() {
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map(msg => (
-              <div
-                key={msg.id}
-                className={cn('flex', msg.senderId === currentUser?.username ? 'justify-end' : 'justify-start')}
-              >
-                <div
-                  className={cn(
-                    'max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg',
-                    msg.senderId === currentUser?.username
-                      ? 'bg-slate-900 dark:bg-slate-700 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
-                  )}
-                >
-                  {selectedConversation.type === 'group' && msg.senderId !== currentUser?.username && (
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{msg.senderName}</p>
-                  )}
-                  <p className="text-sm break-words">{msg.content}</p>
-                  <p className="text-xs mt-1 opacity-70">
-                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
+            {loading.messages ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
               </div>
-            ))}
+            ) : (
+              <>
+                {messages.map(msg => (
+                  <div
+                    key={msg.id}
+                    className={cn('flex', msg.senderId === currentUser?.username ? 'justify-end' : 'justify-start')}
+                  >
+                    <div
+                      className={cn(
+                        'max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg',
+                        msg.senderId === currentUser?.username
+                          ? 'bg-slate-900 dark:bg-slate-700 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                      )}
+                    >
+                      {selectedConversation.type === 'group' && msg.senderId !== currentUser?.username && (
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{msg.senderName}</p>
+                      )}
+                      <p className="text-sm break-words">{msg.content}</p>
+                      <p className="text-xs mt-1 opacity-70">
+                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Enterprise: Typing indicator */}
+                {typingUsers.size > 0 && (
+                  <div className="flex justify-start">
+                    <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -493,23 +725,51 @@ export default function ChatPage() {
               <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <Paperclip className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </button>
-              <input
-                type="text"
-                placeholder="Type a message..."
-                className="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500"
+                  value={messageInput}
+                  onChange={(e) => {
+                    setMessageInput(e.target.value)
+                    if (selectedConversation) {
+                      sendTypingIndicator(true)
+                    }
+                  }}
+                  onBlur={() => {
+                    if (selectedConversation) {
+                      sendTypingIndicator(false)
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                      sendTypingIndicator(false)
+                    }
+                  }}
+                  disabled={loading.sending}
+                  maxLength={5000}
+                />
+                {/* Enterprise: Character counter */}
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 px-1">
+                  {messageInput.length} / 5000 characters
+                </div>
+              </div>
               <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <Smile className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               </button>
               <button
                 onClick={handleSendMessage}
-                disabled={!messageInput.trim()}
+                disabled={!messageInput.trim() || loading.sending}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send className="h-5 w-5 text-slate-900 dark:text-slate-300" />
+                {loading.sending ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-slate-900 dark:text-slate-300" />
+                ) : (
+                  <Send className="h-5 w-5 text-slate-900 dark:text-slate-300" />
+                )}
               </button>
             </div>
           </div>

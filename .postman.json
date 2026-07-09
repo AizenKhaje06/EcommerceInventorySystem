@@ -5501,6 +5501,322 @@
               ]
             },
             {
+              "name": "Edit Message",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"This message has been edited!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "{{messageId}}"]
+                },
+                "description": "Edit an existing message. User must own the message."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has success field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('success');",
+                      "    pm.expect(body.success).to.be.true;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Edit Message - Empty Content",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"   \"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "{{messageId}}"]
+                },
+                "description": "Test validation - empty content should be rejected"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 (Bad Request)', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.include('Content required');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Edit Message - Not Found",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Updated content\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/non-existent-message-id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "non-existent-message-id"]
+                },
+                "description": "Test error handling when message ID does not exist"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 404 (Not Found)', function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.include('not found');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Edit Message - Unauthorized",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Trying to edit without auth\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "{{messageId}}"]
+                },
+                "description": "Test authentication - should fail without user headers"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401 (Unauthorized)', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.include('Unauthorized');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Message",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "{{messageId}}"]
+                },
+                "description": "Delete a message. User must own the message."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has success field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('success');",
+                      "    pm.expect(body.success).to.be.true;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Message - Not Found",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/non-existent-message-id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "non-existent-message-id"]
+                },
+                "description": "Test error handling when message ID does not exist"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 404 (Not Found)', function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.include('not found');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Message - Unauthorized",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages", "{{messageId}}"]
+                },
+                "description": "Test authentication - should fail without user headers"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401 (Unauthorized)', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.include('Unauthorized');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
               "name": "Get Users - Unauthorized",
               "request": {
                 "method": "GET",
