@@ -7,6 +7,8 @@ import { useReducedMotion } from "@/hooks/use-accessibility"
 import { CommandPaletteSearch } from "@/components/command-palette-search"
 import { getCurrentUser } from "@/lib/auth"
 import { ToggleTheme } from "@/components/ui/toggle-theme"
+import { GlobalSearch } from "@/components/global-search"
+import { NotificationSystem } from "@/components/notification-system"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -260,6 +262,12 @@ export function PremiumNavbar({ sidebarCollapsed, onMenuClick, onMobileMenuToggl
           
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Global Search */}
+            <GlobalSearch />
+            
+            {/* Notification System */}
+            <NotificationSystem />
+            
             <button 
               onClick={() => window.location.reload()}
               className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-amber-400/70 hover:text-slate-900 dark:hover:text-amber-300 hover:bg-slate-100 dark:hover:bg-amber-500/10 transition-all"

@@ -12,10 +12,15 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    
+    const currentUser = { username, role }
 
     const { content } = await request.json()
     const messageId = params.id
@@ -63,10 +68,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    
+    const currentUser = { username, role }
 
     const messageId = params.id
 

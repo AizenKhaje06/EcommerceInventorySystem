@@ -23,10 +23,15 @@ function getSupabaseClient() {
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
+    
+    const currentUser = { username, role }
 
     // Rate limiting
     if (!checkRateLimit(currentUser.username, 30, 60000)) {
@@ -35,29 +40,31 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseClient()
 
-    // Optimized query using JOIN instead of nested queries
-    const { data: conversations, error } = await supabase
+    // Simpler approach: Get conversations directly where user is a member
+    const { data: memberConvs, error: memberError } = await supabase
       .from('conversation_members')
-      .select(`
-        conversation_id,
-        conversations!inner (
-          id,
-          name,
-          type,
-          created_by,
-          created_at,
-          updated_at,
-          is_archived
-        )
-      `)
+      .select('conversation_id')
       .eq('user_id', currentUser.username)
-      .order('conversations.updated_at', { ascending: false })
+
+    if (memberError) throw memberError
+
+    const conversationIds = memberConvs.map((m: any) => m.conversation_id)
+
+    if (conversationIds.length === 0) {
+      return NextResponse.json([])
+    }
+
+    // Get conversation details
+    const { data: conversations, error } = await supabase
+      .from('conversations')
+      .select('id, name, type, created_by, created_at, updated_at, is_archived')
+      .in('id', conversationIds)
+      .order('updated_at', { ascending: false })
       .limit(CHAT_CONSTANTS.CONVERSATION_FETCH_LIMIT)
 
     if (error) throw error
 
-    // Get detailed info for each conversation
-    const conversationIds = conversations.map((c: any) => c.conversations.id)
+    const conversationIds = conversations.map((c: any) => c.id)
     
     // Fetch members
     const { data: allMembers } = await supabase
@@ -83,8 +90,7 @@ export async function GET(request: NextRequest) {
       .limit(1)
 
     // Format response
-    const formattedConversations = conversations.map((item: any) => {
-      const conv = item.conversations
+    const formattedConversations = conversations.map((conv: any) => {
       const members = allMembers?.filter((m: any) => m.conversation_id === conv.id) || []
       const lastMsg = lastMessages?.find((msg: any) => msg.conversation_id === conv.id)
 
@@ -119,10 +125,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
+    
+    const currentUser = { username, role }
 
     // Rate limiting
     if (!checkRateLimit(currentUser.username, 10, 60000)) {

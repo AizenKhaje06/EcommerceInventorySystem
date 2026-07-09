@@ -19,10 +19,15 @@ function getSupabaseClient() {
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
+    
+    const currentUser = { username, role }
 
     const conversationId = request.nextUrl.searchParams.get('conversationId')
     if (!conversationId) {
@@ -103,10 +108,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
+    
+    const currentUser = { username, role, displayName: username }
 
     const { conversationId, content } = await request.json()
 

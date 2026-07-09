@@ -213,6 +213,12 @@ export const checkRateLimit = (
   maxRequests: number = 10,
   windowMs: number = 60000 // 1 minute
 ): boolean => {
+  // DEVELOPMENT: Rate limiting disabled for easier testing
+  // TODO: Re-enable in production
+  if (process.env.NODE_ENV === 'development') {
+    return true
+  }
+  
   const now = Date.now()
   const userLimit = rateLimitMap.get(userId)
 

@@ -12,10 +12,15 @@ function getSupabaseClient() {
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
+    // Get user from headers
+    const username = request.headers.get('x-user-username')
+    const role = request.headers.get('x-user-role')
+    
+    if (!username || !role) {
       throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
+    
+    const currentUser = { username, role }
 
     // Rate limiting
     if (!checkRateLimit(`${currentUser.username}:users`, 30, 60000)) {

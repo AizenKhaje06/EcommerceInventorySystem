@@ -134,10 +134,20 @@ export default function ChatPage() {
 
   // Fetch conversations from API
   const fetchConversations = async () => {
+    if (!currentUser) return
+    
     setLoading(prev => ({ ...prev, conversations: true }))
     try {
-      const response = await fetch('/api/chat/conversations')
-      if (!response.ok) throw new Error('Failed to fetch conversations')
+      const response = await fetch('/api/chat/conversations', {
+        headers: {
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch conversations')
+      }
       const data = await response.json()
       setConversations(data)
       if (data.length > 0) {
@@ -154,10 +164,20 @@ export default function ChatPage() {
 
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
+    if (!currentUser) return
+    
     setLoading(prev => ({ ...prev, messages: true }))
     try {
-      const response = await fetch(`/api/chat/messages?conversationId=${conversationId}`)
-      if (!response.ok) throw new Error('Failed to fetch messages')
+      const response = await fetch(`/api/chat/messages?conversationId=${conversationId}`, {
+        headers: {
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch messages')
+      }
       const data = await response.json()
       setMessages(data)
     } catch (error) {
@@ -170,8 +190,15 @@ export default function ChatPage() {
 
   // Fetch all users
   const fetchUsers = async () => {
+    if (!currentUser) return
+    
     try {
-      const response = await fetch('/api/chat/users')
+      const response = await fetch('/api/chat/users', {
+        headers: {
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setAllUsers(data)
@@ -234,7 +261,11 @@ export default function ChatPage() {
     try {
       const response = await fetch('/api/chat/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        },
         body: JSON.stringify({
           conversationId: selectedConversation.id,
           content: sanitized
@@ -274,7 +305,7 @@ export default function ChatPage() {
   
   // Phase 3: Edit message
   const handleEditMessage = async (messageId: string) => {
-    if (!editContent.trim()) {
+    if (!currentUser || !editContent.trim()) {
       showToast('Message cannot be empty', 'error')
       return
     }
@@ -288,7 +319,11 @@ export default function ChatPage() {
     try {
       const response = await fetch(`/api/chat/messages/${messageId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        },
         body: JSON.stringify({ content: sanitizeMessage(editContent) })
       })
       
@@ -308,11 +343,15 @@ export default function ChatPage() {
   
   // Phase 3: Delete message
   const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm('Delete this message? This cannot be undone.')) return
+    if (!currentUser || !confirm('Delete this message? This cannot be undone.')) return
     
     try {
       const response = await fetch(`/api/chat/messages/${messageId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        }
       })
       
       if (!response.ok) throw new Error()
@@ -325,6 +364,8 @@ export default function ChatPage() {
   }
 
   const handleStartDirectMessage = async (user: User) => {
+    if (!currentUser) return
+    
     // Check if conversation already exists
     const existing = conversations.find(c => c.type === 'direct' && c.members.some(m => m.id === user.id))
     if (existing) {
@@ -334,7 +375,11 @@ export default function ChatPage() {
       try {
         const response = await fetch('/api/chat/conversations', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-username': currentUser.username,
+            'x-user-role': currentUser.role
+          },
           body: JSON.stringify({
             type: 'direct',
             members: [user.id]
@@ -356,18 +401,23 @@ export default function ChatPage() {
         setSelectedConversation(newConversation)
       } catch (error) {
         console.error('Error creating conversation:', error)
+        showToast('Failed to create conversation', 'error')
       }
     }
     setShowFriendList(false)
   }
 
   const handleCreateGroup = async () => {
-    if (!groupName.trim() || selectedGroupMembers.length === 0) return
+    if (!currentUser || !groupName.trim() || selectedGroupMembers.length === 0) return
 
     try {
       const response = await fetch('/api/chat/conversations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-username': currentUser.username,
+          'x-user-role': currentUser.role
+        },
         body: JSON.stringify({
           type: 'group',
           name: groupName,
@@ -394,8 +444,10 @@ export default function ChatPage() {
       setGroupName('')
       setSelectedGroupMembers([])
       setShowCreateGroup(false)
+      showToast('Group created successfully', 'success')
     } catch (error) {
       console.error('Error creating group:', error)
+      showToast('Failed to create group', 'error')
     }
   }
 
