@@ -1,0 +1,475 @@
+{
+  "name": "Chat System - Enhanced Tests",
+  "description": "Comprehensive tests for updated chat conversations API with validation, rate limiting, and error handling",
+  "item": [
+    {
+      "name": "Create Direct Conversation - First Time",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"direct\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Create a new direct message conversation - should succeed with 201"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test 1: Status code should be 201 Created",
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Test 2: Response structure is correct (NEW FORMAT)",
+              "pm.test('Response has correct structure', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('id');",
+              "    pm.expect(body).to.have.property('type');",
+              "    pm.expect(body).to.have.property('name');",
+              "    pm.expect(body).to.have.property('exists');",
+              "});",
+              "",
+              "// Test 3: Conversation properties are correct",
+              "pm.test('Conversation properties match request', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.type).to.equal('direct');",
+              "    pm.expect(body.name).to.be.null;",
+              "    pm.expect(body.exists).to.be.false;",
+              "});",
+              "",
+              "// Test 4: Save conversation ID for subsequent tests",
+              "pm.test('Save conversationId to environment', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.id).to.be.a('string');",
+              "    pm.environment.set('testConversationId', body.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Duplicate Direct Conversation - Returns Existing",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"direct\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Attempt to create the same direct conversation again - should return existing one with exists: true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test 1: Status code should be 200 OK (not 201)",
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Test 2: exists flag is true",
+              "pm.test('exists flag is true', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.exists).to.be.true;",
+              "});",
+              "",
+              "// Test 3: Returns same conversation ID as before",
+              "pm.test('Returns same conversation ID', function () {",
+              "    const body = pm.response.json();",
+              "    const savedId = pm.environment.get('testConversationId');",
+              "    pm.expect(body.id).to.equal(savedId);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Group - Missing Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"group\",\n  \"members\": [\"tracker\", \"packer1\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Validation Test: Group chat without name should fail"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test 1: Status code is 400 Bad Request",
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "// Test 2: Error response has correct structure",
+              "pm.test('Error response has error and code fields', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('error');",
+              "    pm.expect(body).to.have.property('code');",
+              "});",
+              "",
+              "// Test 3: Error code is VALIDATION_ERROR",
+              "pm.test('Error code is VALIDATION_ERROR', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.code).to.equal('VALIDATION_ERROR');",
+              "});",
+              "",
+              "// Test 4: Error message mentions group name",
+              "pm.test('Error message mentions group name', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.error.toLowerCase()).to.match(/group name|name.*required/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Group - Empty Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"group\",\n  \"name\": \"\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Validation Test: Group chat with empty name should fail"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error code is VALIDATION_ERROR', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('VALIDATION_ERROR');",
+              "});",
+              "pm.test('Error mentions empty name', () => {",
+              "    pm.expect(pm.response.json().error.toLowerCase()).to.include('empty');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Group - Name Too Long",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"group\",\n  \"name\": \"This is a very long group name that exceeds the maximum allowed length of one hundred characters for testing\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Validation Test: Group name exceeding 100 characters should fail (MAX_GROUP_NAME_LENGTH from chat-utils.ts)"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error code is VALIDATION_ERROR', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('VALIDATION_ERROR');",
+              "});",
+              "pm.test('Error mentions length or max characters', () => {",
+              "    const error = pm.response.json().error.toLowerCase();",
+              "    pm.expect(error).to.match(/too long|max|100/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Conversation - Invalid Type",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"invalid_type\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Validation Test: Invalid conversation type should fail (only 'direct' or 'group' allowed)"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error code is VALIDATION_ERROR', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('VALIDATION_ERROR');",
+              "});",
+              "pm.test('Error mentions invalid type', () => {",
+              "    pm.expect(pm.response.json().error.toLowerCase()).to.include('invalid');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Conversation - No Members",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-user-username",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "x-user-role",
+            "value": "admin",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"direct\",\n  \"members\": []\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Validation Test: Empty members array should fail (at least 1 member required)"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error code is VALIDATION_ERROR', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('VALIDATION_ERROR');",
+              "});",
+              "pm.test('Error mentions members', () => {",
+              "    const error = pm.response.json().error.toLowerCase();",
+              "    pm.expect(error).to.match(/member.*required|at least one/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Conversation - Unauthorized",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"direct\",\n  \"members\": [\"tracker\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Security Test: Request without authentication should fail with 401"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', () => {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test('Error code is UNAUTHORIZED', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('UNAUTHORIZED');",
+              "});",
+              "pm.test('Error mentions authentication', () => {",
+              "    const error = pm.response.json().error.toLowerCase();",
+              "    pm.expect(error).to.match(/authentication|unauthorized/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Conversations - Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/chat/conversations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat", "conversations"]
+        },
+        "description": "Security Test: GET without authentication should fail with 401"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401', () => pm.response.to.have.status(401));",
+              "pm.test('Error code is UNAUTHORIZED', () => {",
+              "    pm.expect(pm.response.json().code).to.equal('UNAUTHORIZED');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}

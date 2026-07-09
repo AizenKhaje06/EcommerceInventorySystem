@@ -1,22 +1,40 @@
 import { createClient } from '@supabase/supabase-js'
 import { getCurrentUser } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  validateMessage,
+  sanitizeMessage,
+  CHAT_CONSTANTS,
+  checkRateLimit,
+  handleChatError,
+  ChatError
+} from '@/lib/chat-utils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+function getSupabaseClient() {
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
 
 export async function GET(request: NextRequest) {
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
 
     const conversationId = request.nextUrl.searchParams.get('conversationId')
     if (!conversationId) {
-      return NextResponse.json({ error: 'Missing conversationId' }, { status: 400 })
+      throw new ChatError('Missing conversationId', 'VALIDATION_ERROR', 400)
     }
+
+    // Rate limiting
+    if (!checkRateLimit(`${currentUser.username}:messages`, 60, 60000)) {
+      throw new ChatError('Too many requests', 'RATE_LIMIT', 429)
+    }
+
+    const supabase = getSupabaseClient()
 
     // Verify user is a member of this conversation
     const { data: member, error: memberError } = await supabase
@@ -24,13 +42,14 @@ export async function GET(request: NextRequest) {
       .select('id')
       .eq('conversation_id', conversationId)
       .eq('user_id', currentUser.username)
-      .single()
+      .maybeSingle()
 
-    if (memberError || !member) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (memberError) throw memberError
+    if (!member) {
+      throw new ChatError('You are not a member of this conversation', 'FORBIDDEN', 403)
     }
 
-    // Get messages for conversation
+    // Get messages with sender info
     const { data: messages, error } = await supabase
       .from('messages')
       .select(`
@@ -38,13 +57,18 @@ export async function GET(request: NextRequest) {
         content,
         sender_id,
         created_at,
-        users (
+        updated_at,
+        edited_at,
+        users!messages_sender_id_fkey (
+          username,
           full_name,
           profile_image
         )
       `)
       .eq('conversation_id', conversationId)
+      .is('deleted_at', null)
       .order('created_at', { ascending: true })
+      .limit(CHAT_CONSTANTS.MESSAGE_FETCH_LIMIT)
 
     if (error) throw error
 
@@ -54,14 +78,26 @@ export async function GET(request: NextRequest) {
       senderId: msg.sender_id,
       content: msg.content,
       createdAt: msg.created_at,
-      senderName: msg.users.full_name,
-      senderAvatar: msg.users.profile_image
+      updatedAt: msg.updated_at,
+      editedAt: msg.edited_at,
+      senderName: msg.users?.full_name || msg.sender_id,
+      senderAvatar: msg.users?.profile_image
     }))
+
+    // Update last_read_at for this user
+    await supabase
+      .from('conversation_members')
+      .update({ last_read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .eq('user_id', currentUser.username)
 
     return NextResponse.json(formattedMessages)
   } catch (error) {
-    console.error('Error fetching messages:', error)
-    return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 })
+    const chatError = handleChatError(error)
+    return NextResponse.json(
+      { error: chatError.message, code: chatError.code },
+      { status: chatError.statusCode }
+    )
   }
 }
 
@@ -69,14 +105,27 @@ export async function POST(request: NextRequest) {
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new ChatError('Authentication required', 'UNAUTHORIZED', 401)
     }
 
     const { conversationId, content } = await request.json()
 
-    if (!conversationId || !content) {
-      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    if (!conversationId) {
+      throw new ChatError('Missing conversationId', 'VALIDATION_ERROR', 400)
     }
+
+    // Validate message content
+    const validation = validateMessage(content)
+    if (!validation.valid) {
+      throw new ChatError(validation.error!, 'VALIDATION_ERROR', 400)
+    }
+
+    // Rate limiting (stricter for sending messages)
+    if (!checkRateLimit(`${currentUser.username}:send`, 20, 60000)) {
+      throw new ChatError('Sending messages too quickly', 'RATE_LIMIT', 429)
+    }
+
+    const supabase = getSupabaseClient()
 
     // Verify user is a member of this conversation
     const { data: member, error: memberError } = await supabase
@@ -84,11 +133,15 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('conversation_id', conversationId)
       .eq('user_id', currentUser.username)
-      .single()
+      .maybeSingle()
 
-    if (memberError || !member) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (memberError) throw memberError
+    if (!member) {
+      throw new ChatError('You are not a member of this conversation', 'FORBIDDEN', 403)
     }
+
+    // Sanitize content
+    const sanitizedContent = sanitizeMessage(content)
 
     // Create message
     const { data: message, error } = await supabase
@@ -96,28 +149,28 @@ export async function POST(request: NextRequest) {
       .insert({
         conversation_id: conversationId,
         sender_id: currentUser.username,
-        content
+        content: sanitizedContent
       })
       .select()
       .single()
 
     if (error) throw error
 
-    // Update conversation last updated time
-    await supabase
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', conversationId)
-
+    // The trigger will automatically update conversation.updated_at
+    
     return NextResponse.json({
       id: message.id,
       conversationId,
       senderId: message.sender_id,
       content: message.content,
-      createdAt: message.created_at
-    })
+      createdAt: message.created_at,
+      senderName: currentUser.displayName
+    }, { status: 201 })
   } catch (error) {
-    console.error('Error creating message:', error)
-    return NextResponse.json({ error: 'Failed to create message' }, { status: 500 })
+    const chatError = handleChatError(error)
+    return NextResponse.json(
+      { error: chatError.message, code: chatError.code },
+      { status: chatError.statusCode }
+    )
   }
 }

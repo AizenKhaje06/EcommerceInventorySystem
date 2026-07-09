@@ -5003,6 +5003,540 @@
               ]
             }
           ]
+        },
+        {
+          "name": "Chat System",
+          "item": [
+            {
+              "name": "Get Available Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "users"]
+                },
+                "description": "Get list of all users available for chat conversations"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response is JSON array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('Users have required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    if (body.length > 0) {",
+                      "        pm.expect(body[0]).to.have.property('username');",
+                      "        pm.expect(body[0]).to.have.property('displayName');",
+                      "        pm.expect(body[0]).to.have.property('role');",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Conversations",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "conversations"]
+                },
+                "description": "Get all conversations for the current user"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response is JSON array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('Conversations have required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    if (body.length > 0) {",
+                      "        pm.expect(body[0]).to.have.property('id');",
+                      "        pm.expect(body[0]).to.have.property('type');",
+                      "        pm.expect(body[0]).to.have.property('members');",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Direct Conversation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"direct\",\n  \"members\": [\"tracker\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "conversations"]
+                },
+                "description": "Create a new direct message conversation with another user"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 201', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});",
+                      "",
+                      "pm.test('Response has conversation object', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('conversation');",
+                      "    pm.expect(body.conversation).to.have.property('id');",
+                      "    pm.expect(body.conversation.type).to.equal('direct');",
+                      "});",
+                      "",
+                      "// Save conversation ID for use in other tests",
+                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "    const body = pm.response.json();",
+                      "    pm.environment.set('conversationId', body.conversation.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Group Conversation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"group\",\n  \"name\": \"Test Group Chat\",\n  \"members\": [\"tracker\", \"packer1\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/conversations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "conversations"]
+                },
+                "description": "Create a new group chat conversation"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 201', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});",
+                      "",
+                      "pm.test('Response has conversation object', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('conversation');",
+                      "    pm.expect(body.conversation).to.have.property('id');",
+                      "    pm.expect(body.conversation.type).to.equal('group');",
+                      "    pm.expect(body.conversation).to.have.property('name');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Messages in Conversation",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages?conversationId={{conversationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages"],
+                  "query": [
+                    {
+                      "key": "conversationId",
+                      "value": "{{conversationId}}"
+                    }
+                  ]
+                },
+                "description": "Get all messages in a specific conversation"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response is JSON array', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('Messages have required fields', function () {",
+                      "    const body = pm.response.json();",
+                      "    if (body.length > 0) {",
+                      "        pm.expect(body[0]).to.have.property('id');",
+                      "        pm.expect(body[0]).to.have.property('content');",
+                      "        pm.expect(body[0]).to.have.property('senderId');",
+                      "        pm.expect(body[0]).to.have.property('createdAt');",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Send Message",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"conversationId\": \"{{conversationId}}\",\n  \"content\": \"Hello! This is a test message from Postman.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages"]
+                },
+                "description": "Send a message to a conversation. Tests validation from chat-utils.ts"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 201', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});",
+                      "",
+                      "pm.test('Response has message object', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('message');",
+                      "    pm.expect(body.message).to.have.property('id');",
+                      "    pm.expect(body.message).to.have.property('content');",
+                      "    pm.expect(body.message.content).to.be.a('string');",
+                      "});",
+                      "",
+                      "pm.test('Content matches request', function () {",
+                      "    const requestBody = JSON.parse(pm.request.body.raw);",
+                      "    const responseBody = pm.response.json();",
+                      "    pm.expect(responseBody.message.content).to.equal(requestBody.content);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Send Message - Empty Content (Validation Test)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"conversationId\": \"{{conversationId}}\",\n  \"content\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages"]
+                },
+                "description": "Test message validation - empty content should be rejected"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 (Bad Request)', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "    pm.expect(body.error).to.be.a('string');",
+                      "});",
+                      "",
+                      "pm.test('Error mentions empty message', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.error.toLowerCase()).to.include('empty');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Send Message - Too Long (Validation Test)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"conversationId\": \"{{conversationId}}\",\n  \"content\": \"{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}{{$randomLoremText}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages"]
+                },
+                "description": "Test message validation - content exceeding 5000 characters should be rejected (MAX_MESSAGE_LENGTH from chat-utils.ts)"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 (Bad Request)', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "});",
+                      "",
+                      "pm.test('Error mentions message length', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.error.toLowerCase()).to.match(/too long|max|5000/);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Messages - Missing conversationId",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-user-username",
+                    "value": "admin",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/messages",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "messages"]
+                },
+                "description": "Test error handling when conversationId is missing"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 (Bad Request)', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "});",
+                      "",
+                      "pm.test('Error mentions conversationId', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.error.toLowerCase()).to.include('conversation');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Users - Unauthorized",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chat/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "chat", "users"]
+                },
+                "description": "Test authentication - should fail without user headers"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401 (Unauthorized)', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test('Response has error field', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('error');",
+                      "});",
+                      "",
+                      "pm.test('Error mentions authentication', function () {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.error.toLowerCase()).to.match(/unauthorized|not logged in|authentication/);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

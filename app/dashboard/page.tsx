@@ -315,42 +315,6 @@ export default function DashboardPage() {
 
       {/* Row 2: Order Status Metrics (4 cards) */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Cancelled (Packing Queue) */}
-        <Card className="p-5 border-0 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-rose-600 shadow-lg shadow-rose-500/30 flex-shrink-0">
-              <PackageX className="h-5 w-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Cancelled (Packing)</p>
-              <p className="text-2xl font-bold text-rose-900 dark:text-rose-100 tabular-nums">
-                <AnimatedNumber value={stats?.cancelledPackingQueue || 0} duration={1500} />
-              </p>
-              <p className="text-xs text-rose-600 dark:text-rose-500 flex items-center gap-1 mt-0.5">
-                Before packing
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Cancelled (Track Orders) */}
-        <Card className="p-5 border-0 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-pink-600 shadow-lg shadow-pink-500/30 flex-shrink-0">
-              <PackageX className="h-5 w-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-wider">Cancelled (Tracked)</p>
-              <p className="text-2xl font-bold text-pink-900 dark:text-pink-100 tabular-nums">
-                <AnimatedNumber value={stats?.cancelledTrackOrders || 0} duration={1500} />
-              </p>
-              <p className="text-xs text-pink-600 dark:text-pink-500 flex items-center gap-1 mt-0.5">
-                After packing
-              </p>
-            </div>
-          </div>
-        </Card>
-
         {/* Total Delivered */}
         <Card className="p-5 border-0 shadow-lg">
           <div className="flex items-center gap-3">
@@ -398,41 +362,76 @@ export default function DashboardPage() {
             </div>
           </div>
         </Card>
-      </div>
 
-      {/* Row 3: Bad Stock Card - Admin & Logistics Only */}
-      {(currentUser?.role === 'admin' || currentUser?.role === 'logistics-admin') && (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Total Bad Stock */}
-          <Card className="p-5 border-0 shadow-lg lg:col-span-1">
-            <div className="flex items-center gap-3">
+        {/* Cancelled Orders - Combined Card */}
+        <Card className="p-5 border-0 shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-rose-600 shadow-lg shadow-rose-500/30 flex-shrink-0">
+              <PackageX className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Cancelled Orders</p>
+              <p className="text-2xl font-bold text-rose-900 dark:text-rose-100 tabular-nums">
+                <AnimatedNumber value={(stats?.cancelledPackingQueue || 0) + (stats?.cancelledTrackOrders || 0)} duration={1500} />
+              </p>
+            </div>
+          </div>
+          {/* Split Display */}
+          <div className="grid grid-cols-2 gap-2 pt-3 border-t border-rose-200 dark:border-rose-800">
+            <div className="text-center">
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mb-1">Packing</p>
+              <p className="text-lg font-bold text-rose-900 dark:text-rose-100 tabular-nums">
+                <AnimatedNumber value={stats?.cancelledPackingQueue || 0} duration={1500} />
+              </p>
+              <p className="text-[10px] text-rose-500 dark:text-rose-500">Before packing</p>
+            </div>
+            <div className="text-center border-l border-rose-200 dark:border-rose-800">
+              <p className="text-xs text-pink-600 dark:text-pink-400 font-medium mb-1">Tracked</p>
+              <p className="text-lg font-bold text-pink-900 dark:text-pink-100 tabular-nums">
+                <AnimatedNumber value={stats?.cancelledTrackOrders || 0} duration={1500} />
+              </p>
+              <p className="text-[10px] text-pink-500 dark:text-pink-500">After packing</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Total Bad Stock - Admin & Logistics Only */}
+        {(currentUser?.role === 'admin' || currentUser?.role === 'logistics-admin') ? (
+          <Card className="p-5 border-0 shadow-lg">
+            <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 rounded-xl bg-red-600 shadow-lg shadow-red-500/30 flex-shrink-0">
                 <AlertTriangle className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Total Bad Stock</p>
-                <p className="text-2xl font-bold text-red-900 dark:text-red-100 tabular-nums mb-2">
+                <p className="text-2xl font-bold text-red-900 dark:text-red-100 tabular-nums">
                   <AnimatedNumber value={totalBadQty} duration={1500} /> units
                 </p>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-red-600/80 dark:text-red-400/80">COGS Lost:</span>
-                    <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
-                      ₱<AnimatedNumber value={totalBadCOGS} duration={1500} />
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-red-600/80 dark:text-red-400/80">Revenue Lost:</span>
-                    <span className="font-bold text-red-700 dark:text-red-300 tabular-nums">
-                      ₱<AnimatedNumber value={totalBadRevenueLost} duration={1500} />
-                    </span>
-                  </div>
-                </div>
+              </div>
+            </div>
+            {/* Split Display */}
+            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-red-200 dark:border-red-800">
+              <div className="text-center">
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium mb-1">COGS Lost</p>
+                <p className="text-lg font-bold text-red-900 dark:text-red-100 tabular-nums">
+                  ₱<AnimatedNumber value={totalBadCOGS} duration={1500} />
+                </p>
+                <p className="text-[10px] text-red-500 dark:text-red-500">Cost value</p>
+              </div>
+              <div className="text-center border-l border-red-200 dark:border-red-800">
+                <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-1">Revenue Lost</p>
+                <p className="text-lg font-bold text-orange-900 dark:text-orange-100 tabular-nums">
+                  ₱<AnimatedNumber value={totalBadRevenueLost} duration={1500} />
+                </p>
+                <p className="text-[10px] text-orange-500 dark:text-orange-500">Selling value</p>
               </div>
             </div>
           </Card>
-        </div>
-      )}
+        ) : (
+          // Placeholder for non-admin users to maintain 4-column grid
+          <div className="hidden lg:block"></div>
+        )}
+      </div>
 
       {/* Quick Actions & Alerts */}
       <div className={cn(
