@@ -4,10 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, handleChatError, ChatError } from '@/lib/chat-utils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
 }
 
 export async function GET(request: NextRequest) {
@@ -32,16 +37,16 @@ export async function GET(request: NextRequest) {
     // Get all users except the current user
     const { data: users, error } = await supabase
       .from('users')
-      .select('username, full_name, profile_image, role')
+      .select('username, profile_image, role')
       .neq('username', currentUser.username)
-      .order('full_name', { ascending: true })
+      .order('username', { ascending: true })
 
     if (error) throw error
 
     const formattedUsers = users.map((user: any) => ({
       id: user.username,
       username: user.username,
-      displayName: user.full_name || user.username,
+      displayName: user.username,
       profileImage: user.profile_image,
       role: user.role || 'user'
     }))

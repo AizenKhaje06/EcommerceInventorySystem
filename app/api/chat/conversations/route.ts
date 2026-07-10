@@ -12,13 +12,18 @@ import {
 } from '@/lib/chat-utils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-// Helper to create Supabase client with user session
+// Helper to create Supabase client with service role key
+// Using service role key because RLS is disabled on chat tables
+// Security is handled at the API layer with header-based authentication
 function getSupabaseClient() {
-  // In production, use createServerClient with cookies
-  // For now, using anon key with RLS policies
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
 }
 
 export async function GET(request: NextRequest) {
@@ -64,7 +69,8 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
-    const conversationIds = conversations.map((c: any) => c.id)
+    // Get the IDs from the fetched conversations for member/message queries
+    const fetchedConversationIds = conversations.map((c: any) => c.id)
     
     // Fetch members
     const { data: allMembers } = await supabase
@@ -74,18 +80,17 @@ export async function GET(request: NextRequest) {
         user_id,
         users!inner (
           username,
-          full_name,
           profile_image,
           role
         )
       `)
-      .in('conversation_id', conversationIds)
+      .in('conversation_id', fetchedConversationIds)
 
     // Fetch last message for each conversation
     const { data: lastMessages } = await supabase
       .from('messages')
       .select('conversation_id, content, created_at')
-      .in('conversation_id', conversationIds)
+      .in('conversation_id', fetchedConversationIds)
       .order('created_at', { ascending: false })
       .limit(1)
 
@@ -104,7 +109,7 @@ export async function GET(request: NextRequest) {
         members: members.map((m: any) => ({
           id: m.users.username,
           username: m.users.username,
-          displayName: m.users.full_name,
+          displayName: m.users.username,
           profileImage: m.users.profile_image,
           role: m.users.role || 'user'
         })),

@@ -130,7 +130,8 @@ export default function ChatPage() {
       fetchConversations()
       fetchUsers()
     }
-  }, [currentUser])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.username])
 
   // Fetch conversations from API
   const fetchConversations = async () => {
@@ -213,6 +214,7 @@ export default function ChatPage() {
     if (selectedConversation) {
       fetchMessages(selectedConversation.id)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConversation?.id])
   
   // Phase 3: Keyboard shortcuts

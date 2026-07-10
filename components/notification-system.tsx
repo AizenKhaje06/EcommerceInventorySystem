@@ -66,11 +66,13 @@ export function NotificationSystem() {
   }, [notifications])
 
   const loadNotifications = async () => {
+    if (!currentUser) return
+    
     try {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', currentUser?.username)
+        .eq('user_id', currentUser.username)
         .order('created_at', { ascending: false })
         .limit(50)
 
@@ -107,11 +109,13 @@ export function NotificationSystem() {
   }
 
   const markAllAsRead = async () => {
+    if (!currentUser) return
+    
     try {
       await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', currentUser?.username)
+        .eq('user_id', currentUser.username)
         .eq('read', false)
 
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))

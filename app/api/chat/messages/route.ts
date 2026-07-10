@@ -11,10 +11,15 @@ import {
 } from '@/lib/chat-utils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
 }
 
 export async function GET(request: NextRequest) {
@@ -66,7 +71,6 @@ export async function GET(request: NextRequest) {
         edited_at,
         users!messages_sender_id_fkey (
           username,
-          full_name,
           profile_image
         )
       `)
@@ -85,7 +89,7 @@ export async function GET(request: NextRequest) {
       createdAt: msg.created_at,
       updatedAt: msg.updated_at,
       editedAt: msg.edited_at,
-      senderName: msg.users?.full_name || msg.sender_id,
+      senderName: msg.users?.username || msg.sender_id,
       senderAvatar: msg.users?.profile_image
     }))
 
