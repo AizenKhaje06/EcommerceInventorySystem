@@ -73,7 +73,6 @@ const getNavigation = (lowStockCount: number = 0, outOfStockCount: number = 0): 
       { name: "Track Orders", href: "/dashboard/track-orders", icon: ShoppingCart },
       { name: "Internal Usage", href: "/dashboard/internal-usage", icon: Users },
       { name: "Team Performance", href: "/dashboard/agent-performance", icon: BarChart2 }, // dept-manager only
-      { name: "Chat", href: "/dashboard/chat", icon: MessageCircle },
     ],
   },
   {
