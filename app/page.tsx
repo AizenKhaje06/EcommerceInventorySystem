@@ -120,12 +120,10 @@ export default function MinimalistLoginPage() {
 
         toast.success(`Welcome back, ${user.displayName || user.username}! 🎉`, {
           description: 'Redirecting to your dashboard...',
-          duration: 2000,
+          duration: 1000,
         })
 
-        setTimeout(() => {
-          router.push(redirectPath)
-        }, 500)
+        router.push(redirectPath)
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -218,31 +216,31 @@ export default function MinimalistLoginPage() {
 
         {/* Core Features - New Addition */}
         <div className="space-y-4">
-          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Core Features</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Core Features</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Real-time Tracking</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Real-time Tracking</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Multi-Channel Sync</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Multi-Channel Sync</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Automated Processing</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Automated Processing</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Advanced Analytics</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Advanced Analytics</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Role-Based Access</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Role-Based Access</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-              <span className="font-light">Secure Encryption</span>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></div>
+              <span className="font-normal" style={{ color: '#ffffff', textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Secure Encryption</span>
             </div>
           </div>
         </div>
@@ -274,24 +272,27 @@ export default function MinimalistLoginPage() {
 
         <div className="w-full max-w-md">
           
-          {/* Login Card - Ultra Premium Minimalist */}
+          {/* Login Card - Glassmorphism */}
           <div className="relative">
             
-            {/* Subtle glow */}
-            <div className="absolute -inset-[1px] bg-gradient-to-br from-amber-500/20 via-transparent to-blue-500/10 rounded-3xl blur-xl opacity-50"></div>
+            {/* Enhanced glow for glassmorphism */}
+            <div className="absolute -inset-[2px] bg-gradient-to-br from-amber-500/30 via-blue-500/20 to-purple-500/20 rounded-3xl blur-2xl opacity-60"></div>
             
-            {/* Card */}
-            <div className="relative bg-[#131318] border border-white/[0.08] rounded-3xl p-10 backdrop-blur-xl">
+            {/* Glassmorphism Card */}
+            <div className="relative bg-white/[0.03] border border-white/[0.15] rounded-3xl p-10 backdrop-blur-2xl shadow-2xl" style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1)'
+            }}>
               
               {/* Header */}
-              <div className="mb-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl">
-                    <Lock className="h-5 w-5 text-black" strokeWidth={2} />
+              <div className="mb-10 text-center">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-xl shadow-amber-600/50">
+                    <Lock className="h-6 w-6 text-black" strokeWidth={3} />
                   </div>
-                  <h2 className="text-2xl font-light text-white">Secure Login</h2>
+                  <h2 className="text-3xl font-bold" style={{ color: '#ffffff', textShadow: '0 2px 15px rgba(0,0,0,0.7)' }}>Secure Login</h2>
                 </div>
-                <p className="text-slate-500 text-sm font-light">Access your enterprise dashboard</p>
+                <p className="text-sm font-normal" style={{ color: '#ffffff', opacity: 0.9, textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>Access your enterprise dashboard</p>
               </div>
 
               {/* Error Alert */}
@@ -307,8 +308,8 @@ export default function MinimalistLoginPage() {
                 
                 {/* Username */}
                 <div className="space-y-3">
-                  <Label htmlFor="username" className="text-slate-400 font-light text-sm">
-                    Username or Email
+                  <Label htmlFor="username" className="font-light text-sm" style={{ color: '#cbd5e1' }}>
+                    Username
                   </Label>
                   <Input
                     id="username"
@@ -317,7 +318,7 @@ export default function MinimalistLoginPage() {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                     placeholder="Enter your username"
-                    className="h-12 bg-white/[0.02] border-white/[0.08] hover:border-white/[0.12] focus:border-amber-500/50 text-white placeholder:text-slate-600 rounded-xl transition-colors font-light"
+                    className="h-12 bg-white/[0.05] border-white/[0.2] hover:border-white/[0.3] focus:border-amber-500/60 text-white placeholder:text-slate-500 rounded-xl transition-all backdrop-blur-sm font-light shadow-inner"
                   />
                 </div>
 
@@ -335,7 +336,7 @@ export default function MinimalistLoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="Enter your password"
-                      className="h-12 bg-white/[0.02] border-white/[0.08] hover:border-white/[0.12] focus:border-amber-500/50 text-white placeholder:text-slate-600 rounded-xl pr-12 transition-colors font-light"
+                      className="h-12 bg-white/[0.05] border-white/[0.2] hover:border-white/[0.3] focus:border-amber-500/60 text-white placeholder:text-slate-500 rounded-xl pr-12 transition-all backdrop-blur-sm font-light shadow-inner"
                     />
                     <button
                       type="button"
@@ -354,9 +355,10 @@ export default function MinimalistLoginPage() {
                     type="checkbox"
                     checked={rememberDevice}
                     onChange={(e) => setRememberDevice(e.target.checked)}
-                    className="w-4 h-4 rounded border-white/[0.08] bg-white/[0.02] text-amber-500 focus:ring-amber-500/50 focus:ring-offset-0 cursor-pointer"
+                    className="rounded border-white/[0.2] bg-white/[0.05] text-amber-500 focus:ring-amber-500/50 focus:ring-offset-0 cursor-pointer backdrop-blur-sm flex-shrink-0"
+                    style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
                   />
-                  <Label htmlFor="remember" className="text-sm text-slate-500 font-light cursor-pointer">
+                  <Label htmlFor="remember" className="text-sm font-light cursor-pointer" style={{ color: '#cbd5e1' }}>
                     Remember this device
                   </Label>
                 </div>
@@ -381,9 +383,9 @@ export default function MinimalistLoginPage() {
                 </Button>
               </form>
 
-              {/* Security Footer */}
-              <div className="mt-8 pt-6 border-t border-white/[0.05]">
-                <div className="flex items-center justify-center gap-2 text-slate-600 text-xs">
+              {/* Security Footer with Glassmorphism */}
+              <div className="mt-8 pt-6 border-t border-white/[0.1]">
+                <div className="flex items-center justify-center gap-2 text-slate-500 text-xs">
                   <Shield className="h-3.5 w-3.5" />
                   <span className="font-light">256-bit Encrypted Connection</span>
                 </div>
@@ -391,8 +393,8 @@ export default function MinimalistLoginPage() {
             </div>
           </div>
 
-          {/* Footer */}
-          <p className="text-center text-slate-600 text-xs mt-8 font-light">
+          {/* Footer with Glassmorphism touch */}
+          <p className="text-center text-slate-500 text-xs mt-8 font-light backdrop-blur-sm">
             © 2024 Vertex Inventory System. All rights reserved.
           </p>
         </div>
