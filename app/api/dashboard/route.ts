@@ -513,7 +513,35 @@ export async function GET(request: Request) {
 
     // Cancelled orders metrics (for KPI cards)
     // Track Orders cancelled (status='Packed' AND parcel_status='CANCELLED')
-    const cancelledTrackOrdersData = filteredOrdersForKPIs.filter(o => o.parcel_status === 'CANCELLED')
+    // When filtering by date, use the CANCELLATION DATE, not the packed date
+    let cancelledTrackOrdersData = []
+    if (startDate || endDate) {
+      // If date filter is applied, filter Track Orders cancelled by cancellation date
+      cancelledTrackOrdersData = allOrders.filter(o => {
+        if (o.parcel_status !== 'CANCELLED') return false
+        
+        // Try multiple date fields for resilience (handles both new and old/mockup data):
+        // 1. cancelled_at - set when order is cancelled (new orders)
+        // 2. updated_at - fallback for mockup/old data
+        // 3. packed_at - last resort fallback
+        const cancellationDate = new Date(o.cancelled_at || o.updated_at || o.packed_at || o.created_at)
+        
+        if (startDate) {
+          const startOfDay = new Date(startDate)
+          startOfDay.setHours(0, 0, 0, 0)
+          if (cancellationDate < startOfDay) return false
+        }
+        if (endDate) {
+          const endOfDay = new Date(endDate)
+          endOfDay.setHours(23, 59, 59, 999)
+          if (cancellationDate > endOfDay) return false
+        }
+        return true
+      })
+    } else {
+      // No date filter, get all cancelled Track Orders
+      cancelledTrackOrdersData = filteredOrdersForKPIs.filter(o => o.parcel_status === 'CANCELLED')
+    }
     
     // Packing Queue cancelled (status='Pending' AND is_cancelled=true)
     // Fetch FULL order data (not just count) to get cancellation reasons and totals
@@ -528,19 +556,32 @@ export async function GET(request: Request) {
       cancelledPackingQueueQuery = cancelledPackingQueueQuery.eq('sales_channel', assignedChannel)
     }
 
-    // Apply date filters if set
-    if (startDate) {
-      const startOfDay = new Date(startDate)
-      startOfDay.setHours(0, 0, 0, 0)
-      cancelledPackingQueueQuery = cancelledPackingQueueQuery.gte('created_at', startOfDay.toISOString())
-    }
-    if (endDate) {
-      const endOfDay = new Date(endDate)
-      endOfDay.setHours(23, 59, 59, 999)
-      cancelledPackingQueueQuery = cancelledPackingQueueQuery.lte('created_at', endOfDay.toISOString())
+    // Fetch all Packing Queue cancelled orders (will filter by date in JavaScript for flexibility)
+    const { data: allPackingQueueCancelled } = await cancelledPackingQueueQuery
+
+    // Apply date filters in JavaScript to handle both cancelled_at and created_at (fallback)
+    let cancelledPackingQueueData = allPackingQueueCancelled || []
+    if (startDate || endDate) {
+      cancelledPackingQueueData = cancelledPackingQueueData.filter(order => {
+        // Try cancelled_at first, fallback to created_at for old/mockup data
+        const cancellationDate = new Date(order.cancelled_at || order.created_at)
+        
+        if (startDate) {
+          const startOfDay = new Date(startDate)
+          startOfDay.setHours(0, 0, 0, 0)
+          if (cancellationDate < startOfDay) return false
+        }
+        if (endDate) {
+          const endOfDay = new Date(endDate)
+          endOfDay.setHours(23, 59, 59, 999)
+          if (cancellationDate > endOfDay) return false
+        }
+        return true
+      })
     }
 
-    const { data: cancelledPackingQueueData } = await cancelledPackingQueueQuery
+    console.log('[Dashboard API] Packing Queue cancelled orders:', cancelledPackingQueueData?.length || 0)
+    console.log('[Dashboard API] Track Orders cancelled data:', cancelledTrackOrdersData?.length || 0)
 
     // COMBINE both Track Orders and Packing Queue cancelled orders
     const allCancelledOrders = [
@@ -557,8 +598,8 @@ export async function GET(request: Request) {
 
     // Cancellation reasons - use both cancellation_reason AND reason fields from BOTH sources
     const cancellationReasonMap = allCancelledOrders.reduce((acc: { [key: string]: number }, order) => {
-      // Try cancellation_reason first, then reason, then default to 'Unknown'
-      const reason = order.cancellation_reason || order.reason || 'Unknown'
+      // Try reason first (Track Orders use this), then cancellation_reason (Packing Queue), then default to 'Unknown'
+      const reason = order.reason || order.cancellation_reason || 'Unknown'
       acc[reason] = (acc[reason] || 0) + 1
       return acc
     }, {})
