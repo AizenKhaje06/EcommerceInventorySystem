@@ -512,15 +512,51 @@ export async function GET(request: Request) {
       .slice(0, 5)
 
     // Cancelled orders metrics (for KPI cards)
-    const cancelledOrders = filteredOrdersForKPIs.filter(o => o.parcel_status === 'CANCELLED')
+    // Track Orders cancelled (status='Packed' AND parcel_status='CANCELLED')
+    const cancelledTrackOrdersData = filteredOrdersForKPIs.filter(o => o.parcel_status === 'CANCELLED')
     
-    const totalCancelledOrders = cancelledOrders.length
-    const cancelledOrdersValue = cancelledOrders.reduce((sum, o) => sum + (o.total || 0), 0)
-    const totalOrdersCount = filteredOrdersForKPIs.length
+    // Packing Queue cancelled (status='Pending' AND is_cancelled=true)
+    // Fetch FULL order data (not just count) to get cancellation reasons and totals
+    let cancelledPackingQueueQuery = supabase
+      .from('orders')
+      .select('*')
+      .eq('status', 'Pending')
+      .eq('is_cancelled', true)
+
+    // Apply department filtering for operations and dept-manager users
+    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
+      cancelledPackingQueueQuery = cancelledPackingQueueQuery.eq('sales_channel', assignedChannel)
+    }
+
+    // Apply date filters if set
+    if (startDate) {
+      const startOfDay = new Date(startDate)
+      startOfDay.setHours(0, 0, 0, 0)
+      cancelledPackingQueueQuery = cancelledPackingQueueQuery.gte('created_at', startOfDay.toISOString())
+    }
+    if (endDate) {
+      const endOfDay = new Date(endDate)
+      endOfDay.setHours(23, 59, 59, 999)
+      cancelledPackingQueueQuery = cancelledPackingQueueQuery.lte('created_at', endOfDay.toISOString())
+    }
+
+    const { data: cancelledPackingQueueData } = await cancelledPackingQueueQuery
+
+    // COMBINE both Track Orders and Packing Queue cancelled orders
+    const allCancelledOrders = [
+      ...cancelledTrackOrdersData,
+      ...(cancelledPackingQueueData || [])
+    ]
+
+    const totalCancelledOrders = allCancelledOrders.length
+    const cancelledOrdersValue = allCancelledOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+    
+    // Total orders count includes BOTH Track Orders (filteredOrdersForKPIs) AND Packing Queue cancelled
+    const totalOrdersCount = filteredOrdersForKPIs.length + (cancelledPackingQueueData?.length || 0)
     const cancellationRate = totalOrdersCount > 0 ? (totalCancelledOrders / totalOrdersCount) * 100 : 0
 
-    // Cancellation reasons - use both cancellation_reason AND reason fields
-    const cancellationReasonMap = cancelledOrders.reduce((acc: { [key: string]: number }, order) => {
+    // Cancellation reasons - use both cancellation_reason AND reason fields from BOTH sources
+    const cancellationReasonMap = allCancelledOrders.reduce((acc: { [key: string]: number }, order) => {
       // Try cancellation_reason first, then reason, then default to 'Unknown'
       const reason = order.cancellation_reason || order.reason || 'Unknown'
       acc[reason] = (acc[reason] || 0) + 1
@@ -543,36 +579,9 @@ export async function GET(request: Request) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 
-    // NEW: Cancelled orders in Packing Queue (status='Pending' AND is_cancelled=true)
-    // These are orders cancelled BEFORE packing started
-    let cancelledPackingQueueQuery = supabase
-      .from('orders')
-      .select('id', { count: 'exact' })
-      .eq('status', 'Pending')
-      .eq('is_cancelled', true)
-
-    // Apply department filtering for operations and dept-manager users
-    if ((userRole === 'operations' || userRole === 'dept-manager') && assignedChannel) {
-      cancelledPackingQueueQuery = cancelledPackingQueueQuery.eq('sales_channel', assignedChannel)
-    }
-
-    // Apply date filters if set
-    if (startDate) {
-      const startOfDay = new Date(startDate)
-      startOfDay.setHours(0, 0, 0, 0)
-      cancelledPackingQueueQuery = cancelledPackingQueueQuery.gte('created_at', startOfDay.toISOString())
-    }
-    if (endDate) {
-      const endOfDay = new Date(endDate)
-      endOfDay.setHours(23, 59, 59, 999)
-      cancelledPackingQueueQuery = cancelledPackingQueueQuery.lte('created_at', endOfDay.toISOString())
-    }
-
-    const { count: cancelledPackingQueueCount } = await cancelledPackingQueueQuery
-
-    // NEW: Cancelled orders in Track Orders (status='Packed' AND parcel_status='CANCELLED')
-    // These are orders cancelled AFTER packing (already in Track Orders)
-    const cancelledTrackOrders = cancelledOrders.length
+    // Separate counts for reporting
+    const cancelledPackingQueue = cancelledPackingQueueData?.length || 0
+    const cancelledTrackOrders = cancelledTrackOrdersData.length
 
     // NEW: Total Delivered orders (status='Packed' AND parcel_status='DELIVERED')
     // Count all delivered orders
@@ -744,7 +753,7 @@ export async function GET(request: Request) {
       topReturnReasons,
       cancelledOrdersByChannel: returnedOrdersByChannel, // Return Count by Sales Channel
       returnsByItem, // Return Count by Item (top 5)
-      cancelledPackingQueue: cancelledPackingQueueCount || 0,
+      cancelledPackingQueue: cancelledPackingQueue,
       cancelledTrackOrders: cancelledTrackOrders,
       totalDelivered: totalDelivered,
       deliveredPercentage: Math.round(deliveredPercentage * 100) / 100,
